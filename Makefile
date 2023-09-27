@@ -18,12 +18,17 @@ all: $(BIN_DIR) $(EXE_NAME)
 
 
 # Завершение сборки
-$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o) 
+$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o) 
 	$(COMPILER) $^ -o $(EXE_NAME) -lsfml-graphics -lsfml-window -lsfml-system
 
 
 # Предварительная сборка main.cpp
 $(BIN_DIR)/main.o: $(addprefix $(SRC_DIR)/, main.cpp configs.hpp)
+	$(COMPILER) $(FLAGS) -c $< -o $@
+
+
+# Предварительная сборка vector.cpp
+$(BIN_DIR)/vector.o: $(addprefix $(SRC_DIR)/, vector.cpp vector.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
