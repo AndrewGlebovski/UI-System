@@ -163,6 +163,39 @@ public:
 
 
     /**
+     * \brief Inserts new element at index position 
+    */
+    void insert(size_t index, T new_value) {
+        ASSERT(index < size, "Index is out of range!\n");
+
+        size++;
+        for(size_t i = size - 1; i > index; i--)
+            buffer[i] = buffer[i - 1];
+        
+        buffer[index] = new_value;
+    
+        if (size == capacity) resize_capacity(capacity * 2);
+    }
+
+
+    /**
+     * \brief Removes element at index position
+    */
+    void remove(size_t index) {
+        ASSERT(index < size, "Index is out of range!\n");
+
+        size--;
+        for(size_t i = index; i < size; i++)
+            buffer[i] = buffer[i + 1];
+        
+        // Last element duplicate should be destroyed manually
+        buffer[size].~T();
+        
+        if (size * 4 < capacity) resize_capacity(capacity / 2);
+    }
+
+
+    /**
      * \brief Pushes value to the end of the list
     */
     void push_back(T new_value) {
