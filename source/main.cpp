@@ -1,21 +1,79 @@
 #include <SFML/Graphics.hpp>
 #include <stdio.h>
 #include "configs.hpp"
+#include "vector.hpp"
+#include "list.hpp"
+#include "action.hpp"
+#include "style.hpp"
+#include "ui-system.hpp"
+
 
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(SCREEN_W, SCREEN_H), "UI");
+    sf::RenderWindow render_window(sf::VideoMode(SCREEN_W, SCREEN_H), "UI", sf::Style::Fullscreen);
 
-    while (window.isOpen()) {
+    sf::Font font;
+    ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
+
+    sf::Text title("Title!", font, WINDOW_TITLE_SIZE);
+
+    WindowStyle window_style(
+        sf::Color(WINDOW_FRAME_COLOR),
+        sf::Color(WINDOW_TITLE_COLOR),
+        WINDOW_FRAME_OUTLINE,
+        WINDOW_TITLE_BAR_HEIGHT,
+        WINDOW_TITLE_SIZE,
+        font
+    );
+
+    MainWindow main_window(
+        Vector2D(100, 100),
+        1,
+        Vector2D(SCREEN_W - 200, SCREEN_H - 200),
+        "Paint",
+        window_style
+    );
+
+     main_window.addElement(new Window(
+        Vector2D(100, 100),
+        1,
+        main_window,
+        Vector2D(400, 400),
+        "picture1.png",
+        window_style
+    ));
+    
+    main_window.addElement(new Window(
+        Vector2D(400, 200),
+        2,
+        main_window,
+        Vector2D(400, 400),
+        "picture2.png",
+        window_style
+    ));
+    
+    sf::RenderTexture result;
+    result.create(SCREEN_W, SCREEN_H);
+
+    while (render_window.isOpen()) {
         sf::Event event;
 
-        while (window.pollEvent(event)) {
+        while (render_window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
-                window.close();
+                render_window.close();
+            
+            parseEvent(event, main_window);
         }
         
-        window.clear();
-        window.display();
+        render_window.clear();
+
+        main_window.draw(result);
+        result.display();
+        sf::Sprite tool_sprite(result.getTexture());
+
+        render_window.draw(tool_sprite);
+
+        render_window.display();
     }
 
     printf("UI System!\n");
