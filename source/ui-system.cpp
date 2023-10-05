@@ -4,16 +4,60 @@
 */
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+
+
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "list.hpp"
 #include "action.hpp"
 #include "style.hpp"
+#include "configs.hpp"
 #include "ui-system.hpp"
 
 
-Container::Container(const Vector2D &pos, int z_, BaseUI &parent_, const Vector2D &size_) :
-    BaseUI(pos, z_, parent_), elements(), size(size_) {}
+BaseUI::BaseUI(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_) :
+    position(position_), size(size_), z_index(z_index_), parent(parent_) {}
+
+
+void BaseUI::draw(sf::RenderTexture &result) {
+    sf::RectangleShape rect(Vector2D(25, 25));
+    rect.setFillColor(sf::Color::Red);
+    rect.setPosition(position);
+    result.draw(rect);
+}
+
+
+Vector2D BaseUI::getAbsolutePosition() const {
+    return position + parent.getAbsolutePosition();
+}
+
+
+void BaseUI::setSize(const Vector2D &new_size) {
+    if (position.x + new_size.x > parent.size.x)
+        size.x = parent.size.x - size.x;
+    
+    if (position.y + size.y > parent.size.y)
+        size.y = parent.size.y - size.y;
+}
+
+
+void BaseUI::setPosition(const Vector2D &new_position) {
+    if (new_position.x < 0)
+        position.x = 0;
+    else if (new_position.x + size.x > parent.size.x)
+        position.x = parent.size.x - size.x;
+    
+    if (new_position.y < 0)
+        position.y = 0;
+    else if (new_position.y + size.y > parent.size.y)
+        position.y = parent.size.y - size.y;
+}
+
+
+Container::Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_) :
+    BaseUI(position_, size_, z_index_, parent_), elements() {}
 
 
 void Container::addElement(BaseUI *ui_element) {
@@ -24,15 +68,15 @@ void Container::addElement(BaseUI *ui_element) {
         elements.push_back(ui_element);
         return;
     }
-    // Find place for UI element according to z-index
+    // Find place for UI element according to z_index
     /// TODO: Replace linear search with binary search
     for (size_t i = 0; i < elements.getSize(); i++) {
-        if (ui_element->z < elements[i]->z) {
+        if (ui_element->z_index < elements[i]->z_index) {
             elements.insert(i, ui_element);
             return;
         }
     }
-    // Element has the biggest z-index
+    // Element has the biggest z_index
     elements.push_back(ui_element);
 }
 
@@ -71,7 +115,7 @@ int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id) {
     for (size_t i = controls_size - 1; i < controls_size; i--)
         if (elements[i]->onMouseButtonDown(mouse_x, mouse_y, button_id) == HANDLED) {
             BaseUI *new_focused = elements[i];
-            new_focused->z = elements[controls_size - 1]->z + 1;    // POSSIBLE Z OVERLFOW
+            new_focused->z_index = elements[controls_size - 1]->z_index + 1;    // POSSIBLE Z OVERLFOW
             
             elements.remove(i);
             elements.push_back(new_focused);
@@ -119,23 +163,20 @@ void Window::draw_frame(sf::RenderTexture &result) {
     Vector2D abs_position = getAbsolutePosition();
 
     sf::RectangleShape frame(container.size);
-    frame.setPosition(abs_position);
+    frame.setPosition(abs_position - position + getAreaPosition());
     frame.setOutlineThickness(style.frame_outline);
     frame.setOutlineColor(sf::Color(style.frame_color));
     frame.setFillColor(sf::Color(0));
 
-    Vector2D title_bar_pos = abs_position - Vector2D(style.frame_outline, style.title_bar_height);
-    Vector2D title_bar_size = Vector2D(buttons.size.x + 2 * style.frame_outline, style.title_bar_height);
-
-    sf::RectangleShape title_bar(title_bar_size);
-    title_bar.setPosition(title_bar_pos);
+    sf::RectangleShape title_bar(Vector2D(size.x, style.title_bar_height));
+    title_bar.setPosition(abs_position);
     title_bar.setFillColor(style.frame_color);
 
     sf::Text text(title, style.font, style.font_size);
 
     sf::FloatRect text_rect = text.getLocalBounds();
 
-    Vector2D title_pos = abs_position - Vector2D(0, style.title_bar_height);
+    Vector2D title_pos = abs_position + Vector2D(style.frame_outline, 0);
     title_pos.y += (style.title_bar_height - text_rect.height) / 2;
 
     text.setPosition(title_pos);
@@ -147,13 +188,31 @@ void Window::draw_frame(sf::RenderTexture &result) {
 }
 
 
-Window::Window(const Vector2D &pos, int z_, BaseUI &parent_, const Vector2D &size_, const sf::String &title_, const WindowStyle &style_) :
-    BaseUI(pos, z_, parent_),
-    title(title_),
-    style(style_),
-    buttons(Vector2D(), z_, *this, Vector2D(size_.x, 30)), 
-    container(Vector2D(), z_, *this, size_) 
-{}
+Window::Window(
+    const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_, 
+    const sf::String &title_, const WindowStyle &style_
+):
+    BaseUI(position_, size_, z_index_, parent_),
+    title(title_), style(style_),
+    buttons(Vector2D(), Vector2D(), z_index_, *this), 
+    container(Vector2D(), Vector2D(), z_index_, *this)
+{
+    buttons.position = -Vector2D(1, 1) * style.frame_outline;
+    buttons.size = size + Vector2D(1, 1) * style.frame_outline;
+
+    container.position = getAreaPosition() - position;
+    container.size = getAreaSize();
+}
+
+
+Vector2D Window::getAreaPosition() const {
+    return position + Vector2D(style.frame_outline, style.title_bar_height);
+}
+
+
+Vector2D Window::getAreaSize() const {
+    return size - Vector2D(style.frame_outline * 2, style.title_bar_height + style.frame_outline);
+}
 
 
 void Window::draw(sf::RenderTexture &result) {
@@ -165,6 +224,8 @@ void Window::draw(sf::RenderTexture &result) {
 
 void Window::addElement(BaseUI *ui_element) {
     ASSERT(ui_element, "UI element is nullptr!\n");
+
+    // ui_element->parent = container; DOESN'T WORK FOR SOME REASON
     container.addElement(ui_element);
 }
 
@@ -174,6 +235,9 @@ int Window::onMouseMove(int mouse_x, int mouse_y) {
         return HANDLED;
     if (container.onMouseMove(mouse_x, mouse_y) == HANDLED)
         return HANDLED;
+    if (isInsideRect(getAbsolutePosition(), size, Vector2D(mouse_x, mouse_y)))
+        return HANDLED;
+    
     return UNHANDLED;
 }
 
@@ -183,24 +247,21 @@ int Window::onMouseButtonUp(int mouse_x, int mouse_y, int button_id) {
         return HANDLED;
     if (container.onMouseButtonUp(mouse_x, mouse_y, button_id) == HANDLED)
         return HANDLED;
+    if (isInsideRect(getAbsolutePosition(), size, Vector2D(mouse_x, mouse_y)))
+        return HANDLED;
+    
     return UNHANDLED;
 }
 
 
 int Window::onMouseButtonDown(int mouse_x, int mouse_y, int button_id) {
-    Vector2D abs_pos = getAbsolutePosition() - Vector2D(style.frame_outline, style.title_bar_height);
-    Vector2D size = size + Vector2D(style.frame_outline * 2, style.title_bar_height + style.frame_outline);
-
     if (buttons.onMouseButtonDown(mouse_x, mouse_y, button_id) == HANDLED)
         return HANDLED;
     if (container.onMouseButtonDown(mouse_x, mouse_y, button_id) == HANDLED)
         return HANDLED;
-    /*
-    if (isInsideRect(abs_pos, size, Vector2D(mouse_x, mouse_y))) {
-        printf("[%p]: Window clicked!\n", this);
+    if (isInsideRect(getAbsolutePosition(), size, Vector2D(mouse_x, mouse_y)))
         return HANDLED;
-    }
-    */
+    
     return UNHANDLED;
 }
 
@@ -223,6 +284,41 @@ int Window::onTimer(float delta_time) {
     buttons.onTimer(delta_time);
     container.onTimer(delta_time);
     return UNHANDLED;
+}
+
+
+MainWindow::MainWindow(
+    const Vector2D &position_, const Vector2D &size_, int z_index_,
+    const sf::String &title_, const WindowStyle &style_
+) :
+    Window(position_, size_, z_index_, *this, title_, style_)
+{}
+
+
+Vector2D MainWindow::getAbsolutePosition() const {
+    return position;
+}
+
+
+void MainWindow::setSize(const Vector2D &new_size) {
+    if (position.x + new_size.x > SCREEN_W)
+        size.x = SCREEN_W - size.x;
+    
+    if (position.y + size.y > SCREEN_H)
+        size.y = SCREEN_H - size.y;
+}
+
+
+void MainWindow::setPosition(const Vector2D &new_position) {
+    if (new_position.x < 0)
+        position.x = 0;
+    else if (new_position.x + size.x > SCREEN_W)
+        position.x = SCREEN_W - size.x;
+    
+    if (new_position.y < 0)
+        position.y = 0;
+    else if (new_position.y + size.y > SCREEN_H)
+        position.y = SCREEN_H - size.y;
 }
 
 
@@ -251,3 +347,6 @@ void parseEvent(const sf::Event &event, Window &window) {
             return;
     }
 }
+
+
+#pragma GCC diagnostic pop

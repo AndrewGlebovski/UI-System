@@ -15,7 +15,11 @@ int main() {
     sf::Font font;
     ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
 
-    sf::Text title("Title!", font, WINDOW_TITLE_SIZE);
+    sf::Texture normal_texture;
+    ASSERT(normal_texture.loadFromFile("assets/textures/normal_button.png"), "Failed to load button normal texture!\n");
+
+    sf::Texture hover_texture;
+    ASSERT(hover_texture.loadFromFile("assets/textures/hover_button.png"), "Failed to load button hover texture!\n");
 
     WindowStyle window_style(
         sf::Color(WINDOW_FRAME_COLOR),
@@ -26,28 +30,34 @@ int main() {
         font
     );
 
+    ButtonStyle button_style(
+        sf::Color(WINDOW_FRAME_COLOR),
+        WINDOW_TITLE_SIZE,
+        font
+    );
+
     MainWindow main_window(
         Vector2D(100, 100),
-        1,
         Vector2D(SCREEN_W - 200, SCREEN_H - 200),
+        1,
         "Paint",
         window_style
     );
-
-     main_window.addElement(new Window(
+    
+    main_window.addElement(new Window(
         Vector2D(100, 100),
+        Vector2D(400, 400),
         1,
         main_window,
-        Vector2D(400, 400),
         "picture1.png",
         window_style
     ));
-    
+
     main_window.addElement(new Window(
         Vector2D(400, 200),
+        Vector2D(400, 400),
         2,
         main_window,
-        Vector2D(400, 400),
         "picture2.png",
         window_style
     ));
@@ -65,7 +75,7 @@ int main() {
             parseEvent(event, main_window);
         }
         
-        render_window.clear();
+        result.clear();
 
         main_window.draw(result);
         result.display();

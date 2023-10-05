@@ -8,7 +8,8 @@
 class BaseUI {
 public:
     Vector2D position;      ///< Element position relative to its parent
-    int z;                  ///< Shows order in which UI elements are drawn
+    Vector2D size;          ///< UI element size
+    int z_index;            ///< Shows order in which UI elements are drawn
     BaseUI &parent;         ///< Parent that holds this UI element
 
 
@@ -19,27 +20,34 @@ public:
     };
 
 
-    BaseUI(Vector2D pos, int z_, BaseUI &parent_) :
-        position(pos), z(z_), parent(parent_) {}
+    /**
+     * \brief Standart constructor
+    */
+    BaseUI(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_);
 
 
     /**
      * \brief Draws red rectangle for debug purposes
     */
-    virtual void draw(sf::RenderTexture &result) {
-        sf::RectangleShape rect(Vector2D(25, 25));
-        rect.setFillColor(sf::Color::Red);
-        rect.setPosition(position);
-        result.draw(rect);
-    }
+    virtual void draw(sf::RenderTexture &result);
 
 
     /**
      * \brief Returns UI element absolute position on screen
     */
-    virtual Vector2D getAbsolutePosition() const {
-        return position + parent.getAbsolutePosition();
-    }
+    virtual Vector2D getAbsolutePosition() const;
+
+
+    /**
+     * \brief Resizes element according to parent area
+    */
+    virtual void setSize(const Vector2D &new_size);
+
+
+    /**
+     * \brief Sets element to new position according to parent area
+    */
+    virtual void setPosition(const Vector2D &new_position);
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y) { return UNHANDLED; }
@@ -60,10 +68,7 @@ private:
     List<BaseUI*> elements;         ///< List of UI elements sorted by z-index
 
 public:
-    Vector2D size;                  ///< Container size
-
-
-    Container(const Vector2D &pos, int z_, BaseUI &parent_, const Vector2D &size_);
+    Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_);
 
 
     /**
@@ -106,7 +111,26 @@ protected:
     void draw_frame(sf::RenderTexture &result);
 
 public:
-    Window(const Vector2D &pos, int z_, BaseUI &parent_, const Vector2D &size_, const sf::String &title_, const WindowStyle &style_);
+    /**
+     * \brief Contstructs window
+     * \note Position and size consider title bar and frame
+    */
+    Window(
+        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_, 
+        const sf::String &title_, const WindowStyle &style_
+    );
+
+
+    /**
+     * \brief Returns position of the window inside area
+    */
+    Vector2D getAreaPosition() const;
+
+
+    /**
+     * \brief Returns position of the window inside area
+    */
+    Vector2D getAreaSize() const;
 
 
     /**
@@ -134,13 +158,19 @@ public:
 /// MainWindow of the application
 class MainWindow : public Window {
 public:
-    MainWindow(const Vector2D &pos, int z_, const Vector2D &size_, const sf::String &title_, const WindowStyle &style_) :
-        Window(pos, z_, *this, size_, title_, style_) {}
+    MainWindow(
+        const Vector2D &position_, const Vector2D &size_, int z_index_,
+        const sf::String &title_, const WindowStyle &style_
+    );
     
 
-    virtual Vector2D getAbsolutePosition() const {
-        return position;
-    }
+    virtual Vector2D getAbsolutePosition() const;
+
+
+    virtual void setSize(const Vector2D &new_size) override;
+
+
+    virtual void setPosition(const Vector2D &new_position) override;
 };
 
 
