@@ -29,13 +29,7 @@ public:
     /**
      * \brief Draws red rectangle for debug purposes
     */
-    virtual void draw(sf::RenderTexture &result);
-
-
-    /**
-     * \brief Returns UI element absolute position on screen
-    */
-    virtual Vector2D getAbsolutePosition() const;
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms);
 
 
     /**
@@ -50,9 +44,15 @@ public:
     virtual void setPosition(const Vector2D &new_position);
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y) { return UNHANDLED; }
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id) { return UNHANDLED; }
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id) { return UNHANDLED; }
+    void apply_local_transform(List<Vector2D> &transforms) const;
+
+
+    void cancel_local_transform(List<Vector2D> &transforms) const;
+
+
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) { return UNHANDLED; }
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) { return UNHANDLED; }
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) { return UNHANDLED; }
     virtual int onKeyUp(int key_id) { return UNHANDLED; }
     virtual int onKeyDown(int key_id) { return UNHANDLED; }
     virtual int onTimer(float delta_time) { return UNHANDLED; }
@@ -81,12 +81,12 @@ public:
     /**
      * \brief Draws elements under his management
     */
-    virtual void draw(sf::RenderTexture &result) override;
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id) override;
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onKeyUp(int key_id) override;
     virtual int onKeyDown(int key_id) override;
     virtual int onTimer(float delta_time) override;
@@ -108,7 +108,7 @@ protected:
     /**
      * \brief Draws window frame
     */
-    void draw_frame(sf::RenderTexture &result);
+    void drawFrame(sf::RenderTexture &result, Vector2D total_position);
 
 public:
     /**
@@ -143,12 +143,12 @@ public:
     /**
      * \brief Draws window frame, title bar and its content
     */
-    virtual void draw(sf::RenderTexture &result) override;
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id) override;
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onKeyUp(int key_id) override;
     virtual int onKeyDown(int key_id) override;
     virtual int onTimer(float delta_time) override;
@@ -162,9 +162,6 @@ public:
         const Vector2D &position_, const Vector2D &size_, int z_index_,
         const sf::String &title_, const WindowStyle &style_
     );
-    
-
-    virtual Vector2D getAbsolutePosition() const;
 
 
     virtual void setSize(const Vector2D &new_size) override;
@@ -183,4 +180,4 @@ bool isInsideRect(Vector2D position, Vector2D size, Vector2D point);
 /**
  * \brief Parses SFML event into my own event system
 */
-void parseEvent(const sf::Event &event, Window &window);
+void parseEvent(const sf::Event &event, Window &window, List<Vector2D> &transforms);

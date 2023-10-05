@@ -47,7 +47,7 @@ int main() {
     main_window.addElement(new Window(
         Vector2D(100, 100),
         Vector2D(400, 400),
-        1,
+        2,
         main_window,
         "picture1.png",
         window_style
@@ -56,7 +56,7 @@ int main() {
     main_window.addElement(new Window(
         Vector2D(400, 200),
         Vector2D(400, 400),
-        2,
+        3,
         main_window,
         "picture2.png",
         window_style
@@ -65,6 +65,9 @@ int main() {
     sf::RenderTexture result;
     result.create(SCREEN_W, SCREEN_H);
 
+    List<Vector2D> transforms;
+    transforms.push_back(Vector2D());
+
     while (render_window.isOpen()) {
         sf::Event event;
 
@@ -72,12 +75,12 @@ int main() {
             if (event.type == sf::Event::Closed)
                 render_window.close();
             
-            parseEvent(event, main_window);
+            parseEvent(event, main_window, transforms);
         }
         
         result.clear();
 
-        main_window.draw(result);
+        main_window.draw(result, transforms);
         result.display();
         sf::Sprite tool_sprite(result.getTexture());
 
