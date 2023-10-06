@@ -10,7 +10,7 @@ public:
     Vector2D position;      ///< Element position relative to its parent
     Vector2D size;          ///< UI element size
     int z_index;            ///< Shows order in which UI elements are drawn
-    BaseUI &parent;         ///< Parent that holds this UI element
+    BaseUI *parent;         ///< Parent that holds this UI element
 
 
     /// Shows if event was handled or not
@@ -23,7 +23,19 @@ public:
     /**
      * \brief Standart constructor
     */
-    BaseUI(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_);
+    BaseUI(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_);
+
+
+    /**
+     * \brief Default copy constructor
+    */
+    BaseUI(const BaseUI&) = default;
+
+
+    /**
+     * \brief Default assignment
+    */
+    BaseUI &operator = (const BaseUI&) = default;
 
 
     /**
@@ -44,9 +56,15 @@ public:
     virtual void setPosition(const Vector2D &new_position);
 
 
+    /**
+     * \brief Applies object's transform to global and pushes to transform stack
+    */
     void apply_local_transform(List<Vector2D> &transforms) const;
 
 
+    /**
+     * \brief Cancels object's transform and pops it from transform stack
+    */
     void cancel_local_transform(List<Vector2D> &transforms) const;
 
 
@@ -68,7 +86,7 @@ private:
     List<BaseUI*> elements;         ///< List of UI elements sorted by z-index
 
 public:
-    Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_);
+    Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_);
 
 
     /**
@@ -108,7 +126,7 @@ protected:
     /**
      * \brief Draws window frame
     */
-    void drawFrame(sf::RenderTexture &result, Vector2D total_position);
+    void drawFrame(sf::RenderTexture &result, const Vector2D &total_position);
 
 public:
     /**
@@ -116,7 +134,7 @@ public:
      * \note Position and size consider title bar and frame
     */
     Window(
-        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_, 
+        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_, 
         const sf::String &title_, const WindowStyle &style_
     );
 
@@ -168,6 +186,43 @@ public:
 
 
     virtual void setPosition(const Vector2D &new_position) override;
+};
+
+
+/// Base class for all buttons
+class BaseButton : public BaseUI {
+public:
+    BaseButton(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
+        BaseUI(position_, size_, z_index_, parent_) {}
+
+
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override = 0;
+
+
+    virtual ~BaseButton() = default;
+};
+
+
+/// Invisible button for moving windows
+class MoveButton : public BaseButton {
+protected:
+    Window &window;         ///< Window to move
+    Vector2D prev_mouse;    ///< Previous mouse click position
+    bool is_moving;         ///< If moving is active
+
+public:
+    MoveButton(
+        const Vector2D &position_, const Vector2D &size_, BaseUI *parent_, 
+        Window &window_
+    );
+
+
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+
+
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
 };
 
 

@@ -44,20 +44,31 @@ int main() {
         window_style
     );
     
-    main_window.addElement(new Window(
+    Window *w1 = new Window(
         Vector2D(100, 100),
-        Vector2D(400, 400),
+        Vector2D(800, 600),
         2,
-        main_window,
+        &main_window,
         "picture1.png",
+        window_style
+    );
+
+    w1->addElement(new Window(
+        Vector2D(100, 100),
+        Vector2D(400, 300),
+        3,
+        w1,
+        "picture3.png",
         window_style
     ));
 
+    main_window.addElement(w1);
+
     main_window.addElement(new Window(
-        Vector2D(400, 200),
+        Vector2D(1000, 200),
         Vector2D(400, 400),
-        3,
-        main_window,
+        4,
+        &main_window,
         "picture2.png",
         window_style
     ));
@@ -68,6 +79,9 @@ int main() {
     List<Vector2D> transforms;
     transforms.push_back(Vector2D());
 
+    //main_window.draw(result, transforms);
+    //ASSERT(transforms[0].length() < 0.001, "Transform!\n");
+
     while (render_window.isOpen()) {
         sf::Event event;
 
@@ -76,11 +90,14 @@ int main() {
                 render_window.close();
             
             parseEvent(event, main_window, transforms);
+            ASSERT(transforms[0].length() < 0.001, "Transform!\n");
         }
         
         result.clear();
 
         main_window.draw(result, transforms);
+        ASSERT(transforms[0].length() < 0.001, "Transform!\n");
+
         result.display();
         sf::Sprite tool_sprite(result.getTexture());
 

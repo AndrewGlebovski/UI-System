@@ -17,7 +17,7 @@
 #include "ui-system.hpp"
 
 
-BaseUI::BaseUI(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_) :
+BaseUI::BaseUI(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
     position(position_), size(size_), z_index(z_index_), parent(parent_) {}
 
 
@@ -32,24 +32,32 @@ void BaseUI::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
 
 
 void BaseUI::setSize(const Vector2D &new_size) {
-    if (position.x + new_size.x > parent.size.x)
-        size.x = parent.size.x - size.x;
+    if (position.x + new_size.x > parent->size.x)
+        size.x = parent->size.x - position.x;
+    else
+        size.x = new_size.x;
     
-    if (position.y + size.y > parent.size.y)
-        size.y = parent.size.y - size.y;
+    if (position.y + size.y > parent->size.y)
+        size.y = parent->size.y - position.y;
+    else
+        size.y = new_size.y;
 }
 
 
 void BaseUI::setPosition(const Vector2D &new_position) {
     if (new_position.x < 0)
         position.x = 0;
-    else if (new_position.x + size.x > parent.size.x)
-        position.x = parent.size.x - size.x;
+    else if (new_position.x + size.x > parent->size.x)
+        position.x = parent->size.x - size.x;
+    else
+        position.x = new_position.x;
     
     if (new_position.y < 0)
         position.y = 0;
-    else if (new_position.y + size.y > parent.size.y)
-        position.y = parent.size.y - size.y;
+    else if (new_position.y + size.y > parent->size.y)
+        position.y = parent->size.y - size.y;
+    else
+        position.y = new_position.y;
 }
 
 
@@ -60,18 +68,22 @@ void BaseUI::apply_local_transform(List<Vector2D> &transforms) const {
 
 
 void BaseUI::cancel_local_transform(List<Vector2D> &transforms) const {
-    transforms[0] -= position;
+    transforms[0] -= transforms[transforms.getSize() - 1];
     transforms.pop_back();
 }
 
 
-Container::Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_) :
+Container::Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
     BaseUI(position_, size_, z_index_, parent_), elements() {}
 
 
 void Container::addElement(BaseUI *ui_element) {
     ASSERT(ui_element, "UI element is nullptr!\n");
     ASSERT(isInsideRect(position, size, ui_element->position), "UI element is outside of the container!\n");
+
+    // Set ui child
+    ui_element->parent = this;
+
     // Container is empty
     if (elements.getSize() == 0) {
         elements.push_back(ui_element);
@@ -185,9 +197,9 @@ Container::~Container() {
 }
 
 
-void Window::drawFrame(sf::RenderTexture &result, Vector2D total_position) {
+void Window::drawFrame(sf::RenderTexture &result, const Vector2D &total_position) {
     sf::RectangleShape frame(container.size);
-    frame.setPosition(total_position - position + getAreaPosition());
+    frame.setPosition(total_position + (getAreaPosition() - position));
     frame.setOutlineThickness(style.frame_outline);
     frame.setOutlineColor(sf::Color(style.frame_color));
     frame.setFillColor(sf::Color(0));
@@ -213,19 +225,26 @@ void Window::drawFrame(sf::RenderTexture &result, Vector2D total_position) {
 
 
 Window::Window(
-    const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI &parent_, 
+    const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_, 
     const sf::String &title_, const WindowStyle &style_
 ):
     BaseUI(position_, size_, z_index_, parent_),
     title(title_), style(style_),
-    buttons(Vector2D(), Vector2D(), z_index_, *this), 
-    container(Vector2D(), Vector2D(), z_index_, *this)
+    buttons(Vector2D(), Vector2D(), z_index_, this), 
+    container(Vector2D(), Vector2D(), z_index_, this)
 {
     buttons.position = -Vector2D(1, 1) * style.frame_outline;
     buttons.size = size + Vector2D(1, 1) * style.frame_outline;
 
     container.position = getAreaPosition() - position;
     container.size = getAreaSize();
+
+    buttons.addElement(new MoveButton(
+        Vector2D(1, 1) * style.frame_outline,
+        Vector2D(container.size.x, style.title_bar_height - style.frame_outline),
+        &buttons,
+        *this
+    ));
 }
 
 
@@ -253,8 +272,6 @@ void Window::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
 
 void Window::addElement(BaseUI *ui_element) {
     ASSERT(ui_element, "UI element is nullptr!\n");
-
-    // ui_element->parent = container; DOESN'T WORK FOR SOME REASON
     container.addElement(ui_element);
 }
 
@@ -299,8 +316,9 @@ int Window::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vect
         status = HANDLED;
     else if (container.onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
         status = HANDLED;
-    else if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y)))
+    else if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y))) {
         status = HANDLED;
+    }
 
     cancel_local_transform(transforms);
     return status;
@@ -332,16 +350,20 @@ MainWindow::MainWindow(
     const Vector2D &position_, const Vector2D &size_, int z_index_,
     const sf::String &title_, const WindowStyle &style_
 ) :
-    Window(position_, size_, z_index_, *this, title_, style_)
+    Window(position_, size_, z_index_, nullptr, title_, style_)
 {}
 
 
 void MainWindow::setSize(const Vector2D &new_size) {
     if (position.x + new_size.x > SCREEN_W)
-        size.x = SCREEN_W - size.x;
+        size.x = SCREEN_W - position.x;
+    else
+        size.x = new_size.x;
     
     if (position.y + size.y > SCREEN_H)
-        size.y = SCREEN_H - size.y;
+        size.y = SCREEN_H - position.y;
+    else
+        size.y = new_size.y;
 }
 
 
@@ -350,11 +372,64 @@ void MainWindow::setPosition(const Vector2D &new_position) {
         position.x = 0;
     else if (new_position.x + size.x > SCREEN_W)
         position.x = SCREEN_W - size.x;
+    else
+        position.x = new_position.x;
     
     if (new_position.y < 0)
         position.y = 0;
     else if (new_position.y + size.y > SCREEN_H)
         position.y = SCREEN_H - size.y;
+    else
+        position.y = new_position.y;
+}
+
+
+MoveButton::MoveButton(
+    const Vector2D &position_, const Vector2D &size_, BaseUI *parent_, 
+    Window &window_
+) :
+    BaseButton(position_, size_, 0, parent_),
+    window(window_), prev_mouse(Vector2D()), is_moving(false)
+{}
+
+
+void MoveButton::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {}
+
+
+int MoveButton::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
+    if (!is_moving) return UNHANDLED;
+
+    // WE CHANGED WINDOW POSITION SO CURRENT TRANSFORM WILL BE INCORRECT
+    // BUT IT DOESN'T MATTER CAUSE EVENT IS HANDLED
+    // AND FARTHER BROADCASTING IS NOT NEEDED
+
+    Vector2D new_position = window.position + (Vector2D(mouse_x, mouse_y) - prev_mouse);
+    prev_mouse = Vector2D(mouse_x, mouse_y);
+
+    window.setPosition(new_position);
+
+    return HANDLED;
+}
+
+
+int MoveButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
+    apply_local_transform(transforms);
+    EVENT_STATUS status = UNHANDLED;
+
+    if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y))) {
+        status = HANDLED;
+        is_moving = true;
+        prev_mouse = Vector2D(mouse_x, mouse_y);
+    }
+
+    cancel_local_transform(transforms);
+    return status;
+}
+
+
+int MoveButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
+    is_moving = false;
+    return UNHANDLED;
 }
 
 
