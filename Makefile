@@ -18,7 +18,7 @@ all: $(BIN_DIR) $(EXE_NAME)
 
 
 # Завершение сборки
-$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o ui-system.o ui-base.o) 
+$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o ui-system.o ui-base.o canvas.o) 
 	$(COMPILER) $^ -o $(EXE_NAME) -lsfml-graphics -lsfml-window -lsfml-system
 
 
@@ -39,6 +39,11 @@ $(BIN_DIR)/ui-system.o: $(addprefix $(SRC_DIR)/, ui-system.cpp ui-system.hpp vec
 
 # Предварительная сборка ui-base.cpp
 $(BIN_DIR)/ui-base.o: $(addprefix $(SRC_DIR)/, ui-base.cpp ui-base.hpp vector.hpp list.hpp)
+	$(COMPILER) $(FLAGS) -c $< -o $@
+
+
+# Предварительная сборка canvas.cpp
+$(BIN_DIR)/canvas.o: $(addprefix $(SRC_DIR)/, canvas.cpp canvas.hpp vector.hpp list.hpp ui-base.hpp key-id.hpp configs.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
