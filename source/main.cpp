@@ -7,11 +7,15 @@
 #include "style.hpp"
 #include "ui-base.hpp"
 #include "ui-system.hpp"
+#include "canvas.hpp"
 
 
 
 int main() {
     sf::RenderWindow render_window(sf::VideoMode(SCREEN_W, SCREEN_H), "UI", sf::Style::Fullscreen);
+
+    // ENABLED VSYNC TO AVOID VISUAL ARTIFACTS WHEN WINDOWS ARE MOVING
+    render_window.setVerticalSyncEnabled(true);
 
     sf::Font font;
     ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
@@ -37,10 +41,18 @@ int main() {
         Vector2D(100, 100),
         Vector2D(800, 600),
         2,
-        &main_window,
+        nullptr,
         "picture1.png",
         window_style
     );
+    
+    w1->addElement(new Canvas(
+        Vector2D(0, 0),
+        Vector2D(794, 550),
+        5,
+        nullptr,
+        nullptr
+    ));
     
     main_window.addElement(w1);
     
@@ -57,7 +69,7 @@ int main() {
             if (event.type == sf::Event::Closed)
                 render_window.close();
             
-            parseEvent(event, main_window, transforms);
+            main_window.parseEvent(event, transforms);
             ASSERT(transforms[0].length() < 0.001, "Transform failed!\n");
         }
         

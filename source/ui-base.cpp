@@ -66,3 +66,12 @@ TransformApplier::~TransformApplier() {
     transforms[0] -= transforms[transforms.getSize() - 1];
     transforms.pop_back();
 }
+
+
+bool isInsideRect(Vector2D position, Vector2D size, Vector2D point) {
+    if (point.x < position.x) return false;
+    if (point.x > position.x + size.x) return false;
+    if (point.y < position.y) return false;
+    if (point.y > position.y + size.y) return false;
+    return true;
+}

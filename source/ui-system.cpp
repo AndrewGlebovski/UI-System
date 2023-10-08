@@ -57,6 +57,7 @@ void Container::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
 
 
 int Container::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
+    TransformApplier add_transform(transforms, position);
     size_t controls_size = elements.getSize();
 
     for (size_t i = controls_size - 1; i < controls_size; i--)
@@ -309,6 +310,24 @@ void MainWindow::setPosition(const Vector2D &new_position) {
 }
 
 
+void MainWindow::parseEvent(const sf::Event &event, List<Vector2D> &transforms) {
+    switch (event.type) {
+        case sf::Event::KeyPressed:
+            onKeyDown(event.key.code); break;
+        case sf::Event::KeyReleased:
+            onKeyUp(event.key.code); break;
+        case sf::Event::MouseButtonPressed:
+            onMouseButtonDown(event.mouseButton.x, event.mouseButton.y, event.mouseButton.button, transforms); break;
+        case sf::Event::MouseButtonReleased:
+            onMouseButtonUp(event.mouseButton.x, event.mouseButton.y, event.mouseButton.button, transforms); break;
+        case sf::Event::MouseMoved:
+            onMouseMove(event.mouseMove.x, event.mouseMove.y, transforms); break;
+        default:
+            return;
+    }
+}
+
+
 MoveButton::MoveButton(
     const Vector2D &position_, const Vector2D &size_, BaseUI *parent_, 
     Window &window_
@@ -353,33 +372,6 @@ int MoveButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 int MoveButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
     is_moving = false;
     return UNHANDLED;
-}
-
-
-bool isInsideRect(Vector2D position, Vector2D size, Vector2D point) {
-    if (point.x < position.x) return false;
-    if (point.x > position.x + size.x) return false;
-    if (point.y < position.y) return false;
-    if (point.y > position.y + size.y) return false;
-    return true;
-}
-
-
-void parseEvent(const sf::Event &event, Window &window, List<Vector2D> &transforms) {
-    switch (event.type) {
-        case sf::Event::KeyPressed:
-            window.onKeyDown(event.key.code); break;
-        case sf::Event::KeyReleased:
-            window.onKeyUp(event.key.code); break;
-        case sf::Event::MouseButtonPressed:
-            window.onMouseButtonDown(event.mouseButton.x, event.mouseButton.y, event.mouseButton.button, transforms); break;
-        case sf::Event::MouseButtonReleased:
-            window.onMouseButtonUp(event.mouseButton.x, event.mouseButton.y, event.mouseButton.button, transforms); break;
-        case sf::Event::MouseMoved:
-            window.onMouseMove(event.mouseMove.x, event.mouseMove.y, transforms); break;
-        default:
-            return;
-    }
 }
 
 

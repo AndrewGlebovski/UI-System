@@ -110,6 +110,12 @@ public:
 
 
     virtual void setPosition(const Vector2D &new_position) override;
+
+
+    /**
+     * \brief Parses SFML event into my own event system
+    */
+    void parseEvent(const sf::Event &event, List<Vector2D> &transforms);
 };
 
 
@@ -148,15 +154,3 @@ public:
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
 };
-
-
-/**
- * \brief Checks if point is inside rectangle
-*/
-bool isInsideRect(Vector2D position, Vector2D size, Vector2D point);
-
-
-/**
- * \brief Parses SFML event into my own event system
-*/
-void parseEvent(const sf::Event &event, Window &window, List<Vector2D> &transforms);

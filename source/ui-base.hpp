@@ -85,3 +85,9 @@ public:
     */
     ~TransformApplier();
 };
+
+
+/**
+ * \brief Checks if point is inside rectangle
+*/
+bool isInsideRect(Vector2D position, Vector2D size, Vector2D point);
