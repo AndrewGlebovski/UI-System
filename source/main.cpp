@@ -5,6 +5,7 @@
 #include "list.hpp"
 #include "action.hpp"
 #include "style.hpp"
+#include "ui-base.hpp"
 #include "ui-system.hpp"
 
 
