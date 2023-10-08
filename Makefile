@@ -33,7 +33,7 @@ $(BIN_DIR)/vector.o: $(addprefix $(SRC_DIR)/, vector.cpp vector.hpp)
 
 
 # Предварительная сборка ui-system.cpp
-$(BIN_DIR)/ui-system.o: $(addprefix $(SRC_DIR)/, ui-system.cpp ui-system.hpp vector.hpp list.hpp style.hpp action.hpp)
+$(BIN_DIR)/ui-system.o: $(addprefix $(SRC_DIR)/, ui-system.cpp ui-system.hpp vector.hpp list.hpp style.hpp action.hpp key-id.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 

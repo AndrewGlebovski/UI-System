@@ -15,6 +15,7 @@
 #include "style.hpp"
 #include "configs.hpp"
 #include "ui-system.hpp"
+#include "key-id.hpp"
 
 
 BaseUI::BaseUI(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
@@ -79,7 +80,7 @@ Container::Container(const Vector2D &position_, const Vector2D &size_, int z_ind
 
 void Container::addElement(BaseUI *ui_element) {
     ASSERT(ui_element, "UI element is nullptr!\n");
-    ASSERT(isInsideRect(position, size, ui_element->position), "UI element is outside of the container!\n");
+    ASSERT(isInsideRect(Vector2D(), size, ui_element->position), "UI element is outside of the container!\n");
 
     // Set ui child
     ui_element->parent = this;
@@ -91,12 +92,12 @@ void Container::addElement(BaseUI *ui_element) {
     }
     // Find place for UI element according to z_index
     /// TODO: Replace linear search with binary search
-    for (size_t i = 0; i < elements.getSize(); i++) {
+    for (size_t i = 0; i < elements.getSize(); i++)
         if (ui_element->z_index < elements[i]->z_index) {
             elements.insert(i, ui_element);
             return;
         }
-    }
+
     // Element has the biggest z_index
     elements.push_back(ui_element);
 }
@@ -167,7 +168,7 @@ int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<V
 
 int Container::onKeyUp(int key_id) {
     for (size_t i = 0; i < elements.getSize(); i++)
-        elements[i]->onKeyUp(key_id);
+        if (elements[i]->onKeyUp(key_id) == HANDLED) return HANDLED;
     
     return UNHANDLED;
 }
@@ -175,7 +176,7 @@ int Container::onKeyUp(int key_id) {
 
 int Container::onKeyDown(int key_id) {
     for (size_t i = 0; i < elements.getSize(); i++)
-        elements[i]->onKeyDown(key_id);
+        if (elements[i]->onKeyDown(key_id) == HANDLED) return HANDLED;
     
     return UNHANDLED;
 }

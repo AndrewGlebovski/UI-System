@@ -15,23 +15,11 @@ int main() {
     sf::Font font;
     ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
 
-    sf::Texture normal_texture;
-    ASSERT(normal_texture.loadFromFile("assets/textures/normal_button.png"), "Failed to load button normal texture!\n");
-
-    sf::Texture hover_texture;
-    ASSERT(hover_texture.loadFromFile("assets/textures/hover_button.png"), "Failed to load button hover texture!\n");
-
     WindowStyle window_style(
         sf::Color(WINDOW_FRAME_COLOR),
         sf::Color(WINDOW_TITLE_COLOR),
         WINDOW_FRAME_OUTLINE,
         WINDOW_TITLE_BAR_HEIGHT,
-        WINDOW_TITLE_SIZE,
-        font
-    );
-
-    ButtonStyle button_style(
-        sf::Color(WINDOW_FRAME_COLOR),
         WINDOW_TITLE_SIZE,
         font
     );
@@ -52,35 +40,14 @@ int main() {
         "picture1.png",
         window_style
     );
-
-    w1->addElement(new Window(
-        Vector2D(100, 100),
-        Vector2D(400, 300),
-        3,
-        w1,
-        "picture3.png",
-        window_style
-    ));
-
+    
     main_window.addElement(w1);
-
-    main_window.addElement(new Window(
-        Vector2D(1000, 200),
-        Vector2D(400, 400),
-        4,
-        &main_window,
-        "picture2.png",
-        window_style
-    ));
     
     sf::RenderTexture result;
     result.create(SCREEN_W, SCREEN_H);
 
     List<Vector2D> transforms;
     transforms.push_back(Vector2D());
-
-    //main_window.draw(result, transforms);
-    //ASSERT(transforms[0].length() < 0.001, "Transform!\n");
 
     while (render_window.isOpen()) {
         sf::Event event;
@@ -90,13 +57,13 @@ int main() {
                 render_window.close();
             
             parseEvent(event, main_window, transforms);
-            ASSERT(transforms[0].length() < 0.001, "Transform!\n");
+            ASSERT(transforms[0].length() < 0.001, "Transform failed!\n");
         }
         
         result.clear();
 
         main_window.draw(result, transforms);
-        ASSERT(transforms[0].length() < 0.001, "Transform!\n");
+        ASSERT(transforms[0].length() < 0.001, "Transform failed!\n");
 
         result.display();
         sf::Sprite tool_sprite(result.getTexture());

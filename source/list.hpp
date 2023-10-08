@@ -198,7 +198,7 @@ public:
     /**
      * \brief Pushes value to the end of the list
     */
-    void push_back(T new_value) {
+    void push_back(const T &new_value) {
         ASSERT(buffer, "Buffer is nullptr!\n");
 
         buffer[size++] = new_value;
