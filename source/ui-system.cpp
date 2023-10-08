@@ -18,6 +18,33 @@
 #include "key-id.hpp"
 
 
+/// Tool class for temporarily applying local transform
+class TransformApplier {
+private:
+    List<Vector2D> &transforms;     ///< Transform stack
+
+public:
+    /**
+     * \brief Applies local transform and pushes it to the transform stack
+    */
+    TransformApplier(List<Vector2D> &transforms_, const Vector2D &local_transform) :
+        transforms(transforms_)
+    {
+        transforms[0] += local_transform;
+        transforms.push_back(local_transform);
+    }
+
+
+    /**
+     * \brief Cancels local transform and pops it from the transform stack
+    */
+    ~TransformApplier() {
+        transforms[0] -= transforms[transforms.getSize() - 1];
+        transforms.pop_back();
+    }
+};
+
+
 BaseUI::BaseUI(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
     position(position_), size(size_), z_index(z_index_), parent(parent_) {}
 
@@ -62,18 +89,6 @@ void BaseUI::setPosition(const Vector2D &new_position) {
 }
 
 
-void BaseUI::apply_local_transform(List<Vector2D> &transforms) const {
-    transforms[0] += position;
-    transforms.push_back(position);
-}
-
-
-void BaseUI::cancel_local_transform(List<Vector2D> &transforms) const {
-    transforms[0] -= transforms[transforms.getSize() - 1];
-    transforms.pop_back();
-}
-
-
 Container::Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
     BaseUI(position_, size_, z_index_, parent_), elements() {}
 
@@ -104,49 +119,38 @@ void Container::addElement(BaseUI *ui_element) {
 
 
 void Container::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
-    apply_local_transform(transforms);
+    TransformApplier add_transform(transforms, position);
 
     for (size_t i = 0; i < elements.getSize(); i++)
         elements[i]->draw(result, transforms);
-    
-    cancel_local_transform(transforms);
 }
 
 
 int Container::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
-    apply_local_transform(transforms);
     size_t controls_size = elements.getSize();
 
     for (size_t i = controls_size - 1; i < controls_size; i--)
-        if (elements[i]->onMouseMove(mouse_x, mouse_y, transforms) == HANDLED) {
-            cancel_local_transform(transforms);
+        if (elements[i]->onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
             return HANDLED;
-        }
-
-    cancel_local_transform(transforms);
+    
     return UNHANDLED;
 }
 
 
 int Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
-    apply_local_transform(transforms);
-    EVENT_STATUS status = UNHANDLED;
+    TransformApplier add_transform(transforms, position);
     size_t controls_size = elements.getSize();
 
     for (size_t i = controls_size - 1; i < controls_size; i--)
-        if (elements[i]->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED) {
-            status = HANDLED;
-            break;
-        }
+        if (elements[i]->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
+            return HANDLED;
 
-    cancel_local_transform(transforms);
-    return status;
+    return UNHANDLED;
 }
 
 
 int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
-    apply_local_transform(transforms);
-    EVENT_STATUS status = UNHANDLED;
+    TransformApplier add_transform(transforms, position);
     size_t controls_size = elements.getSize();
 
     for (size_t i = controls_size - 1; i < controls_size; i--)
@@ -157,12 +161,10 @@ int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<V
             elements.remove(i);
             elements.push_back(new_focused);
 
-            status = HANDLED;
-            break;
+            return HANDLED;
         }
 
-    cancel_local_transform(transforms);
-    return status;
+    return UNHANDLED;
 }
 
 
@@ -260,14 +262,12 @@ Vector2D Window::getAreaSize() const {
 
 
 void Window::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
-    apply_local_transform(transforms);
+    TransformApplier add_transform(transforms, position);
 
     container.draw(result, transforms);
     buttons.draw(result, transforms);
 
     drawFrame(result, transforms[0]);
-
-    cancel_local_transform(transforms);
 }
 
 
@@ -278,51 +278,45 @@ void Window::addElement(BaseUI *ui_element) {
 
 
 int Window::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
-    apply_local_transform(transforms);
-    EVENT_STATUS status = UNHANDLED;
+    TransformApplier add_transform(transforms, position);
 
     if (buttons.onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
-        status = HANDLED;
+        return HANDLED;
     else if (container.onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
-        status = HANDLED;
+        return HANDLED;
     else if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y)))
-        status = HANDLED;
+        return HANDLED;
 
-    cancel_local_transform(transforms);
-    return status;
+    return UNHANDLED;
 }
 
 
 int Window::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
-    apply_local_transform(transforms);
-    EVENT_STATUS status = UNHANDLED;
+    TransformApplier add_transform(transforms, position);
 
     if (buttons.onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-        status = HANDLED;
+        return HANDLED;
     else if (container.onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-        status = HANDLED;
+        return HANDLED;
     else if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y)))
-        status = HANDLED;
+        return HANDLED;
 
-    cancel_local_transform(transforms);
-    return status;
+    return UNHANDLED;
 }
 
 
 int Window::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
-    apply_local_transform(transforms);
-    EVENT_STATUS status = UNHANDLED;
+    TransformApplier add_transform(transforms, position);
 
     if (buttons.onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-        status = HANDLED;
+        return HANDLED;
     else if (container.onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-        status = HANDLED;
+        return HANDLED;
     else if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y))) {
-        status = HANDLED;
+        return HANDLED;
     }
 
-    cancel_local_transform(transforms);
-    return status;
+    return UNHANDLED;
 }
 
 
@@ -414,17 +408,15 @@ int MoveButton::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms
 
 
 int MoveButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
-    apply_local_transform(transforms);
-    EVENT_STATUS status = UNHANDLED;
+    TransformApplier add_transform(transforms, position);
 
     if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y))) {
-        status = HANDLED;
         is_moving = true;
         prev_mouse = Vector2D(mouse_x, mouse_y);
+        return HANDLED;
     }
 
-    cancel_local_transform(transforms);
-    return status;
+    return UNHANDLED;
 }
 
 

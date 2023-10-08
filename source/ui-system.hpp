@@ -56,18 +56,6 @@ public:
     virtual void setPosition(const Vector2D &new_position);
 
 
-    /**
-     * \brief Applies object's transform to global and pushes to transform stack
-    */
-    void apply_local_transform(List<Vector2D> &transforms) const;
-
-
-    /**
-     * \brief Cancels object's transform and pops it from transform stack
-    */
-    void cancel_local_transform(List<Vector2D> &transforms) const;
-
-
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) { return UNHANDLED; }
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) { return UNHANDLED; }
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) { return UNHANDLED; }
