@@ -16,6 +16,7 @@
 #include "configs.hpp"
 #include "key-id.hpp"
 #include "ui-base.hpp"
+#include "button.hpp"
 #include "ui-system.hpp"
 
 

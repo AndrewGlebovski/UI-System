@@ -119,20 +119,6 @@ public:
 };
 
 
-/// Base class for all buttons
-class BaseButton : public BaseUI {
-public:
-    BaseButton(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
-        BaseUI(position_, size_, z_index_, parent_) {}
-
-
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override = 0;
-
-
-    virtual ~BaseButton() = default;
-};
-
-
 /// Invisible button for moving windows
 class MoveButton : public BaseButton {
 protected:

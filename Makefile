@@ -18,12 +18,12 @@ all: $(BIN_DIR) $(EXE_NAME)
 
 
 # Завершение сборки
-$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o ui-system.o ui-base.o canvas.o) 
+$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o ui-system.o ui-base.o canvas.o button.o) 
 	$(COMPILER) $^ -o $(EXE_NAME) -lsfml-graphics -lsfml-window -lsfml-system
 
 
 # Предварительная сборка main.cpp
-$(BIN_DIR)/main.o: $(addprefix $(SRC_DIR)/, main.cpp configs.hpp ui-system.hpp vector.hpp list.hpp action.hpp style.hpp ui-base.hpp)
+$(BIN_DIR)/main.o: $(addprefix $(SRC_DIR)/, main.cpp configs.hpp ui-system.hpp vector.hpp list.hpp action.hpp style.hpp ui-base.hpp button.hpp canvas.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
@@ -33,7 +33,7 @@ $(BIN_DIR)/vector.o: $(addprefix $(SRC_DIR)/, vector.cpp vector.hpp)
 
 
 # Предварительная сборка ui-system.cpp
-$(BIN_DIR)/ui-system.o: $(addprefix $(SRC_DIR)/, ui-system.cpp ui-system.hpp vector.hpp list.hpp style.hpp action.hpp key-id.hpp ui-base.hpp)
+$(BIN_DIR)/ui-system.o: $(addprefix $(SRC_DIR)/, ui-system.cpp ui-system.hpp vector.hpp list.hpp style.hpp action.hpp key-id.hpp ui-base.hpp button.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
@@ -44,6 +44,11 @@ $(BIN_DIR)/ui-base.o: $(addprefix $(SRC_DIR)/, ui-base.cpp ui-base.hpp vector.hp
 
 # Предварительная сборка canvas.cpp
 $(BIN_DIR)/canvas.o: $(addprefix $(SRC_DIR)/, canvas.cpp canvas.hpp vector.hpp list.hpp ui-base.hpp key-id.hpp configs.hpp)
+	$(COMPILER) $(FLAGS) -c $< -o $@
+
+
+# Предварительная сборка button.cpp
+$(BIN_DIR)/button.o: $(addprefix $(SRC_DIR)/, button.cpp button.hpp vector.hpp list.hpp ui-base.hpp style.hpp configs.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
