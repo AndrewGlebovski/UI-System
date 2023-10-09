@@ -20,7 +20,7 @@
 
 
 Container::Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
-    BaseUI(position_, size_, z_index_, parent_), elements() {}
+    BaseUI(position_, size_, z_index_, parent_), elements(), focused(0) {}
 
 
 void Container::addElement(BaseUI *ui_element) {
@@ -33,34 +33,53 @@ void Container::addElement(BaseUI *ui_element) {
     // Container is empty
     if (elements.getSize() == 0) {
         elements.push_back(ui_element);
+        focused = 0;
         return;
     }
     // Find place for UI element according to z_index
     /// TODO: Replace linear search with binary search
     for (size_t i = 0; i < elements.getSize(); i++)
-        if (ui_element->z_index < elements[i]->z_index) {
+        if (ui_element->z_index > elements[i]->z_index) {
             elements.insert(i, ui_element);
+            focused = i;
             return;
         }
 
     // Element has the biggest z_index
     elements.push_back(ui_element);
+    focused = elements.getSize() - 1;
 }
 
 
 void Container::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
+    size_t count = elements.getSize();
+    if (count == 0) return;
+
     TransformApplier add_transform(transforms, position);
 
-    for (size_t i = 0; i < elements.getSize(); i++)
+    for (size_t i = count - 1; i > focused; i--)
         elements[i]->draw(result, transforms);
+    
+    for (size_t i = focused - 1; i < count; i--)
+        elements[i]->draw(result, transforms);
+    
+    elements[focused]->draw(result, transforms);
 }
 
 
 int Container::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
-    size_t controls_size = elements.getSize();
+    if (elements.getSize() == 0) return UNHANDLED;
 
-    for (size_t i = controls_size - 1; i < controls_size; i--)
+    TransformApplier add_transform(transforms, position);
+
+    if (elements[focused]->onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
+        return HANDLED;
+
+    for (size_t i = 0; i < focused; i++)
+        if (elements[i]->onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
+            return HANDLED;
+    
+    for (size_t i = focused + 1; i < elements.getSize(); i++)
         if (elements[i]->onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
             return HANDLED;
     
@@ -69,38 +88,58 @@ int Container::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms)
 
 
 int Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
-    size_t controls_size = elements.getSize();
+    if (elements.getSize() == 0) return UNHANDLED;
 
-    for (size_t i = controls_size - 1; i < controls_size; i--)
+    TransformApplier add_transform(transforms, position);
+
+    if (elements[focused]->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
+        return HANDLED;
+
+    for (size_t i = 0; i < focused; i++)
         if (elements[i]->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
             return HANDLED;
-
+    
+    for (size_t i = focused + 1; i < elements.getSize(); i++)
+        if (elements[i]->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
+            return HANDLED;
+    
     return UNHANDLED;
 }
 
 
 int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
+    if (elements.getSize() == 0) return UNHANDLED;
+
     TransformApplier add_transform(transforms, position);
-    size_t controls_size = elements.getSize();
 
-    for (size_t i = controls_size - 1; i < controls_size; i--)
+    if (elements[focused]->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
+        return HANDLED;
+
+    for (size_t i = 0; i < focused; i++)
         if (elements[i]->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED) {
-            BaseUI *new_focused = elements[i];
-            new_focused->z_index = elements[controls_size - 1]->z_index + 1;    // POSSIBLE Z OVERLFOW
-            
-            elements.remove(i);
-            elements.push_back(new_focused);
-
+            focused = i;
             return HANDLED;
         }
-
+    
+    for (size_t i = focused + 1; i < elements.getSize(); i++)
+        if (elements[i]->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED) {
+            focused = i;
+            return HANDLED;
+        }
+    
     return UNHANDLED;
 }
 
 
 int Container::onKeyUp(int key_id) {
-    for (size_t i = 0; i < elements.getSize(); i++)
+    if (elements.getSize() == 0) return UNHANDLED;
+
+    if (elements[focused]->onKeyUp(key_id) == HANDLED) return HANDLED;
+
+    for (size_t i = 0; i < focused; i++)
+        if (elements[i]->onKeyUp(key_id) == HANDLED) return HANDLED;
+    
+    for (size_t i = focused + 1; i < elements.getSize(); i++)
         if (elements[i]->onKeyUp(key_id) == HANDLED) return HANDLED;
     
     return UNHANDLED;
@@ -108,7 +147,14 @@ int Container::onKeyUp(int key_id) {
 
 
 int Container::onKeyDown(int key_id) {
-    for (size_t i = 0; i < elements.getSize(); i++)
+    if (elements.getSize() == 0) return UNHANDLED;
+
+    if (elements[focused]->onKeyDown(key_id) == HANDLED) return HANDLED;
+
+    for (size_t i = 0; i < focused; i++)
+        if (elements[i]->onKeyDown(key_id) == HANDLED) return HANDLED;
+    
+    for (size_t i = focused + 1; i < elements.getSize(); i++)
         if (elements[i]->onKeyDown(key_id) == HANDLED) return HANDLED;
     
     return UNHANDLED;
@@ -116,6 +162,8 @@ int Container::onKeyDown(int key_id) {
 
 
 int Container::onTimer(float delta_time) {
+    if (elements.getSize() == 0) return UNHANDLED;
+
     for (size_t i = 0; i < elements.getSize(); i++)
         elements[i]->onTimer(delta_time);
     

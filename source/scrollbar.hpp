@@ -43,6 +43,9 @@ public:
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+
+
+    ~VScrollBar();
 };
 
 
@@ -68,4 +71,7 @@ public:
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+
+
+    ~HScrollBar();
 };

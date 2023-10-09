@@ -93,6 +93,11 @@ int VScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Ve
 }
 
 
+VScrollBar::~VScrollBar() {
+    if (action) delete action;
+}
+
+
 HScrollBar::HScrollBar(
     const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
     ScrollAction *action_, const ScrollBarStyle &style_
@@ -171,4 +176,9 @@ int HScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 int HScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
     is_moving = false;
     return UNHANDLED;
+}
+
+
+HScrollBar::~HScrollBar() {
+    if (action) delete action;
 }

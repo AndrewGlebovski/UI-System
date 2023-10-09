@@ -8,6 +8,7 @@
 class Container : public BaseUI {
 private:
     List<BaseUI*> elements;         ///< List of UI elements sorted by z-index
+    size_t focused;
 
 public:
     Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_);
