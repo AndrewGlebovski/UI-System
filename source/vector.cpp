@@ -10,6 +10,9 @@ Vector2D::Vector2D() : x(0), y(0) {}
 Vector2D::Vector2D(vec_t init_x, vec_t init_y) : x(init_x), y(init_y) {}
 
 
+Vector2D::Vector2D(const sf::Vector2f &vec) : x(vec.x), y(vec.y) {}
+
+
 Vector2D::~Vector2D() { x = NAN, y = NAN; }
 
 

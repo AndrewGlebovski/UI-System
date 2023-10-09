@@ -11,7 +11,6 @@
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "list.hpp"
-#include "action.hpp"
 #include "style.hpp"
 #include "ui-base.hpp"
 #include "button.hpp"
@@ -19,7 +18,7 @@
 
 RectButton::RectButton(
     const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
-    BaseAction *action_,
+    ButtonAction *action_,
     const sf::String &text_, const ButtonStyle &style_,
     const sf::Color &normal_, const sf::Color &hover_
 ) :
@@ -78,7 +77,7 @@ int RectButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 
 TextureButton::TextureButton(
     const Vector2D &position_, int z_index_, BaseUI *parent_,
-    BaseAction *action_,
+    ButtonAction *action_,
     const sf::String &text_, const ButtonStyle &style_, 
     const sf::Texture &normal_, const sf::Texture &hover_
 ) :

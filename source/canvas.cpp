@@ -14,7 +14,9 @@
 #include "list.hpp"
 #include "configs.hpp"
 #include "key-id.hpp"
+#include "style.hpp"
 #include "ui-base.hpp"
+#include "scrollbar.hpp"
 #include "canvas.hpp"
 
 
@@ -100,24 +102,40 @@ Canvas::Canvas(
     const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
     const char *image_path
 ) :
-    BaseUI(position_, size_, z_index_, parent_), texture(),
+    BaseUI(position_, size_, z_index_, parent_),
+    texture(), texture_offset(Vector2D(0, 0)),
     tools(), current_tool(0)
 {
     tools.push_back(new PencilTool(sf::Color::Red));
     tools.push_back(new EraserTool(25));
 
-    texture.create(size.x, size.y);
-    clear_canvas();
+    Vector2D texture_size = size;
 
     if (image_path) {
         sf::Texture image;
         if (image.loadFromFile(image_path)) {
+            if (texture_size.x < image.getSize().x) texture_size.x = image.getSize().x;
+            if (texture_size.y < image.getSize().y) texture_size.y = image.getSize().y;
+
+            texture.create(texture_size.x, texture_size.y);
+            clear_canvas();
+
             sf::Sprite tool_sprite(image);
             tool_sprite.setPosition(Vector2D());
 
             texture.draw(tool_sprite);
+
+            return;
         }
     }
+
+    texture.create(size.x, size.y);
+    clear_canvas();
+}
+
+
+Vector2D Canvas::getTextureSize() const {
+    return Vector2D(texture.getSize().x, texture.getSize().y);
 }
 
 
@@ -127,6 +145,9 @@ void Canvas::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
     texture.display();
 
     sf::Sprite tool_sprite(texture.getTexture());
+    sf::Vector2i offset_(texture_offset.x, texture_offset.y);
+    sf::Vector2i size_(size.x, size.y);
+    tool_sprite.setTextureRect(sf::IntRect(offset_, size_));
     tool_sprite.setPosition(transforms[0]);
 
     result.draw(tool_sprite);
@@ -139,7 +160,11 @@ int Canvas::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
     Vector2D mouse_cur = Vector2D(mouse_x, mouse_y);
 
     if (isInsideRect(transforms[0], size, mouse_cur)) {
-        tools[current_tool]->onMouseMove(mouse_cur.x - transforms[0].x, mouse_cur.y - transforms[0].y, texture);
+        tools[current_tool]->onMouseMove(
+            mouse_cur.x - transforms[0].x + texture_offset.x,
+            mouse_cur.y - transforms[0].y + texture_offset.y,
+            texture
+        );
         return HANDLED;
     }
     else
@@ -157,7 +182,11 @@ int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vect
     Vector2D mouse_cur = Vector2D(mouse_x, mouse_y);
 
     if (isInsideRect(transforms[0], size, mouse_cur)) {
-        tools[current_tool]->onMouseButtonDown(mouse_cur.x - transforms[0].x, mouse_cur.y - transforms[0].y, texture);
+        tools[current_tool]->onMouseButtonDown(
+            mouse_cur.x - transforms[0].x + texture_offset.x,
+            mouse_cur.y - transforms[0].y + texture_offset.y,
+            texture
+        );
         return HANDLED;
     }
 
@@ -173,7 +202,11 @@ int Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector
     Vector2D mouse_cur = Vector2D(mouse_x, mouse_y);
 
     if (isInsideRect(transforms[0], size, mouse_cur)) {
-        tools[current_tool]->onMouseButtonUp(mouse_cur.x - transforms[0].x, mouse_cur.y - transforms[0].y, texture);
+        tools[current_tool]->onMouseButtonUp(
+            mouse_cur.x - transforms[0].x + texture_offset.x,
+            mouse_cur.y - transforms[0].y + texture_offset.y,
+            texture
+        );
         return HANDLED;
     }
 

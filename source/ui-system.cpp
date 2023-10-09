@@ -11,7 +11,6 @@
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "list.hpp"
-#include "action.hpp"
 #include "style.hpp"
 #include "configs.hpp"
 #include "key-id.hpp"

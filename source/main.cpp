@@ -3,10 +3,10 @@
 #include "configs.hpp"
 #include "vector.hpp"
 #include "list.hpp"
-#include "action.hpp"
 #include "style.hpp"
 #include "ui-base.hpp"
 #include "button.hpp"
+#include "scrollbar.hpp"
 #include "canvas.hpp"
 #include "ui-system.hpp"
 
@@ -29,6 +29,14 @@ int main() {
         font
     );
 
+    ScrollBarStyle scrollbar_style(
+        sf::Color::Black,
+        -1,
+        sf::Color::White,
+        sf::Color::Black,
+        0.1f
+    );
+
     MainWindow main_window(
         Vector2D(100, 100),
         Vector2D(SCREEN_W - 200, SCREEN_H - 200),
@@ -46,14 +54,34 @@ int main() {
         window_style
     );
     
-    w1->addElement(new Canvas(
+    Canvas *canvas = new Canvas(
         Vector2D(0, 0),
-        Vector2D(794, 550),
+        Vector2D(774, 527),
         5,
         nullptr,
         nullptr
+    );
+
+    w1->addElement(canvas);
+
+    w1->addElement(new VScrollBar(
+        Vector2D(774, 0),
+        Vector2D(20, 527),
+        5,
+        nullptr,
+        new VScrollCanvas(*canvas),
+        scrollbar_style
     ));
-    
+
+    w1->addElement(new HScrollBar(
+        Vector2D(0, 527),
+        Vector2D(794, 20),
+        5,
+        nullptr,
+        new HScrollCanvas(*canvas),
+        scrollbar_style
+    ));
+
     main_window.addElement(w1);
     
     sf::RenderTexture result;

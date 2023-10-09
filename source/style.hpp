@@ -43,3 +43,25 @@ public:
         font_size(font_size_), font(font_) 
     {}
 };
+
+
+/// Contains scroll bar style
+class ScrollBarStyle {
+public:
+    sf::Color frame_color;
+    vec_t frame_outline;
+    sf::Color background_color;
+    sf::Color scroller_color;
+    vec_t scroller_factor;
+
+
+    ScrollBarStyle(
+        const sf::Color &frame_color_, vec_t frame_outline_,
+        const sf::Color &background_color_,
+        const sf::Color &scroller_color_, vec_t scroller_factor_
+    ) :
+        frame_color(frame_color_), frame_outline(frame_outline_),
+        background_color(background_color_),
+        scroller_color(scroller_color_), scroller_factor(scroller_factor_) 
+    {}
+};

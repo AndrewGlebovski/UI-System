@@ -28,6 +28,12 @@ public:
 
 
     /**
+     * \brief Constructs vector from its SFML analogue
+    */
+    Vector2D(const sf::Vector2f &vec);
+
+
+    /**
      * \brief Fills all fields with NAN
     */
     ~Vector2D();

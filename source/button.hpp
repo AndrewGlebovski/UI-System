@@ -18,10 +18,26 @@ public:
 };
 
 
+/// Base class for all button actions
+class ButtonAction {
+public:
+    /**
+     * \brief Does something
+    */
+    virtual void operator () () = 0;
+
+
+    /**
+     * \brief Destroyes action
+    */
+    virtual ~ButtonAction() = default;
+};
+
+
 /// Button that holds action and have status
 class ActionButton : public BaseButton {
 protected:
-    BaseAction *action;
+    ButtonAction *action;
     int status;
 
 public:
@@ -33,7 +49,7 @@ public:
 
     ActionButton(
         const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
-        BaseAction *action_
+        ButtonAction *action_
     ) :
         BaseButton(position_, size_, z_index_, parent_),
         action(action_), status(BUTTON_NORMAL)
@@ -85,7 +101,7 @@ protected:
 public:
     RectButton(
         const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
-        BaseAction *action_,
+        ButtonAction *action_,
         const sf::String &text_, const ButtonStyle &style_, 
         const sf::Color &normal_, const sf::Color &hover_
     );
@@ -110,7 +126,7 @@ protected:
 public:
     TextureButton(
         const Vector2D &position_, int z_index_, BaseUI *parent_,
-        BaseAction *action_,
+        ButtonAction *action_,
         const sf::String &text_, const ButtonStyle &style_, 
         const sf::Texture &normal_, const sf::Texture &hover_
     );
