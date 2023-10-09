@@ -48,11 +48,11 @@ public:
 /// Contains scroll bar style
 class ScrollBarStyle {
 public:
-    sf::Color frame_color;
-    vec_t frame_outline;
-    sf::Color background_color;
-    sf::Color scroller_color;
-    vec_t scroller_factor;
+    sf::Color frame_color;          ///< Frame color
+    vec_t frame_outline;            ///< Frame outline thickness
+    sf::Color background_color;     ///< Background color
+    sf::Color scroller_color;       ///< Scroller
+    vec_t scroller_factor;          ///< Scroller height = factor * scrollbar.size
 
 
     ScrollBarStyle(

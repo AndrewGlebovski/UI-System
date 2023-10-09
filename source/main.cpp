@@ -30,11 +30,11 @@ int main() {
     );
 
     ScrollBarStyle scrollbar_style(
-        sf::Color::Black,
-        -1,
-        sf::Color::White,
-        sf::Color::Black,
-        0.1f
+        sf::Color(SCROLLBAR_FRAME_COLOR),
+        SCROLLBAR_FRAME_OUTLINE,
+        sf::Color(SCROLLBAR_BACKGROUND_COLOR),
+        sf::Color(SCROLLBAR_SCROLLER_COLOR),
+        SCROLLBAR_SCROLLER_FACTOR
     );
 
     MainWindow main_window(

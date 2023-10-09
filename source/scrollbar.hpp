@@ -4,23 +4,31 @@
 */
 
 
+/// Triggers when scroller moves
 class ScrollAction {
 public:
+    /**
+     * \brief Calls when scroller moves
+     * \param [in]  param   Real number from [0;1] respreseting scroller position
+    */
     virtual void operator () (vec_t param) = 0;
 
 
+    /**
+     * \brief Default destructor
+    */
     virtual ~ScrollAction() = default;
 };
 
 
-/// Allows to move scroller
+/// Can be scrolled up and down
 class VScrollBar : public BaseUI {
 protected:
-    ScrollAction *action;
-    ScrollBarStyle style;
-    sf::RectangleShape scroller;
-    bool is_moving;
-    Vector2D mouse_prev;
+    ScrollAction *action;               ///< Triggers when scroller moves
+    ScrollBarStyle style;               ///< Style
+    sf::RectangleShape scroller;        ///< Rectangle that represents scroller
+    bool is_moving;                     ///< Scroller is moving right now
+    Vector2D mouse_prev;                ///< Previous mouse click position
 
 public:
     VScrollBar(
@@ -38,14 +46,14 @@ public:
 };
 
 
-/// Allows to move scroller
+/// Can be scrolled left and right
 class HScrollBar : public BaseUI {
 protected:
-    ScrollAction *action;
-    ScrollBarStyle style;
-    sf::RectangleShape scroller;
-    bool is_moving;
-    Vector2D mouse_prev;
+    ScrollAction *action;               ///< Triggers when scroller moves
+    ScrollBarStyle style;               ///< Style
+    sf::RectangleShape scroller;        ///< Rectangle that represents scroller
+    bool is_moving;                     ///< Scroller is moving right now
+    Vector2D mouse_prev;                ///< Previous mouse click position
 
 public:
     HScrollBar(
