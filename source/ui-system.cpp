@@ -67,21 +67,27 @@ void Container::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
 }
 
 
+/**
+ * \brief Special define for short loops inside container's event handler
+*/
+#define CONTAINER_FOR(CALL_FUNC, ...)                                               \
+do {                                                                                \
+    if (elements[focused]->CALL_FUNC == HANDLED) return HANDLED;                    \
+    \
+    for (size_t i = 0; i < focused; i++)                                            \
+        if (elements[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; }     \
+    \
+    for (size_t i = focused + 1; i < elements.getSize(); i++)                       \
+        if (elements[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; }     \
+} while(0)
+
+
 int Container::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
     if (elements.getSize() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, position);
 
-    if (elements[focused]->onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
-        return HANDLED;
-
-    for (size_t i = 0; i < focused; i++)
-        if (elements[i]->onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
-            return HANDLED;
-    
-    for (size_t i = focused + 1; i < elements.getSize(); i++)
-        if (elements[i]->onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
-            return HANDLED;
+    CONTAINER_FOR(onMouseMove(mouse_x, mouse_y, transforms));
     
     return UNHANDLED;
 }
@@ -92,16 +98,7 @@ int Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vec
 
     TransformApplier add_transform(transforms, position);
 
-    if (elements[focused]->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-        return HANDLED;
-
-    for (size_t i = 0; i < focused; i++)
-        if (elements[i]->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-            return HANDLED;
-    
-    for (size_t i = focused + 1; i < elements.getSize(); i++)
-        if (elements[i]->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-            return HANDLED;
+    CONTAINER_FOR(onMouseButtonUp(mouse_x, mouse_y, button_id, transforms));
     
     return UNHANDLED;
 }
@@ -112,20 +109,7 @@ int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<V
 
     TransformApplier add_transform(transforms, position);
 
-    if (elements[focused]->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-        return HANDLED;
-
-    for (size_t i = 0; i < focused; i++)
-        if (elements[i]->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED) {
-            focused = i;
-            return HANDLED;
-        }
-    
-    for (size_t i = focused + 1; i < elements.getSize(); i++)
-        if (elements[i]->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED) {
-            focused = i;
-            return HANDLED;
-        }
+    CONTAINER_FOR(onMouseButtonDown(mouse_x, mouse_y, button_id, transforms), focused = i);
     
     return UNHANDLED;
 }
@@ -134,13 +118,7 @@ int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<V
 int Container::onKeyUp(int key_id) {
     if (elements.getSize() == 0) return UNHANDLED;
 
-    if (elements[focused]->onKeyUp(key_id) == HANDLED) return HANDLED;
-
-    for (size_t i = 0; i < focused; i++)
-        if (elements[i]->onKeyUp(key_id) == HANDLED) return HANDLED;
-    
-    for (size_t i = focused + 1; i < elements.getSize(); i++)
-        if (elements[i]->onKeyUp(key_id) == HANDLED) return HANDLED;
+    CONTAINER_FOR(onKeyUp(key_id));
     
     return UNHANDLED;
 }
@@ -149,13 +127,7 @@ int Container::onKeyUp(int key_id) {
 int Container::onKeyDown(int key_id) {
     if (elements.getSize() == 0) return UNHANDLED;
 
-    if (elements[focused]->onKeyDown(key_id) == HANDLED) return HANDLED;
-
-    for (size_t i = 0; i < focused; i++)
-        if (elements[i]->onKeyDown(key_id) == HANDLED) return HANDLED;
-    
-    for (size_t i = focused + 1; i < elements.getSize(); i++)
-        if (elements[i]->onKeyDown(key_id) == HANDLED) return HANDLED;
+    CONTAINER_FOR(onKeyDown(key_id));
     
     return UNHANDLED;
 }
@@ -169,6 +141,9 @@ int Container::onTimer(float delta_time) {
     
     return UNHANDLED;
 }
+
+
+#undef CONTAINER_FOR
 
 
 Container::~Container() {
