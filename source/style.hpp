@@ -68,3 +68,21 @@ public:
         scroller_color(scroller_color_), scroller_factor(scroller_factor_) 
     {}
 };
+
+
+/// Controls how clock looks
+class ClockStyle {
+public:
+    sf::Color text_color;       ///< Text color
+    unsigned font_size;         ///< Font size
+    const sf::Font &font;       ///< Font
+
+
+    ClockStyle(
+        const sf::Color &text_color_, 
+        unsigned font_size_, sf::Font &font_
+    ) :
+        text_color(text_color_), 
+        font_size(font_size_), font(font_) 
+    {}
+};

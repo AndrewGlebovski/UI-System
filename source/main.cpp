@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <stdio.h>
+#include <time.h>
 #include "vector.hpp"
 #include "list.hpp"
 #include "configs.hpp"
@@ -10,6 +11,7 @@
 #include "scrollbar.hpp"
 #include "canvas.hpp"
 #include "ui-system.hpp"
+#include "clock.hpp"
 
 
 int main() {
@@ -42,6 +44,12 @@ int main() {
         SCROLLBAR_SCROLLER_FACTOR
     );
 
+    ClockStyle clock_style(
+        sf::Color::Black,
+        20,
+        font
+    );
+
     MainWindow main_window(
         Vector2D(100, 100),
         Vector2D(SCREEN_W - 200, SCREEN_H - 200),
@@ -49,26 +57,23 @@ int main() {
         "Paint",
         window_style
     );
-    
+
+    main_window.addElement(new Clock(
+        Vector2D(0, 0),
+        Vector2D(100, 50),
+        5,
+        nullptr,
+        clock_style
+    ));
+
     Window *w1 = new Window(
-        Vector2D(100, 100),
+        Vector2D(200, 200),
         Vector2D(800, 600),
         2,
         nullptr,
         "picture1.png",
         window_style
     );
-
-    Window *w2 = new Window(
-        Vector2D(100, 100),
-        Vector2D(400, 400),
-        5,
-        nullptr,
-        "picture2.png",
-        window_style
-    );
-    
-    main_window.addElement(w2);
 
     Canvas *canvas = new Canvas(
         Vector2D(0, 0),
@@ -106,6 +111,8 @@ int main() {
     List<Vector2D> transforms;
     transforms.push_back(Vector2D());
 
+    sf::Clock timer;
+
     while (render_window.isOpen()) {
         sf::Event event;
 
@@ -117,6 +124,11 @@ int main() {
             ASSERT(transforms[0].length() < 0.001, "Transform failed!\n");
         }
         
+        if (timer.getElapsedTime().asSeconds() > 1) {
+            main_window.onTimer(timer.getElapsedTime().asSeconds());
+            timer.restart();
+        }
+
         result.clear();
 
         main_window.draw(result, transforms);
