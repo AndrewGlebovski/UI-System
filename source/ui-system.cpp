@@ -11,6 +11,7 @@
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "list.hpp"
+#include "asset.hpp"
 #include "style.hpp"
 #include "configs.hpp"
 #include "key-id.hpp"
@@ -154,51 +155,21 @@ Container::~Container() {
 }
 
 
-void Window::drawFrame(sf::RenderTexture &result, const Vector2D &total_position) {
-    sf::RectangleShape frame(container.size);
-    frame.setPosition(total_position + (getAreaPosition() - position));
-    frame.setOutlineThickness(style.frame_outline);
-    frame.setOutlineColor(sf::Color(style.frame_color));
-    frame.setFillColor(sf::Color(0));
-
-    sf::RectangleShape title_bar(Vector2D(size.x, style.title_bar_height));
-    title_bar.setPosition(total_position);
-    title_bar.setFillColor(style.frame_color);
-
-    sf::Text text(title, style.font, style.font_size);
-
-    sf::FloatRect text_rect = text.getLocalBounds();
-
-    Vector2D title_pos = total_position + Vector2D(style.frame_outline, 0);
-    title_pos.y += (style.title_bar_height - text_rect.height) / 2;
-
-    text.setPosition(title_pos);
-    text.setFillColor(style.title_color);
-
-    result.draw(frame);
-    result.draw(title_bar);
-    result.draw(text);
-}
-
-
 Window::Window(
     const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_, 
     const sf::String &title_, const WindowStyle &style_
 ):
     BaseUI(position_, size_, z_index_, parent_),
     title(title_), style(style_),
-    buttons(Vector2D(), Vector2D(), z_index_, this), 
-    container(Vector2D(), Vector2D(), z_index_, this)
+    buttons(Vector2D(), size, 1, this), 
+    container(Vector2D(), Vector2D(), 1, this)
 {
-    buttons.position = -Vector2D(1, 1) * style.frame_outline;
-    buttons.size = size + Vector2D(1, 1) * style.frame_outline;
-
     container.position = getAreaPosition() - position;
     container.size = getAreaSize();
 
     buttons.addElement(new MoveButton(
-        Vector2D(1, 1) * style.frame_outline,
-        Vector2D(container.size.x, style.title_bar_height - style.frame_outline),
+        Vector2D(1, 1) * style.outline,
+        Vector2D(container.size.x, style.tl_offset.y - style.outline),
         &buttons,
         *this
     ));
@@ -206,22 +177,64 @@ Window::Window(
 
 
 Vector2D Window::getAreaPosition() const {
-    return position + Vector2D(style.frame_outline, style.title_bar_height);
+    return position + style.tl_offset;
 }
 
 
 Vector2D Window::getAreaSize() const {
-    return size - Vector2D(style.frame_outline * 2, style.title_bar_height + style.frame_outline);
+    return size - style.tl_offset - style.br_offset;
 }
+
+
+struct SpriteInfo {
+    WindowAsset::TEXTURE_ID id;
+    Vector2D position;
+    Vector2D rect_size;
+
+
+    SpriteInfo(WindowAsset::TEXTURE_ID id_, const Vector2D &position_, const Vector2D &rect_size_) :
+        id(id_), position(position_), rect_size(rect_size_) {}
+};
 
 
 void Window::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
     TransformApplier add_transform(transforms, position);
 
+    Vector2D tl_size = style.asset[WindowAsset::FRAME_TL].getSize();
+    Vector2D br_size = style.asset[WindowAsset::FRAME_BR].getSize();
+
+    vec_t center_h = size.y - tl_size.y - br_size.y;
+    vec_t center_w = size.x - tl_size.x - br_size.x;
+
+    SpriteInfo sprites[] = {
+        SpriteInfo(WindowAsset::FRAME_TL,       Vector2D(),                                             tl_size),
+        SpriteInfo(WindowAsset::FRAME_L,        Vector2D(0, tl_size.y),                                 Vector2D(tl_size.x, center_h)),
+        SpriteInfo(WindowAsset::FRAME_BL,       Vector2D(0, tl_size.y + center_h),                      Vector2D(tl_size.x, br_size.y)),
+        SpriteInfo(WindowAsset::FRAME_B,        Vector2D(tl_size.x, tl_size.y + center_h),              Vector2D(center_w, br_size.y)),
+        SpriteInfo(WindowAsset::FRAME_BR,       Vector2D(tl_size.x + center_w, tl_size.y + center_h),   br_size),
+        SpriteInfo(WindowAsset::FRAME_R,        Vector2D(tl_size.x + center_w, tl_size.y),              Vector2D(br_size.x, center_h)),
+        SpriteInfo(WindowAsset::FRAME_TR,       Vector2D(tl_size.x + center_w, 0),                      Vector2D(br_size.x, tl_size.y)),
+        SpriteInfo(WindowAsset::TITLE,          Vector2D(tl_size.x, 0),                                 Vector2D(center_w, tl_size.y)),
+        SpriteInfo(WindowAsset::FRAME_CENTER,   tl_size,                                                Vector2D(center_w, center_h)),
+    };
+
+    sf::Sprite tool_sprite;
+
+    for (size_t i = 0; i < 9; i++) {
+        tool_sprite.setTexture(style.asset[sprites[i].id]);
+        tool_sprite.setTextureRect(sf::IntRect(Vector2D(), sprites[i].rect_size));
+        tool_sprite.setPosition(sprites[i].position + transforms[0]);
+        result.draw(tool_sprite);
+    }
+
+    sf::Text text(title, style.font, style.font_size);
+    text.setPosition(transforms[0] + style.title_offset);
+    text.setFillColor(style.title_color);
+
+    result.draw(text);
+
     container.draw(result, transforms);
     buttons.draw(result, transforms);
-
-    drawFrame(result, transforms[0]);
 }
 
 

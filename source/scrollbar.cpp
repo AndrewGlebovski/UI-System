@@ -4,9 +4,14 @@
 */
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+
+
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "list.hpp"
+#include "asset.hpp"
 #include "style.hpp"
 #include "ui-base.hpp"
 #include "scrollbar.hpp"
@@ -182,3 +187,6 @@ int HScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Ve
 HScrollBar::~HScrollBar() {
     if (action) delete action;
 }
+
+
+#pragma GCC diagnostic pop

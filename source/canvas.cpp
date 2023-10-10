@@ -14,6 +14,7 @@
 #include "list.hpp"
 #include "configs.hpp"
 #include "key-id.hpp"
+#include "asset.hpp"
 #include "style.hpp"
 #include "ui-base.hpp"
 #include "scrollbar.hpp"

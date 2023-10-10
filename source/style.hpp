@@ -22,25 +22,29 @@ public:
 };
 
 
-/// Contains window style
+/// Controls how window looks
 class WindowStyle {
 public:
-    sf::Color frame_color;      ///< Window frame color
-    sf::Color title_color;      ///< Window title color
-    float frame_outline;        ///< Frame outline thickness
-    float title_bar_height;     ///< Window title bar height
+    sf::Color title_color;      ///< Title color
+    Vector2D title_offset;      ///< Title offset from top-left corner
     unsigned font_size;         ///< Title font size
     const sf::Font &font;       ///< Title font
+    const WindowAsset &asset;   ///< Textures used in window
+    float outline;              ///< Describes size of window resizing buttons
+    Vector2D tl_offset;         ///< Window inner area offset from top-left corner
+    Vector2D br_offset;         ///< Window inner area offset from bottom-right corner
 
 
     WindowStyle(
-        const sf::Color &frame_color_, const sf::Color &title_color_, 
-        float frame_outline_, float title_bar_height_, 
-        unsigned font_size_, const sf::Font &font_
+        const sf::Color &title_color_, const Vector2D &title_offset_,
+        unsigned font_size_, const sf::Font &font_,
+        const WindowAsset &asset_, float outline_, 
+        const Vector2D &tl_offset_, const Vector2D &br_offset_
     ) :
-        frame_color(frame_color_), title_color(title_color_),
-        frame_outline(frame_outline_), title_bar_height(title_bar_height_),
-        font_size(font_size_), font(font_) 
+        title_color(title_color_), title_offset(title_offset_),
+        font_size(font_size_), font(font_),
+        asset(asset_), outline(outline_),
+        tl_offset(tl_offset_), br_offset(br_offset_)
     {}
 };
 
@@ -53,7 +57,6 @@ public:
     sf::Color background_color;     ///< Background color
     sf::Color scroller_color;       ///< Scroller
     vec_t scroller_factor;          ///< Scroller height = factor * scrollbar.size
-
 
     ScrollBarStyle(
         const sf::Color &frame_color_, vec_t frame_outline_,

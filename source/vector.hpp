@@ -34,6 +34,12 @@ public:
 
 
     /**
+     * \brief Constructs vector from SFML Vector2u
+    */
+    Vector2D(const sf::Vector2u &vec);
+
+
+    /**
      * \brief Fills all fields with NAN
     */
     ~Vector2D();
@@ -73,6 +79,12 @@ public:
      * \brief Converts Vector2D to its SFML analogue
     */
     operator sf::Vector2f() const;
+
+
+    /**
+     * \brief Converts Vector2D to SFML Vector2i
+    */
+    operator sf::Vector2i() const;
 };
 
 

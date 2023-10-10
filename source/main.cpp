@@ -1,8 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include <stdio.h>
-#include "configs.hpp"
 #include "vector.hpp"
 #include "list.hpp"
+#include "configs.hpp"
+#include "asset.hpp"
 #include "style.hpp"
 #include "ui-base.hpp"
 #include "button.hpp"
@@ -20,13 +21,17 @@ int main() {
     sf::Font font;
     ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
 
+    WindowAsset window_asset(WINDOW_ASSET_DIR);
+
     WindowStyle window_style(
-        sf::Color(WINDOW_FRAME_COLOR),
         sf::Color(WINDOW_TITLE_COLOR),
-        WINDOW_FRAME_OUTLINE,
-        WINDOW_TITLE_BAR_HEIGHT,
-        WINDOW_TITLE_SIZE,
-        font
+        WINDOW_TITLE_OFFSET,
+        WINDOW_FONT_SIZE,
+        font,
+        window_asset,
+        WINDOW_OUTLINE,
+        WINDOW_TL_OFFSET,
+        WINDOW_BR_OFFSET
     );
 
     ScrollBarStyle scrollbar_style(
@@ -53,10 +58,21 @@ int main() {
         "picture1.png",
         window_style
     );
+
+    Window *w2 = new Window(
+        Vector2D(100, 100),
+        Vector2D(400, 400),
+        5,
+        nullptr,
+        "picture2.png",
+        window_style
+    );
     
+    main_window.addElement(w2);
+
     Canvas *canvas = new Canvas(
         Vector2D(0, 0),
-        Vector2D(774, 527),
+        w1->getAreaSize() - Vector2D(30, 30),
         5,
         nullptr,
         nullptr
@@ -65,8 +81,8 @@ int main() {
     w1->addElement(canvas);
 
     w1->addElement(new VScrollBar(
-        Vector2D(774, 0),
-        Vector2D(20, 527),
+        Vector2D(w1->getAreaSize().x - 20, 0),
+        Vector2D(20, w1->getAreaSize().y - 30),
         5,
         nullptr,
         new VScrollCanvas(*canvas),
@@ -74,8 +90,8 @@ int main() {
     ));
 
     w1->addElement(new HScrollBar(
-        Vector2D(0, 527),
-        Vector2D(794, 20),
+        Vector2D(0, w1->getAreaSize().y - 20),
+        Vector2D(w1->getAreaSize().x, 20),
         5,
         nullptr,
         new HScrollCanvas(*canvas),

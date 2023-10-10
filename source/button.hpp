@@ -56,29 +56,10 @@ public:
     {}
 
 
-    ActionButton(const ActionButton &button) :
-        BaseButton(button.position, button.size, button.z_index, button.parent),
-        action(nullptr), status(BUTTON_NORMAL)
-    {
-        // THIS SHOULD BE CHANGED!!!
-        *action = *button.action;
-        abort();
-    }
+    ActionButton(const ActionButton &button) = delete;
 
 
-    ActionButton &operator = (const ActionButton& button) {
-        if (this != &button) {
-            position = button.position;
-            size = button.size;
-            z_index = button.z_index;
-            parent = button.parent;
-
-            // THIS SHOULD BE CHANGED!!!
-            *action = *button.action;
-            abort();
-        }
-        return *this;
-    }
+    ActionButton &operator = (const ActionButton& button) = delete;
 
 
     virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override = 0;

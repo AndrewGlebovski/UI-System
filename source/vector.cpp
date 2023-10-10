@@ -13,6 +13,9 @@ Vector2D::Vector2D(vec_t init_x, vec_t init_y) : x(init_x), y(init_y) {}
 Vector2D::Vector2D(const sf::Vector2f &vec) : x(vec.x), y(vec.y) {}
 
 
+Vector2D::Vector2D(const sf::Vector2u &vec) : x(float(vec.x)), y(float(vec.y)) {}
+
+
 Vector2D::~Vector2D() { x = NAN, y = NAN; }
 
 
@@ -43,6 +46,9 @@ void Vector2D::print() const {
 
 
 Vector2D::operator sf::Vector2f() const { return sf::Vector2f(x, y); }
+
+
+Vector2D::operator sf::Vector2i() const { return sf::Vector2i(int(x), int(y)); }
 
 
 Vector2D &operator += (Vector2D &a, const Vector2D &b) {

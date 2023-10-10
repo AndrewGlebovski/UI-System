@@ -11,6 +11,7 @@
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "list.hpp"
+#include "asset.hpp"
 #include "style.hpp"
 #include "ui-base.hpp"
 #include "button.hpp"

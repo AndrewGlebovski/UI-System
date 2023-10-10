@@ -37,6 +37,12 @@ public:
     );
 
 
+    VScrollBar(const VScrollBar &scrollbar) = delete;
+
+
+    VScrollBar &operator = (const VScrollBar& scrollbar) = delete;
+
+
     virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
 
 
@@ -63,6 +69,12 @@ public:
         const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
+
+
+    HScrollBar(const HScrollBar &scrollbar) = delete;
+
+
+    HScrollBar &operator = (const HScrollBar& scrollbar) = delete;
 
 
     virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
