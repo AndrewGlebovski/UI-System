@@ -11,7 +11,7 @@ const int SCREEN_H = 1080;                      ///< Screen height in pixels
 const size_t WINDOW_TITLE_COLOR = 0xffffffff;
 const Vector2D WINDOW_TITLE_OFFSET(20, 20);
 const int WINDOW_FONT_SIZE = 20;
-const float WINDOW_OUTLINE = 3;
+const float WINDOW_OUTLINE = 10;
 const Vector2D WINDOW_TL_OFFSET(15, 60);
 const Vector2D WINDOW_BR_OFFSET(15, 15);
 

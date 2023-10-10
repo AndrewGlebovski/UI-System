@@ -215,6 +215,17 @@ int Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector
 }
 
 
+int Canvas::onParentResize() {
+    Vector2D new_size = texture.getSize();
+    if (new_size.x > parent->size.x - 30) new_size.x = parent->size.x - 30;
+    if (new_size.y > parent->size.y - 30) new_size.y = parent->size.y - 30;
+
+    setSize(new_size);
+
+    return UNHANDLED;
+}
+
+
 int Canvas::onKeyDown(int key_id) {
     switch (key_id) {
         case Num1: current_tool = 0; return HANDLED;

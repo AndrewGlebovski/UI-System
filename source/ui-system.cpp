@@ -144,6 +144,16 @@ int Container::onTimer(float delta_time) {
 }
 
 
+int Container::onParentResize() {
+    if (elements.getSize() == 0) return UNHANDLED;
+
+    for (size_t i = 0; i < elements.getSize(); i++)
+        elements[i]->onParentResize();
+    
+    return UNHANDLED;
+}
+
+
 #undef CONTAINER_FOR
 
 
@@ -158,7 +168,7 @@ Container::~Container() {
 Window::Window(
     const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_, 
     const sf::String &title_, const WindowStyle &style_
-):
+) :
     BaseUI(position_, size_, z_index_, parent_),
     title(title_), style(style_),
     buttons(Vector2D(), size, 1, this), 
@@ -169,9 +179,73 @@ Window::Window(
 
     buttons.addElement(new MoveButton(
         Vector2D(1, 1) * style.outline,
-        Vector2D(container.size.x, style.tl_offset.y - style.outline),
-        &buttons,
+        Vector2D(size.x - 2 * style.outline, style.tl_offset.y - style.outline),
+        nullptr,
         *this
+    ));
+
+    buttons.addElement(new ResizeButton(
+        Vector2D(0, style.outline),
+        Vector2D(style.outline, size.y - 2 * style.outline),
+        nullptr,
+        *this,
+        ResizeButton::LEFT
+    ));
+
+    buttons.addElement(new ResizeButton(
+        Vector2D(style.outline, 0),
+        Vector2D(size.x - 2 * style.outline, style.outline),
+        nullptr,
+        *this,
+        ResizeButton::TOP
+    ));
+
+    buttons.addElement(new ResizeButton(
+        Vector2D(style.outline, size.y - style.outline),
+        Vector2D(size.x - 2 * style.outline, style.outline),
+        nullptr,
+        *this,
+        ResizeButton::BOTTOM
+    ));
+
+    buttons.addElement(new ResizeButton(
+        Vector2D(size.x - style.outline, style.outline),
+        Vector2D(style.outline, size.y - 2 * style.outline),
+        nullptr,
+        *this,
+        ResizeButton::RIGHT
+    ));
+
+    buttons.addElement(new ResizeButton(
+        Vector2D(),
+        Vector2D(style.outline, style.outline),
+        nullptr,
+        *this,
+        ResizeButton::TOP_LEFT
+    ));
+
+    buttons.addElement(new ResizeButton(
+        Vector2D(size.x - style.outline, 0),
+        Vector2D(style.outline, style.outline),
+        nullptr,
+        *this,
+        ResizeButton::TOP_RIGHT
+    ));
+
+    buttons.addElement(new ResizeButton(
+        Vector2D(0, size.y - style.outline),
+        Vector2D(style.outline, style.outline),
+        nullptr,
+        *this,
+        ResizeButton::BOTTOM_LEFT
+    ));
+
+    buttons.addElement(new ResizeButton(
+        Vector2D(size.x - style.outline, size.y - style.outline),
+        Vector2D(style.outline, style.outline),
+        nullptr,
+        *this,
+        ResizeButton::BOTTOM_RIGHT
     ));
 }
 
@@ -308,6 +382,38 @@ int Window::onTimer(float delta_time) {
 }
 
 
+int Window::onParentResize() {
+    setPosition(position);
+
+    Vector2D new_size = size;
+
+    if (position.x < 0) {
+        position.x = 0;
+        new_size.x = parent->size.x;
+    }
+
+    if (position.y < 0) {
+        position.y = 0;
+        new_size.y = parent->size.y;
+    }
+
+    setSize(new_size);
+
+    return UNHANDLED;
+}
+
+
+void Window::setSize(const Vector2D &new_size) {
+    BaseUI::setSize(new_size);
+
+    buttons.size = size;
+    buttons.onParentResize();
+
+    container.size = getAreaSize();
+    container.onParentResize();
+}
+
+
 MainWindow::MainWindow(
     const Vector2D &position_, const Vector2D &size_, int z_index_,
     const sf::String &title_, const WindowStyle &style_
@@ -317,15 +423,17 @@ MainWindow::MainWindow(
 
 
 void MainWindow::setSize(const Vector2D &new_size) {
-    if (position.x + new_size.x > SCREEN_W)
-        size.x = SCREEN_W - position.x;
-    else
-        size.x = new_size.x;
+    if (position.x + new_size.x > SCREEN_W) size.x = SCREEN_W - position.x;
+    else size.x = new_size.x;
     
-    if (position.y + size.y > SCREEN_H)
-        size.y = SCREEN_H - position.y;
-    else
-        size.y = new_size.y;
+    if (position.y + size.y > SCREEN_H) size.y = SCREEN_H - position.y;
+    else size.y = new_size.y;
+    
+    buttons.size = size;
+    buttons.onParentResize();
+
+    container.size = getAreaSize();
+    container.onParentResize();
 }
 
 
@@ -373,7 +481,16 @@ MoveButton::MoveButton(
 {}
 
 
-void MoveButton::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {}
+void MoveButton::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
+    /* DEBUG DRAWING
+    TransformApplier add_transform(transforms, position);
+
+    sf::RectangleShape rect(size);
+    rect.setPosition(transforms[0]);
+    rect.setFillColor(sf::Color::Cyan);
+    result.draw(rect);
+    */
+}
 
 
 int MoveButton::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
@@ -407,6 +524,146 @@ int MoveButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 
 int MoveButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
     is_moving = false;
+    return UNHANDLED;
+}
+
+
+int MoveButton::onParentResize() {
+    float outline = window.getStyle().outline;
+    Vector2D window_size = window.size;
+
+    size = Vector2D(window_size.x - 2 * outline, window.getStyle().tl_offset.y - outline);
+    
+    return UNHANDLED;
+}
+
+
+ResizeButton::ResizeButton(
+    const Vector2D &position_, const Vector2D &size_, BaseUI *parent_, 
+    Window &window_, RESIZE_DIRECTION resize_dir_
+) :
+    BaseButton(position_, size_, 0, parent_),
+    window(window_), prev_mouse(Vector2D()), is_moving(false), resize_dir(resize_dir_)
+{}
+
+
+void ResizeButton::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
+    /* DEBUG DRAWING
+    TransformApplier add_transform(transforms, position);
+
+    sf::RectangleShape rect(size);
+    rect.setPosition(transforms[0]);
+    rect.setFillColor(sf::Color::Red);
+    result.draw(rect);
+    */
+}
+
+
+int ResizeButton::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
+    if (!is_moving) return UNHANDLED;
+
+    Vector2D shift = Vector2D(mouse_x, mouse_y) - prev_mouse;
+    prev_mouse = Vector2D(mouse_x, mouse_y);
+
+    switch (resize_dir) {
+        case LEFT: 
+            shift.y = 0;
+            window.setPosition(window.position + shift);
+            window.setSize(window.size - shift);
+            break;
+        case TOP: 
+            shift.x = 0;
+            window.setPosition(window.position + shift);
+            window.setSize(window.size - shift);
+            break;
+        case BOTTOM: 
+            shift.x = 0;
+            window.setSize(window.size + shift);
+            break;
+        case RIGHT: 
+            shift.y = 0;
+            window.setSize(window.size + shift);
+            break;
+        case TOP_LEFT: 
+            window.setPosition(window.position + shift);
+            window.setSize(window.size - shift);
+            break;
+        case TOP_RIGHT: 
+            window.setPosition(window.position + Vector2D(0, shift.y));
+            window.setSize(window.size + Vector2D(shift.x, -shift.y));
+            break;
+        case BOTTOM_LEFT: 
+            window.setPosition(window.position + Vector2D(shift.x, 0));
+            window.setSize(window.size + Vector2D(-shift.x, shift.y));
+            break;
+        case BOTTOM_RIGHT: 
+            window.setSize(window.size + shift);
+            break;
+        default:
+            printf("Unknown resize direction!\n"); abort();
+    }
+
+    return HANDLED;
+}
+
+
+int ResizeButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
+    TransformApplier add_transform(transforms, position);
+
+    if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y))) {
+        is_moving = true;
+        prev_mouse = Vector2D(mouse_x, mouse_y);
+        return HANDLED;
+    }
+
+    return UNHANDLED;
+}
+
+
+int ResizeButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
+    is_moving = false;
+    return UNHANDLED;
+}
+
+
+int ResizeButton::onParentResize() {
+    float outline = window.getStyle().outline;
+    Vector2D window_size = window.size;
+
+    switch (resize_dir) {
+        case LEFT: 
+            size = Vector2D(outline, window_size.y - 2 * outline);
+            break;
+        case TOP: 
+            size = Vector2D(window_size.x - 2 * outline, outline);
+            break;
+        case BOTTOM: 
+            position = Vector2D(outline, window_size.y - outline);
+            size = Vector2D(window_size.x - 2 * outline, outline);
+            break;
+        case RIGHT: 
+            position = Vector2D(window_size.x - outline, outline);
+            size = Vector2D(outline, window_size.y - 2 * outline);
+            break;
+        case TOP_LEFT: 
+            size = Vector2D(outline, outline);
+            break;
+        case TOP_RIGHT: 
+            position = Vector2D(window_size.x - outline, 0);
+            size = Vector2D(outline, outline);
+            break;
+        case BOTTOM_LEFT: 
+            position = Vector2D(0, window_size.y - outline);
+            size = Vector2D(outline, outline);
+            break;
+        case BOTTOM_RIGHT: 
+            position = Vector2D(window_size.x - outline, window_size.y - outline);
+            size = Vector2D(outline, outline);
+            break;
+        default:
+            printf("Unknown resize direction!\n"); abort();
+    }
+    
     return UNHANDLED;
 }
 

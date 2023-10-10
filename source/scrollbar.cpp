@@ -98,6 +98,19 @@ int VScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Ve
 }
 
 
+int VScrollBar::onParentResize() {
+    float prev = scroller.getPosition().y / (size.y - scroller.getSize().y);
+
+    setPosition(Vector2D(parent->size.x - 20, position.y));
+    setSize(Vector2D(size.x, parent->size.y - 30));
+
+    scroller.setSize(Vector2D(size.x, style.scroller_factor * size.y));
+    scroller.setPosition(Vector2D(scroller.getPosition().x, prev * (size.y - scroller.getSize().y)));
+
+    return UNHANDLED;
+}
+
+
 VScrollBar::~VScrollBar() {
     if (action) delete action;
 }
@@ -180,6 +193,19 @@ int HScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 
 int HScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
     is_moving = false;
+    return UNHANDLED;
+}
+
+
+int HScrollBar::onParentResize() {
+    float prev = scroller.getPosition().x / (size.x - scroller.getSize().x);
+
+    setPosition(Vector2D(position.x, parent->size.y - 20));
+    setSize(Vector2D(parent->size.x, size.y));
+
+    scroller.setSize(Vector2D(style.scroller_factor * size.x, size.y));
+    scroller.setPosition(Vector2D(prev * (size.x - scroller.getSize().x), scroller.getPosition().y));
+
     return UNHANDLED;
 }
 

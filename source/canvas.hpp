@@ -96,6 +96,7 @@ public:
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onKeyDown(int key_id) override;
+    virtual int onParentResize() override;
 
 
     virtual ~Canvas();

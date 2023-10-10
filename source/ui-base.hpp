@@ -62,6 +62,7 @@ public:
     virtual int onKeyUp(int key_id) { return UNHANDLED; }
     virtual int onKeyDown(int key_id) { return UNHANDLED; }
     virtual int onTimer(float delta_time) { return UNHANDLED; }
+    virtual int onParentResize() { return UNHANDLED; } ;
 
 
     virtual ~BaseUI() {};

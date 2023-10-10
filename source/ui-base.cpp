@@ -25,12 +25,16 @@ void BaseUI::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
 
 
 void BaseUI::setSize(const Vector2D &new_size) {
-    if (position.x + new_size.x > parent->size.x)
+    if (new_size.x < 0)
+        size.x = 0;
+    else if (position.x + new_size.x > parent->size.x)
         size.x = parent->size.x - position.x;
     else
         size.x = new_size.x;
     
-    if (position.y + size.y > parent->size.y)
+    if (new_size.y < 0)
+        size.y = 0;
+    else if (position.y + size.y > parent->size.y)
         size.y = parent->size.y - position.y;
     else
         size.y = new_size.y;

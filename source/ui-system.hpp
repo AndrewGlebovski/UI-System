@@ -33,6 +33,7 @@ public:
     virtual int onKeyUp(int key_id) override;
     virtual int onKeyDown(int key_id) override;
     virtual int onTimer(float delta_time) override;
+    virtual int onParentResize() override;
 
 
     ~Container();
@@ -46,12 +47,6 @@ protected:
     WindowStyle style;          ///< Window style
     Container buttons;          ///< Window title bar and resize buttons
     Container container;        ///< Window content manager
-
-
-    /**
-     * \brief Draws window frame
-    */
-    void drawFrame(sf::RenderTexture &result, const Vector2D &total_position);
 
 public:
     /**
@@ -83,6 +78,12 @@ public:
     void addElement(BaseUI *control);
 
 
+    virtual void setSize(const Vector2D &new_size) override;
+
+
+    const WindowStyle &getStyle() const { return style; }
+
+
     /**
      * \brief Draws window frame, title bar and its content
     */
@@ -95,6 +96,7 @@ public:
     virtual int onKeyUp(int key_id) override;
     virtual int onKeyDown(int key_id) override;
     virtual int onTimer(float delta_time) override;
+    virtual int onParentResize() override;
 };
 
 
@@ -140,4 +142,42 @@ public:
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onParentResize() override;
+};
+
+
+/// Invisible button for resizing windows
+class ResizeButton : public BaseButton {
+protected:
+    Window &window;         ///< Window to move
+    Vector2D prev_mouse;    ///< Previous mouse click position
+    bool is_moving;         ///< If moving is active
+    const int resize_dir;   ///< Resize direction
+
+public:
+    enum RESIZE_DIRECTION {
+        LEFT,
+        TOP,
+        BOTTOM,
+        RIGHT,
+        TOP_LEFT,
+        TOP_RIGHT,
+        BOTTOM_LEFT,
+        BOTTOM_RIGHT
+    };
+
+
+    ResizeButton(
+        const Vector2D &position_, const Vector2D &size_, BaseUI *parent_, 
+        Window &window_, RESIZE_DIRECTION resize_dir_
+    );
+
+
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+
+
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onParentResize() override;
 };
