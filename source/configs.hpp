@@ -26,5 +26,8 @@ const float SCROLLBAR_SCROLLER_FACTOR = 0.1f;
 /// Path to window textures root directory
 #define WINDOW_ASSET_DIR "assets/textures/window"
 
+/// Path to palette view textures root directory
+#define PALETTE_ASSET_DIR "assets/textures/tools"
+
 /// Path to font file
 #define FONT_FILE "assets/MainFont.ttf"

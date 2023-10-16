@@ -43,7 +43,7 @@ $(BIN_DIR)/ui-base.o: $(addprefix $(SRC_DIR)/, ui-base.cpp ui-base.hpp vector.hp
 
 
 # Предварительная сборка canvas.cpp
-$(BIN_DIR)/canvas.o: $(addprefix $(SRC_DIR)/, canvas.cpp canvas.hpp vector.hpp list.hpp ui-base.hpp key-id.hpp configs.hpp)
+$(BIN_DIR)/canvas.o: $(addprefix $(SRC_DIR)/, canvas.cpp canvas.hpp vector.hpp list.hpp ui-base.hpp key-id.hpp configs.hpp button.hpp ui-system.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 

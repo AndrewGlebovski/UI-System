@@ -68,7 +68,7 @@ Asset &Asset::operator = (const Asset &arg) {
 
 const sf::Texture &Asset::getTexture(int id) const {
     assert(textures);
-    assert(0 <= id && id < count);
+    assert(0 <= id && size_t(id) < count);
 
     return textures[id];
 }

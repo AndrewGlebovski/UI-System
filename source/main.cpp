@@ -9,8 +9,8 @@
 #include "ui-base.hpp"
 #include "button.hpp"
 #include "scrollbar.hpp"
-#include "canvas.hpp"
 #include "ui-system.hpp"
+#include "canvas.hpp"
 #include "clock.hpp"
 
 
@@ -25,6 +25,8 @@ int main() {
 
     WindowAsset window_asset(WINDOW_ASSET_DIR);
 
+    PaletteViewAsset palette_asset(PALETTE_ASSET_DIR);
+    
     WindowStyle window_style(
         sf::Color(WINDOW_TITLE_COLOR),
         WINDOW_TITLE_OFFSET,
@@ -75,12 +77,26 @@ int main() {
         window_style
     );
 
+    Palette *palette = new Palette();
+
+    PaletteView *palette_view = new PaletteView(
+        Vector2D(100, 100),
+        Vector2D(188, 94),
+        10,
+        nullptr,
+        palette,
+        palette_asset
+    );
+
+    main_window.addElement(palette_view);
+
     Canvas *canvas = new Canvas(
         Vector2D(0, 0),
         w1->getAreaSize() - Vector2D(30, 30),
         5,
         nullptr,
-        nullptr
+        nullptr,
+        palette
     );
 
     w1->addElement(canvas);
@@ -142,6 +158,8 @@ int main() {
         render_window.display();
     }
 
+    delete palette;
+    
     printf("UI System!\n");
     return 0;
 }

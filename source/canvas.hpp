@@ -4,57 +4,111 @@
 */
 
 
+class Canvas;
+
+
 /// Base class for canvas tool
 class CanvasTool {
 protected:
     bool is_drawing;            ///< Tool is in drawing mode
 
 public:
+    enum ButtonState {
+        PRESSED,
+        REALEASED
+    };
+
+
     CanvasTool() : is_drawing(false) {}
 
 
-    void setDrawing(bool new_value) { is_drawing = new_value; }
+    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) = 0;
+    virtual void onSecondaryButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
+    virtual void onModifier1(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
+    virtual void onModifier2(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
+    virtual void onModifier3(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
+    virtual void onMove(const Vector2D &mouse, Canvas &canvas) = 0;
+    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) = 0;
+    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) = 0;
+    virtual BaseUI* getWidget() { return nullptr; };
 
-
-    virtual void onMouseMove(int mouse_x, int mouse_y, sf::RenderTexture &result) = 0;
-    virtual void onMouseButtonDown(int mouse_x, int mouse_y, sf::RenderTexture &result) = 0;
-    virtual void onMouseButtonUp(int mouse_x, int mouse_y, sf::RenderTexture &result) = 0;
 
     virtual ~CanvasTool() = default;
 };
 
 
-/// Draws line of canvas
+/// Standart pencil tool
 class PencilTool : public CanvasTool {
 protected:
-    Vector2D mouse_prev;        ///< Previous mouse click position
-    sf::Color color;
+    Vector2D prev_position;        ///< Previous mouse click position
 
 public:
-    PencilTool(const sf::Color &color_);
+    PencilTool();
 
-    void setColor(const sf::Color &new_color);
 
-    virtual void onMouseMove(int mouse_x, int mouse_y, sf::RenderTexture &result) override;
-    virtual void onMouseButtonDown(int mouse_x, int mouse_y, sf::RenderTexture &result) override;
-    virtual void onMouseButtonUp(int mouse_x, int mouse_y, sf::RenderTexture &result) override;
+    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) override;
 };
 
 
-/// Clears part of canvas
-class EraserTool : public CanvasTool {
+/// Handles tools and colors for canvas
+class Palette {
 protected:
-    Vector2D mouse_prev;        ///< Previous mouse click position
-    vec_t radius;
+    List<CanvasTool*> tools;
+    size_t current_tool;
+
+    sf::Color current_color;
 
 public:
-    EraserTool(vec_t radius_);
+    Palette();
 
-    void setRadius(vec_t new_radius);
 
-    virtual void onMouseMove(int mouse_x, int mouse_y, sf::RenderTexture &result) override;
-    virtual void onMouseButtonDown(int mouse_x, int mouse_y, sf::RenderTexture &result) override;
-    virtual void onMouseButtonUp(int mouse_x, int mouse_y, sf::RenderTexture &result) override;
+    CanvasTool *getCurrentTool();
+
+
+    void setCurrentTool(size_t index);
+
+
+    const sf::Color &getCurrentColor() const;
+
+
+    void setCurrentColor(const sf::Color &color);
+
+
+    ~Palette();
+};
+
+
+/// GUI for Palette
+class PaletteView : public BaseUI {
+protected:
+    Container buttons;                  ///< Palette buttonы for tool selection
+
+    Palette *palette;                   ///< Palette which this PaletteView affects
+
+    const PaletteViewAsset &asset;      ///< Assets for buttons
+
+public:
+    PaletteView(
+        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        Palette *palette_, const PaletteViewAsset &asset_
+    );
+
+
+    PaletteView(const PaletteView &plaette_view) = default;
+
+
+    PaletteView &operator = (const PaletteView &plaette_view) = default;
+
+
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+
+
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
 };
 
 
@@ -68,9 +122,14 @@ protected:
     sf::RenderTexture texture;
     Vector2D texture_offset;
 
-    List<CanvasTool*> tools;
-    size_t current_tool;
+    Palette *palette;
 
+    Vector2D last_position;
+
+
+    /**
+     * \brief Clears canvas with white color
+    */
     void clear_canvas();
 
 public:
@@ -83,10 +142,23 @@ public:
     */
     Canvas(
         const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
-        const char *image_path
+        const char *image_path, Palette *palette_
     );
 
+
+    Canvas(const Canvas &canvas) = default;
+
+
+    Canvas &operator = (const Canvas &canvas) = default;
+
+
     Vector2D getTextureSize() const;
+
+
+    sf::RenderTexture &getTexture();
+
+
+    Palette *getPalette();
 
 
     virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
@@ -97,9 +169,6 @@ public:
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onKeyDown(int key_id) override;
     virtual int onParentResize() override;
-
-
-    virtual ~Canvas();
 };
 
 
