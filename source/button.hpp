@@ -96,11 +96,9 @@ public:
 };
 
 
-/// Texture button with some text
+/// Texture button
 class TextureButton : public ActionButton {
 protected:
-    sf::String text;
-    ButtonStyle style;
     const sf::Texture &normal;
     const sf::Texture &hover;
 
@@ -108,7 +106,6 @@ public:
     TextureButton(
         const Vector2D &position_, int z_index_, BaseUI *parent_,
         ButtonAction *action_,
-        const sf::String &text_, const ButtonStyle &style_, 
         const sf::Texture &normal_, const sf::Texture &hover_
     );
 

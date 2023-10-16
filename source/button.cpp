@@ -79,11 +79,9 @@ int RectButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 TextureButton::TextureButton(
     const Vector2D &position_, int z_index_, BaseUI *parent_,
     ButtonAction *action_,
-    const sf::String &text_, const ButtonStyle &style_, 
     const sf::Texture &normal_, const sf::Texture &hover_
 ) :
     ActionButton(position_, Vector2D(), z_index_, parent_, action_),
-    text(text_), style(style_),
     normal(normal_), hover(hover_)
 {
     size = Vector2D(normal.getSize().x, normal.getSize().y);
@@ -116,12 +114,6 @@ int TextureButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, Li
 void TextureButton::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
     TransformApplier add_transform(transforms, position);
 
-    sf::Text btn_text(text, style.font, style.font_size);
-    sf::FloatRect text_rect = btn_text.getLocalBounds();
-    Vector2D text_offset((size.x - text_rect.width) / 2, (size.y - text_rect.height) / 2);
-
-    btn_text.setPosition(transforms[0] + text_offset);
-
     sf::Sprite btn_sprite;
 
     switch(status) {
@@ -133,7 +125,6 @@ void TextureButton::draw(sf::RenderTexture &result, List<Vector2D> &transforms) 
     btn_sprite.setPosition(transforms[0]);
 
     result.draw(btn_sprite);
-    result.draw(btn_text);
 }
 
 
