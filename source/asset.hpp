@@ -4,11 +4,52 @@
 */
 
 
-/// Holds textures required for window
-class WindowAsset {
-private:
+/// Base class for all assets
+class Asset {
+protected:
     sf::Texture *textures;      ///< Textures required for window
+    size_t count;               ///< Amount of textures
 
+
+    /**
+     * \brief Contructs empty asset
+    */
+    Asset();
+
+
+    /**
+     * \brief Init texture buffer and copies assets
+    */
+    Asset(const Asset &arg);
+
+
+    /**
+     * \brief Loads textures from files located in the rootpath directory
+    */
+    void loadTextures(const char *rootpath, const char *files[], size_t assets_count);
+
+
+    /**
+     * \brief Copies assets
+    */
+    Asset &operator = (const Asset &arg);
+
+
+    /**
+     * \brief Returns texture by its id
+    */
+    const sf::Texture &getTexture(int id) const;
+
+
+    /**
+     * \brief Free textures
+    */
+    ~Asset();
+};
+
+
+/// Holds textures required for window
+class WindowAsset : public Asset {
 public:
     enum TEXTURE_ID {
         TITLE,                  ///< Title texture (will be repeated)
@@ -23,23 +64,28 @@ public:
     };
 
 
-    /**
-     * \brief Loads window textures from the given directory
-    */
     WindowAsset(const char *rootpath);
 
 
-    WindowAsset(const WindowAsset &arg);
-
-
-    WindowAsset &operator = (const WindowAsset &arg);
-
-
-    /**
-     * \brief Returns texture by its id
-    */
     const sf::Texture &operator [] (TEXTURE_ID id) const;
+};
 
 
-    ~WindowAsset();
+/// Holds textures required for palette
+class PaletteViewAsset : public Asset {
+public:
+    enum TEXTURE_ID {
+        BUCKET,
+        ERASER,
+        LINE,
+        PENCIL,
+        PICKER,
+        RECT
+    };
+
+
+    PaletteViewAsset(const char *rootpath);
+
+
+    const sf::Texture &operator [] (TEXTURE_ID id) const;
 };

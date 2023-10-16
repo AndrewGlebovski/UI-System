@@ -12,12 +12,77 @@
 #include "asset.hpp"
 
 
-const size_t WINDOW_ASSETS_SIZE = 9;
 const size_t MAX_PATH = 256;
 
 
-WindowAsset::WindowAsset(const char *rootpath) : textures(nullptr) {
-    static const char *PATHS_TO_ASSETS[] = {
+Asset::Asset() : textures(nullptr), count(0) {}
+
+
+Asset::Asset(const Asset &arg) : textures(nullptr), count(arg.count) {
+    assert(arg.textures);
+
+    textures = new sf::Texture[count];
+    assert(textures);
+
+    for (size_t i = 0; i < count; i++)
+        textures[i] = arg.textures[i];
+}
+
+
+void Asset::loadTextures(const char *rootpath, const char *files[], size_t files_size) {
+    textures = new sf::Texture[files_size];
+    assert(textures);
+
+    count = files_size;
+
+    char *path = (char *) calloc(strlen(rootpath) + MAX_PATH, 1);
+    assert(path);
+
+    for (size_t i = 0; i < files_size; i++) {
+        sprintf(path, "%s/%s.png", rootpath, files[i]);
+        assert(textures[i].loadFromFile(path));
+    }
+
+    free(path);
+}
+
+
+Asset &Asset::operator = (const Asset &arg) {
+    assert(arg.textures);
+
+    if (this != &arg) {
+        if (textures) delete[] textures;
+
+        count = arg.count;
+
+        textures = new sf::Texture[count];
+        assert(textures);
+
+        for (size_t i = 0; i < count; i++)
+            textures[i] = arg.textures[i];
+    }
+
+    return *this;
+}
+
+
+const sf::Texture &Asset::getTexture(int id) const {
+    assert(textures);
+    assert(0 <= id && id < count);
+
+    return textures[id];
+}
+
+
+Asset::~Asset() {
+    assert(textures);
+    
+    delete[] textures;
+}
+
+
+WindowAsset::WindowAsset(const char *rootpath) {
+    static const char *FILES[] = {
         "title",
         "top_left",
         "left",
@@ -29,18 +94,7 @@ WindowAsset::WindowAsset(const char *rootpath) : textures(nullptr) {
         "center"
     };
 
-    textures = new sf::Texture[WINDOW_ASSETS_SIZE];
-    assert(textures);
-
-    char *path = (char *) calloc(strlen(rootpath) + MAX_PATH, 1);
-    assert(path);
-
-    for (size_t i = 0; i < WINDOW_ASSETS_SIZE; i++) {
-        sprintf(path, "%s/%s.png", rootpath, PATHS_TO_ASSETS[i]);
-        assert(textures[i].loadFromFile(path));
-    }
-
-    free(path);
+    loadTextures(rootpath, FILES, sizeof(FILES) / 8);
 
     // SET REPEAT FLAG
 
@@ -52,38 +106,25 @@ WindowAsset::WindowAsset(const char *rootpath) : textures(nullptr) {
 }
 
 
-WindowAsset::WindowAsset(const WindowAsset &arg) : textures(nullptr) {
-    assert(arg.textures);
-
-    textures = new sf::Texture[WINDOW_ASSETS_SIZE];
-    assert(textures);
-
-    for (size_t i = 0; i < WINDOW_ASSETS_SIZE; i++)
-        textures[i] = arg.textures[i];
-}
-
-
-WindowAsset &WindowAsset::operator = (const WindowAsset &arg) {
-    assert(textures);
-    assert(arg.textures);
-
-    if (this != &arg) {
-        for (size_t i = 0; i < WINDOW_ASSETS_SIZE; i++)
-            textures[i] = arg.textures[i];
-    }
-    return *this;
-}
-
-
 const sf::Texture &WindowAsset::operator [] (TEXTURE_ID id) const {
-    assert(textures);
-
-    return textures[id];
+    return getTexture(id);
 }
 
 
-WindowAsset::~WindowAsset() {
-    assert(textures);
-    
-    delete[] textures;
+PaletteViewAsset::PaletteViewAsset(const char *rootpath) {
+    static const char *FILES[] = {
+        "bucket",
+        "eraser",
+        "line",
+        "pencil",
+        "picker",
+        "rect"
+    };
+
+    loadTextures(rootpath, FILES, sizeof(FILES) / 8);
+}
+
+
+const sf::Texture &PaletteViewAsset::operator [] (TEXTURE_ID id) const {
+    return getTexture(id);
 }
