@@ -81,7 +81,7 @@ int main() {
 
     PaletteView *palette_view = new PaletteView(
         Vector2D(100, 100),
-        Vector2D(188, 94),
+        Vector2D(188, 376),
         10,
         nullptr,
         palette,

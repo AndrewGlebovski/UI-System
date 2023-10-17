@@ -23,6 +23,24 @@
 #include "canvas.hpp"
 
 
+const sf::Color PREVIEW_COLOR = sf::Color::Blue;    ///< Standart color for all previews
+const float RECT_PREVIEW_OUTLINE = -1;              ///< Rect preview outline thickness
+
+
+/// Draws line on the texture
+void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf::RenderTexture &result);
+
+
+void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf::RenderTexture &result) {
+    sf::Vertex line[] = {
+        sf::Vertex(p1, color),
+        sf::Vertex(p2, color)
+    };
+
+    result.draw(line, 2, sf::Lines);
+}
+
+
 PencilTool::PencilTool() : prev_position() {}
 
 
@@ -79,8 +97,8 @@ public:
         sf::RectangleShape rect(size);
         rect.setPosition(transforms[0]);
         rect.setFillColor(sf::Color(0));
-        rect.setOutlineThickness(-1);
-        rect.setOutlineColor(sf::Color::Blue);
+        rect.setOutlineThickness(RECT_PREVIEW_OUTLINE);
+        rect.setOutlineColor(PREVIEW_COLOR);
         result.draw(rect);
     }
 };
@@ -156,9 +174,83 @@ RectTool::~RectTool() {
 }
 
 
+/// Draws preview of the rectangle
+class LinePreview : public BaseUI {
+private:
+    LineTool &tool;     ///< Tool that holds this object
+
+public:
+    /**
+     * \note Position used as line's first point and size as second
+    */
+    LinePreview(
+        const Vector2D &point1_, const Vector2D &point2_, int z_index_, BaseUI *parent_,
+        LineTool &tool_
+    ) :
+        BaseUI(point1_, point2_, z_index_, parent_), tool(tool_)
+    {}
+    
+
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override {
+        // REMAINDER: position = point1, size = point2
+        drawLine(transforms[0] + position, transforms[0] + size, PREVIEW_COLOR, result);
+    }
+};
+
+
+LineTool::LineTool() : draw_start(), line_preview(nullptr) {
+    line_preview = new LinePreview(Vector2D(), Vector2D(), 1, nullptr, *this);
+}
+
+
+void LineTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
+    switch (state) {
+        case PRESSED:
+            is_drawing = true;
+            draw_start = mouse;
+            line_preview->position = mouse;
+            line_preview->size = mouse;
+            break;
+        case REALEASED:
+            onConfirm(mouse, canvas);
+        default:
+            break;
+    }
+}
+
+
+void LineTool::onMove(const Vector2D &mouse, Canvas &canvas) {
+    line_preview->size = mouse;
+}
+
+
+void LineTool::onConfirm(const Vector2D &mouse, Canvas &canvas) {
+    if (is_drawing) {
+        drawLine(draw_start, mouse, canvas.getPalette()->getCurrentColor(), canvas.getTexture());
+        is_drawing = false;
+    }
+}
+
+
+void LineTool::onCancel(const Vector2D &mouse, Canvas &canvas) {
+    is_drawing = false;
+}
+
+
+BaseUI *LineTool::getWidget() {
+    return (is_drawing) ? line_preview : nullptr;
+}
+
+
+LineTool::~LineTool() {
+    delete line_preview;
+}
+
+
 Palette::Palette() : tools(), current_tool(0), current_color(sf::Color::Red) {
     tools.push_back(new PencilTool());
     tools.push_back(new RectTool());
+    tools.push_back(new LineTool());
 }
 
 
@@ -227,6 +319,15 @@ PaletteView::PaletteView(
         new PaletteAction(*palette, 1),
         asset[PaletteViewAsset::RECT],
         asset[PaletteViewAsset::RECT]
+    ));
+
+    buttons.addElement(new TextureButton(
+        Vector2D(0, 94),
+        0,
+        nullptr,
+        new PaletteAction(*palette, 2),
+        asset[PaletteViewAsset::LINE],
+        asset[PaletteViewAsset::LINE]
     ));
 }
 

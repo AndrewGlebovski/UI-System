@@ -80,6 +80,27 @@ public:
 };
 
 
+/// Tool for drawing line
+class LineTool : public CanvasTool {
+protected:
+    Vector2D draw_start;            ///< Previous mouse click position
+    BaseUI *line_preview;           ///< Widget that draws preview of the rectangle
+
+public:
+    LineTool();
+
+
+    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) override;
+    virtual BaseUI *getWidget() override;
+
+
+    virtual ~LineTool() override;
+};
+
+
 /// Handles tools and colors for canvas
 class Palette {
 protected:
