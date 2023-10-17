@@ -75,12 +75,13 @@ public:
 class PaletteViewAsset : public Asset {
 public:
     enum TEXTURE_ID {
-        BUCKET,
-        ERASER,
-        LINE,
-        PENCIL,
-        PICKER,
-        RECT
+        BUCKET_TEXTURE,
+        ERASER_TEXTURE,
+        LINE_TEXTURE,
+        PENCIL_TEXTURE,
+        PICKER_TEXTURE,
+        RECT_TEXTURE,
+        POLYGON_TEXTURE
     };
 
 

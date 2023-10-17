@@ -29,7 +29,7 @@ public:
     virtual void onModifier3(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) {}
     virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
-    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
+    virtual void onCancel() { is_drawing = false; }
     virtual BaseUI *getWidget() { return nullptr; };
 
 
@@ -81,7 +81,7 @@ public:
 class LineTool : public CanvasTool {
 protected:
     Vector2D draw_start;            ///< Previous mouse click position
-    BaseUI *line_preview;           ///< Widget that draws preview of the rectangle
+    BaseUI *line_preview;           ///< Widget that draws preview of the line
 
 public:
     LineTool();
@@ -125,6 +125,29 @@ public:
 };
 
 
+/// Tool for drawing polygon
+class PolygonTool : public CanvasTool {
+protected:
+    List<Vector2D> points;          ///< Points that form polygon
+    BaseUI *polygon_preview;        ///< Widget that draws preview of the polygon
+
+public:
+    PolygonTool();
+
+
+    List<Vector2D> &getPoints();
+
+
+    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onCancel() override;
+    virtual BaseUI *getWidget() override;
+
+
+    virtual ~PolygonTool() override;
+};
+
+
 /// Handles tools and colors for canvas
 class Palette {
 protected:
@@ -134,7 +157,7 @@ protected:
     sf::Color current_color;
 
 public:
-    /// Id for all available tools (do not confuse with TEXTURE_ID in PaletteViewAsset!)
+    /// Tools avalaible for the palette
     enum TOOLS {
         PENCIL_TOOL,        ///< Pencil tool
         RECT_TOOL,          ///< Rectangle tool
@@ -142,6 +165,7 @@ public:
         ERASER_TOOL,        ///< Eraser
         COLOR_PICKER,       ///< Color picker
         BUCKET_TOOL,        ///< Bucket tool
+        POLYGON_TOOL,       ///< Polygon tool
         TOOLS_SIZE          ///< Tools size (this field must always be last!)
     };
 

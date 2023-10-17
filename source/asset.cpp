@@ -118,7 +118,8 @@ PaletteViewAsset::PaletteViewAsset(const char *rootpath) {
         "line",
         "pencil",
         "picker",
-        "rect"
+        "rect",
+        "polygon"
     };
 
     loadTextures(rootpath, FILES, sizeof(FILES) / 8);

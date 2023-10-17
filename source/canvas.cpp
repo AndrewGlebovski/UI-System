@@ -28,10 +28,15 @@ const float RECT_PREVIEW_OUTLINE = -1;                  ///< Rect preview outlin
 const int ERASER_STEP = 100;                            ///< Amount of spheres that drawn between two points
 const float ERASER_RADIUS = 25;                         ///< Eraser sphere radius
 const sf::Color CANVAS_BACKGROUND = sf::Color::White;   ///< Canvas background color
+const float POLYGON_EPSILON = 25;
 
 
 /// Draws line on the texture
 void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf::RenderTexture &result);
+
+
+/// Draws polygon or polyline based on the primitive type
+void drawPolygon(const Vector2D &offset, const List<Vector2D> &points, const sf::Color &color, sf::RenderTexture &result, sf::PrimitiveType type);
 
 
 void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf::RenderTexture &result) {
@@ -41,6 +46,18 @@ void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf
     };
 
     result.draw(line, 2, sf::Lines);
+}
+
+
+void drawPolygon(const Vector2D &offset, const List<Vector2D> &points, const sf::Color &color, sf::RenderTexture &result, sf::PrimitiveType type) {
+    sf::Vertex *polygon = new sf::Vertex[points.getSize()];
+
+    for (size_t i = 0; i < points.getSize(); i++)
+        polygon[i] = sf::Vertex(points[i] + offset, color);
+
+    result.draw(polygon, points.getSize(), type);
+
+    delete polygon;
 }
 
 
@@ -166,7 +183,7 @@ RectTool::~RectTool() {
 }
 
 
-/// Draws preview of the rectangle
+/// Draws preview of the line
 class LinePreview : public BaseUI {
 private:
     LineTool &tool;     ///< Tool that holds this object
@@ -331,6 +348,69 @@ void BucketTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &
 }
 
 
+/// Draws preview of the polygon
+class PolygonPreview : public BaseUI {
+private:
+    PolygonTool &tool;     ///< Tool that holds this object
+
+public:
+    PolygonPreview(PolygonTool &tool_) :
+        BaseUI(Vector2D(), Vector2D(), 1, nullptr), tool(tool_) {}
+    
+
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override {
+        drawPolygon(transforms[0], tool.getPoints(), PREVIEW_COLOR, result, sf::PrimitiveType::LineStrip);
+    }
+};
+
+
+PolygonTool::PolygonTool() : points(), polygon_preview(nullptr) {
+    polygon_preview = new PolygonPreview(*this);
+}
+
+
+List<Vector2D> &PolygonTool::getPoints() {
+    return points;
+}
+
+
+void PolygonTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
+    if (state == PRESSED) {
+        is_drawing = true;
+        if (points.getSize() && (points[0] - mouse).length() < POLYGON_EPSILON)
+            onConfirm(mouse, canvas);
+        else
+            points.push_back(mouse);
+    }
+}
+
+
+void PolygonTool::onConfirm(const Vector2D &mouse, Canvas &canvas) {
+    if (is_drawing) {
+        drawPolygon(Vector2D(), points, canvas.getPalette()->getCurrentColor(), canvas.getTexture(), sf::PrimitiveType::TriangleFan);
+        is_drawing = false;
+    }
+
+    points.resize(0, Vector2D());
+}
+
+
+void PolygonTool::onCancel() {
+    is_drawing = false;
+    points.resize(0, Vector2D());
+}
+
+
+BaseUI *PolygonTool::getWidget() {
+    return (is_drawing) ? polygon_preview : nullptr;
+}
+
+
+PolygonTool::~PolygonTool() {
+    delete polygon_preview;
+}
+
+
 Palette::Palette() : tools(TOOLS_SIZE, nullptr), current_tool(PENCIL_TOOL), current_color(sf::Color::Red) {
     tools[PENCIL_TOOL] = new PencilTool();
     tools[RECT_TOOL] = new RectTool();
@@ -338,6 +418,7 @@ Palette::Palette() : tools(TOOLS_SIZE, nullptr), current_tool(PENCIL_TOOL), curr
     tools[ERASER_TOOL] = new EraserTool();
     tools[COLOR_PICKER] = new ColorPicker();
     tools[BUCKET_TOOL] = new BucketTool();
+    tools[POLYGON_TOOL] = new PolygonTool();
 }
 
 
@@ -347,8 +428,10 @@ CanvasTool *Palette::getCurrentTool() {
 
 
 void Palette::setCurrentTool(size_t index) {
-    // NEED TO CANCEL CURRENT TOOL BEFORE SWITCHING
-    current_tool = index;
+    if (index < TOOLS_SIZE) {
+        tools[current_tool]->onCancel();
+        current_tool = index;
+    }
 }
 
 
@@ -395,8 +478,8 @@ PaletteView::PaletteView(
         0,
         nullptr,
         new PaletteAction(*palette, Palette::PENCIL_TOOL),
-        asset[PaletteViewAsset::PENCIL],
-        asset[PaletteViewAsset::PENCIL]
+        asset[PaletteViewAsset::PENCIL_TEXTURE],
+        asset[PaletteViewAsset::PENCIL_TEXTURE]
     ));
 
     buttons.addElement(new TextureButton(
@@ -404,8 +487,8 @@ PaletteView::PaletteView(
         0,
         nullptr,
         new PaletteAction(*palette, Palette::RECT_TOOL),
-        asset[PaletteViewAsset::RECT],
-        asset[PaletteViewAsset::RECT]
+        asset[PaletteViewAsset::RECT_TEXTURE],
+        asset[PaletteViewAsset::RECT_TEXTURE]
     ));
 
     buttons.addElement(new TextureButton(
@@ -413,8 +496,8 @@ PaletteView::PaletteView(
         0,
         nullptr,
         new PaletteAction(*palette, Palette::LINE_TOOL),
-        asset[PaletteViewAsset::LINE],
-        asset[PaletteViewAsset::LINE]
+        asset[PaletteViewAsset::LINE_TEXTURE],
+        asset[PaletteViewAsset::LINE_TEXTURE]
     ));
 
     buttons.addElement(new TextureButton(
@@ -422,8 +505,8 @@ PaletteView::PaletteView(
         0,
         nullptr,
         new PaletteAction(*palette, Palette::ERASER_TOOL),
-        asset[PaletteViewAsset::ERASER],
-        asset[PaletteViewAsset::ERASER]
+        asset[PaletteViewAsset::ERASER_TEXTURE],
+        asset[PaletteViewAsset::ERASER_TEXTURE]
     ));
 
     buttons.addElement(new TextureButton(
@@ -431,8 +514,8 @@ PaletteView::PaletteView(
         0,
         nullptr,
         new PaletteAction(*palette, Palette::COLOR_PICKER),
-        asset[PaletteViewAsset::PICKER],
-        asset[PaletteViewAsset::PICKER]
+        asset[PaletteViewAsset::PICKER_TEXTURE],
+        asset[PaletteViewAsset::PICKER_TEXTURE]
     ));
 
     buttons.addElement(new TextureButton(
@@ -440,8 +523,17 @@ PaletteView::PaletteView(
         0,
         nullptr,
         new PaletteAction(*palette, Palette::BUCKET_TOOL),
-        asset[PaletteViewAsset::BUCKET],
-        asset[PaletteViewAsset::BUCKET]
+        asset[PaletteViewAsset::BUCKET_TEXTURE],
+        asset[PaletteViewAsset::BUCKET_TEXTURE]
+    ));
+
+    buttons.addElement(new TextureButton(
+        Vector2D(0, 282),
+        0,
+        nullptr,
+        new PaletteAction(*palette, Palette::POLYGON_TOOL),
+        asset[PaletteViewAsset::POLYGON_TEXTURE],
+        asset[PaletteViewAsset::POLYGON_TEXTURE]
     ));
 }
 
@@ -622,7 +714,7 @@ int Canvas::onParentResize() {
 int Canvas::onKeyDown(int key_id) {
     switch (key_id) {
         case Escape: 
-            palette->getCurrentTool()->onCancel(last_position, *this); return HANDLED;
+            palette->getCurrentTool()->onCancel(); return HANDLED;
         case LShift:
         case RShift:
             palette->getCurrentTool()->onModifier1(CanvasTool::PRESSED, last_position, *this); return HANDLED;
