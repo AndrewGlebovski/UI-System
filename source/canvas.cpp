@@ -23,8 +23,11 @@
 #include "canvas.hpp"
 
 
-const sf::Color PREVIEW_COLOR = sf::Color::Blue;    ///< Standart color for all previews
-const float RECT_PREVIEW_OUTLINE = -1;              ///< Rect preview outline thickness
+const sf::Color PREVIEW_COLOR = sf::Color::Blue;        ///< Standart color for all previews
+const float RECT_PREVIEW_OUTLINE = -1;                  ///< Rect preview outline thickness
+const int ERASER_STEP = 100;                            ///< Amount of spheres that drawn between two points
+const float ERASER_RADIUS = 25;                         ///< Eraser sphere radius
+const sf::Color CANVAS_BACKGROUND = sf::Color::White;   ///< Canvas background color
 
 
 /// Draws line on the texture
@@ -247,10 +250,55 @@ LineTool::~LineTool() {
 }
 
 
+EraserTool::EraserTool() : prev_position() {}
+
+
+void EraserTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
+    switch (state) {
+        case PRESSED:
+            is_drawing = true;
+            prev_position = mouse;
+            break;
+        case REALEASED:
+            is_drawing = false;
+        default:
+            break;
+    }
+}
+
+
+void EraserTool::onMove(const Vector2D &mouse, Canvas &canvas) {
+    if (is_drawing) {
+        Vector2D step(
+            (mouse.x - prev_position.x) / ERASER_STEP, 
+            (mouse.y - prev_position.y) / ERASER_STEP
+        );
+
+        sf::CircleShape circle(ERASER_RADIUS);
+        circle.setFillColor(CANVAS_BACKGROUND);
+        circle.setPosition(mouse);
+
+        for (int i = 0; i < ERASER_STEP; i++) {
+            canvas.getTexture().draw(circle);
+            circle.setPosition(circle.getPosition() + step);
+        }
+
+        prev_position = mouse;
+    }
+}
+
+
+void EraserTool::onConfirm(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
+
+
+void EraserTool::onCancel(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
+
+
 Palette::Palette() : tools(), current_tool(0), current_color(sf::Color::Red) {
     tools.push_back(new PencilTool());
     tools.push_back(new RectTool());
     tools.push_back(new LineTool());
+    tools.push_back(new EraserTool());
 }
 
 
@@ -329,6 +377,15 @@ PaletteView::PaletteView(
         asset[PaletteViewAsset::LINE],
         asset[PaletteViewAsset::LINE]
     ));
+
+    buttons.addElement(new TextureButton(
+        Vector2D(94, 94),
+        0,
+        nullptr,
+        new PaletteAction(*palette, 3),
+        asset[PaletteViewAsset::ERASER],
+        asset[PaletteViewAsset::ERASER]
+    ));
 }
 
 
@@ -361,7 +418,7 @@ int PaletteView::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<V
 
 
 void Canvas::clear_canvas() {
-    texture.clear(sf::Color::White);
+    texture.clear(CANVAS_BACKGROUND);
 }
 
 

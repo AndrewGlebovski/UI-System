@@ -101,6 +101,22 @@ public:
 };
 
 
+/// Eraser tool
+class EraserTool : public CanvasTool {
+protected:
+    Vector2D prev_position;        ///< Previous mouse click position
+
+public:
+    EraserTool();
+
+
+    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) override;
+};
+
+
 /// Handles tools and colors for canvas
 class Palette {
 protected:
