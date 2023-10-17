@@ -287,12 +287,57 @@ void ColorPicker::onMainButton(ButtonState state, const Vector2D &mouse, Canvas 
 }
 
 
-Palette::Palette() : tools(), current_tool(0), current_color(sf::Color::Red) {
-    tools.push_back(new PencilTool());
-    tools.push_back(new RectTool());
-    tools.push_back(new LineTool());
-    tools.push_back(new EraserTool());
-    tools.push_back(new ColorPicker());
+void BucketTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
+    if (state == PRESSED) {
+        sf::Image image = canvas.getTexture().getTexture().copyToImage();
+        sf::Color color = canvas.getPalette()->getCurrentColor();
+        sf::Color origin = image.getPixel(mouse.x, mouse.y);
+
+        List<Vector2D> dfs;
+        dfs.push_back(mouse);
+        image.setPixel(mouse.x, mouse.y, color);
+        
+        while (dfs.getSize()) {
+            Vector2D pixel = dfs[dfs.getSize() - 1];
+            dfs.remove(dfs.getSize() - 1);
+
+            if (pixel.x > 0.5 && image.getPixel(pixel.x - 1, pixel.y) == origin) {
+                dfs.push_back(Vector2D(pixel.x - 1, pixel.y));
+                image.setPixel(pixel.x - 1, pixel.y, color);
+            }
+
+            if (pixel.x < canvas.getTextureSize().x - 0.5 && image.getPixel(pixel.x + 1, pixel.y) == origin) {
+                dfs.push_back(Vector2D(pixel.x + 1, pixel.y));
+                image.setPixel(pixel.x + 1, pixel.y, color);
+            }
+
+            if (pixel.y > 0.5 && image.getPixel(pixel.x, pixel.y - 1) == origin) {
+                dfs.push_back(Vector2D(pixel.x, pixel.y - 1));
+                image.setPixel(pixel.x, pixel.y - 1, color);
+            }
+
+            if (pixel.y < canvas.getTextureSize().y - 0.5 && image.getPixel(pixel.x, pixel.y + 1) == origin) {
+                dfs.push_back(Vector2D(pixel.x, pixel.y + 1));
+                image.setPixel(pixel.x, pixel.y + 1, color);
+            }
+        }
+
+        sf::Texture tool_texture;
+        tool_texture.loadFromImage(image);
+
+        sf::Sprite tool_sprite(tool_texture);
+        canvas.getTexture().draw(tool_sprite);
+    }
+}
+
+
+Palette::Palette() : tools(TOOLS_SIZE, nullptr), current_tool(PENCIL_TOOL), current_color(sf::Color::Red) {
+    tools[PENCIL_TOOL] = new PencilTool();
+    tools[RECT_TOOL] = new RectTool();
+    tools[LINE_TOOL] = new LineTool();
+    tools[ERASER_TOOL] = new EraserTool();
+    tools[COLOR_PICKER] = new ColorPicker();
+    tools[BUCKET_TOOL] = new BucketTool();
 }
 
 
@@ -349,7 +394,7 @@ PaletteView::PaletteView(
         Vector2D(),
         0,
         nullptr,
-        new PaletteAction(*palette, 0),
+        new PaletteAction(*palette, Palette::PENCIL_TOOL),
         asset[PaletteViewAsset::PENCIL],
         asset[PaletteViewAsset::PENCIL]
     ));
@@ -358,7 +403,7 @@ PaletteView::PaletteView(
         Vector2D(94, 0),
         0,
         nullptr,
-        new PaletteAction(*palette, 1),
+        new PaletteAction(*palette, Palette::RECT_TOOL),
         asset[PaletteViewAsset::RECT],
         asset[PaletteViewAsset::RECT]
     ));
@@ -367,7 +412,7 @@ PaletteView::PaletteView(
         Vector2D(0, 94),
         0,
         nullptr,
-        new PaletteAction(*palette, 2),
+        new PaletteAction(*palette, Palette::LINE_TOOL),
         asset[PaletteViewAsset::LINE],
         asset[PaletteViewAsset::LINE]
     ));
@@ -376,7 +421,7 @@ PaletteView::PaletteView(
         Vector2D(94, 94),
         0,
         nullptr,
-        new PaletteAction(*palette, 3),
+        new PaletteAction(*palette, Palette::ERASER_TOOL),
         asset[PaletteViewAsset::ERASER],
         asset[PaletteViewAsset::ERASER]
     ));
@@ -385,9 +430,18 @@ PaletteView::PaletteView(
         Vector2D(0, 188),
         0,
         nullptr,
-        new PaletteAction(*palette, 4),
+        new PaletteAction(*palette, Palette::COLOR_PICKER),
         asset[PaletteViewAsset::PICKER],
         asset[PaletteViewAsset::PICKER]
+    ));
+
+    buttons.addElement(new TextureButton(
+        Vector2D(94, 188),
+        0,
+        nullptr,
+        new PaletteAction(*palette, Palette::BUCKET_TOOL),
+        asset[PaletteViewAsset::BUCKET],
+        asset[PaletteViewAsset::BUCKET]
     ));
 }
 

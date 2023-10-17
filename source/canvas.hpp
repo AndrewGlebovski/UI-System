@@ -118,6 +118,13 @@ public:
 };
 
 
+/// Fill all pixels with the same color to palette color
+class BucketTool : public CanvasTool {
+public:
+    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
+};
+
+
 /// Handles tools and colors for canvas
 class Palette {
 protected:
@@ -127,6 +134,18 @@ protected:
     sf::Color current_color;
 
 public:
+    /// Id for all available tools (do not confuse with TEXTURE_ID in PaletteViewAsset!)
+    enum TOOLS {
+        PENCIL_TOOL,        ///< Pencil tool
+        RECT_TOOL,          ///< Rectangle tool
+        LINE_TOOL,          ///< Line tool
+        ERASER_TOOL,        ///< Eraser
+        COLOR_PICKER,       ///< Color picker
+        BUCKET_TOOL,        ///< Bucket tool
+        TOOLS_SIZE          ///< Tools size (this field must always be last!)
+    };
+
+
     Palette();
 
 
