@@ -74,12 +74,6 @@ void PencilTool::onMove(const Vector2D &mouse, Canvas &canvas) {
 }
 
 
-void PencilTool::onConfirm(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
-
-
-void PencilTool::onCancel(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
-
-
 /// Draws preview of the rectangle
 class RectPreview : public BaseUI {
 private:
@@ -162,11 +156,6 @@ void RectTool::onConfirm(const Vector2D &mouse, Canvas &canvas) {
 }
 
 
-void RectTool::onCancel(const Vector2D &mouse, Canvas &canvas) {
-    is_drawing = false;
-}
-
-
 BaseUI *RectTool::getWidget() {
     return (is_drawing) ? rect_preview : nullptr;
 }
@@ -235,11 +224,6 @@ void LineTool::onConfirm(const Vector2D &mouse, Canvas &canvas) {
 }
 
 
-void LineTool::onCancel(const Vector2D &mouse, Canvas &canvas) {
-    is_drawing = false;
-}
-
-
 BaseUI *LineTool::getWidget() {
     return (is_drawing) ? line_preview : nullptr;
 }
@@ -255,10 +239,17 @@ EraserTool::EraserTool() : prev_position() {}
 
 void EraserTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
     switch (state) {
-        case PRESSED:
+        case PRESSED: {
             is_drawing = true;
             prev_position = mouse;
+
+            sf::CircleShape circle(ERASER_RADIUS);
+            circle.setFillColor(CANVAS_BACKGROUND);
+            circle.setPosition(mouse - Vector2D(ERASER_RADIUS, ERASER_RADIUS));
+            canvas.getTexture().draw(circle);
+
             break;
+        }
         case REALEASED:
             is_drawing = false;
         default:
@@ -276,7 +267,7 @@ void EraserTool::onMove(const Vector2D &mouse, Canvas &canvas) {
 
         sf::CircleShape circle(ERASER_RADIUS);
         circle.setFillColor(CANVAS_BACKGROUND);
-        circle.setPosition(mouse);
+        circle.setPosition(mouse - Vector2D(ERASER_RADIUS, ERASER_RADIUS));
 
         for (int i = 0; i < ERASER_STEP; i++) {
             canvas.getTexture().draw(circle);
@@ -288,10 +279,12 @@ void EraserTool::onMove(const Vector2D &mouse, Canvas &canvas) {
 }
 
 
-void EraserTool::onConfirm(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
-
-
-void EraserTool::onCancel(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
+void ColorPicker::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
+    if (state == PRESSED) {
+        // VERY SLOW (TEXTURE PIXELS COPIES TO AN IMAGE)
+        canvas.getPalette()->setCurrentColor(canvas.getTexture().getTexture().copyToImage().getPixel(mouse.x, mouse.y));
+    }
+}
 
 
 Palette::Palette() : tools(), current_tool(0), current_color(sf::Color::Red) {
@@ -299,6 +292,7 @@ Palette::Palette() : tools(), current_tool(0), current_color(sf::Color::Red) {
     tools.push_back(new RectTool());
     tools.push_back(new LineTool());
     tools.push_back(new EraserTool());
+    tools.push_back(new ColorPicker());
 }
 
 
@@ -385,6 +379,15 @@ PaletteView::PaletteView(
         new PaletteAction(*palette, 3),
         asset[PaletteViewAsset::ERASER],
         asset[PaletteViewAsset::ERASER]
+    ));
+
+    buttons.addElement(new TextureButton(
+        Vector2D(0, 188),
+        0,
+        nullptr,
+        new PaletteAction(*palette, 4),
+        asset[PaletteViewAsset::PICKER],
+        asset[PaletteViewAsset::PICKER]
     ));
 }
 

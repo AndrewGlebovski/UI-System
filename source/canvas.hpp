@@ -27,9 +27,9 @@ public:
     virtual void onModifier1(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
     virtual void onModifier2(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
     virtual void onModifier3(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
-    virtual void onMove(const Vector2D &mouse, Canvas &canvas) = 0;
-    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) = 0;
-    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) = 0;
+    virtual void onMove(const Vector2D &mouse, Canvas &canvas) {}
+    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
+    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
     virtual BaseUI *getWidget() { return nullptr; };
 
 
@@ -48,8 +48,6 @@ public:
 
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) override;
 };
 
 
@@ -72,7 +70,6 @@ public:
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
     virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) override;
     virtual BaseUI *getWidget() override;
 
 
@@ -93,7 +90,6 @@ public:
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
     virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) override;
     virtual BaseUI *getWidget() override;
 
 
@@ -112,8 +108,13 @@ public:
 
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) override;
+};
+
+
+/// Changes palette color to color of pixel under mouse
+class ColorPicker : public CanvasTool {
+public:
+    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
 };
 
 
