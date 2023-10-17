@@ -14,6 +14,14 @@
 #include "clock.hpp"
 
 
+/// Opens picture on canvas in new subwindow with scrollbars
+BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
+
+
+/// Creates palette view in new subwindow
+BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset);
+
+
 int main() {
     sf::RenderWindow render_window(sf::VideoMode(SCREEN_W, SCREEN_H), "UI", sf::Style::Fullscreen);
 
@@ -53,8 +61,8 @@ int main() {
     );
 
     MainWindow main_window(
-        Vector2D(100, 100),
-        Vector2D(SCREEN_W - 200, SCREEN_H - 200),
+        Vector2D(0, 0),
+        Vector2D(SCREEN_W, SCREEN_H),
         1,
         "Paint",
         window_style
@@ -63,63 +71,16 @@ int main() {
     main_window.addElement(new Clock(
         Vector2D(0, 0),
         Vector2D(100, 50),
-        5,
+        3,
         nullptr,
         clock_style
     ));
 
-    Window *w1 = new Window(
-        Vector2D(200, 200),
-        Vector2D(800, 600),
-        2,
-        nullptr,
-        "picture1.png",
-        window_style
-    );
-
     Palette *palette = new Palette();
 
-    PaletteView *palette_view = new PaletteView(
-        Vector2D(100, 100),
-        Vector2D(188, 376),
-        10,
-        nullptr,
-        palette,
-        palette_asset
-    );
+    main_window.addElement(openPicture(nullptr, palette, window_style, scrollbar_style));
 
-    main_window.addElement(palette_view);
-
-    Canvas *canvas = new Canvas(
-        Vector2D(0, 0),
-        w1->getAreaSize() - Vector2D(30, 30),
-        5,
-        nullptr,
-        nullptr,
-        palette
-    );
-
-    w1->addElement(canvas);
-
-    w1->addElement(new VScrollBar(
-        Vector2D(w1->getAreaSize().x - 20, 0),
-        Vector2D(20, w1->getAreaSize().y - 30),
-        5,
-        nullptr,
-        new VScrollCanvas(*canvas),
-        scrollbar_style
-    ));
-
-    w1->addElement(new HScrollBar(
-        Vector2D(0, w1->getAreaSize().y - 20),
-        Vector2D(w1->getAreaSize().x, 20),
-        5,
-        nullptr,
-        new HScrollCanvas(*canvas),
-        scrollbar_style
-    ));
-
-    main_window.addElement(w1);
+    main_window.addElement(createPaletteView(palette, window_style, palette_asset));
     
     sf::RenderTexture result;
     result.create(SCREEN_W, SCREEN_H);
@@ -162,4 +123,71 @@ int main() {
     
     printf("UI System!\n");
     return 0;
+}
+
+
+BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
+    Window *subwindow = new Window(
+        Vector2D(300, 100),
+        Vector2D(800, 600),
+        1,
+        nullptr,
+        (filename) ? filename : "Canvas",
+        window_style
+    );
+
+    Canvas *canvas = new Canvas(
+        Vector2D(0, 0),
+        subwindow->getAreaSize() - Vector2D(30, 30),
+        0,
+        nullptr,
+        filename,
+        palette
+    );
+
+    subwindow->addElement(canvas);
+
+    subwindow->addElement(new VScrollBar(
+        Vector2D(subwindow->getAreaSize().x - 20, 0),
+        Vector2D(20, subwindow->getAreaSize().y - 30),
+        1,
+        nullptr,
+        new VScrollCanvas(*canvas),
+        scrollbar_style
+    ));
+
+    subwindow->addElement(new HScrollBar(
+        Vector2D(0, subwindow->getAreaSize().y - 20),
+        Vector2D(subwindow->getAreaSize().x, 20),
+        1,
+        nullptr,
+        new HScrollCanvas(*canvas),
+        scrollbar_style
+    ));
+
+    return subwindow;
+}
+
+
+BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset) {
+    Window *subwindow = new Window(
+        Vector2D(0, 100),
+        Vector2D(218, 451),
+        2,
+        nullptr,
+        "Palette",
+        window_style
+    );
+
+
+    subwindow->addElement(new PaletteView(
+        Vector2D(0, 0),
+        Vector2D(188, 376),
+        1,
+        nullptr,
+        palette,
+        palette_asset
+    ));
+
+    return subwindow;
 }

@@ -28,7 +28,7 @@ const float RECT_PREVIEW_OUTLINE = -1;                  ///< Rect preview outlin
 const int ERASER_STEP = 100;                            ///< Amount of spheres that drawn between two points
 const float ERASER_RADIUS = 25;                         ///< Eraser sphere radius
 const sf::Color CANVAS_BACKGROUND = sf::Color::White;   ///< Canvas background color
-const float POLYGON_EPSILON = 25;
+const float POLYGON_EPSILON = 25;                       ///< Maximal distance for points of polygon to form it
 
 
 /// Draws line on the texture
