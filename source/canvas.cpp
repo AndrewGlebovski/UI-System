@@ -59,8 +59,106 @@ void PencilTool::onConfirm(const Vector2D &mouse, Canvas &canvas) { is_drawing =
 void PencilTool::onCancel(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
 
 
+/// Draws preview of the rectangle
+class RectPreview : public BaseUI {
+private:
+    RectTool &tool;     ///< Tool that holds this object
+
+public:
+    RectPreview(
+        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        RectTool &tool_
+    ) :
+        BaseUI(position_, size_, z_index_, parent_), tool(tool_)
+    {}
+    
+
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override {
+        TransformApplier add_transform(transforms, position);
+
+        sf::RectangleShape rect(size);
+        rect.setPosition(transforms[0]);
+        rect.setFillColor(sf::Color(0));
+        rect.setOutlineThickness(-1);
+        rect.setOutlineColor(sf::Color::Blue);
+        result.draw(rect);
+    }
+};
+
+
+RectTool::RectTool() : draw_start(), rect_preview(nullptr) {
+    rect_preview = new RectPreview(Vector2D(), Vector2D(), 1, nullptr, *this);
+}
+
+
+sf::RectangleShape RectTool::createRect(const Vector2D &p1, const Vector2D &p2) const {
+    Vector2D position = p1;
+    Vector2D size = p2 - p1;
+    if (position.x > p2.x) position.x = p2.x;
+    if (position.y > p2.y) position.y = p2.y;
+    if (size.x < 0) size.x *= -1;
+    if (size.y < 0) size.y *= -1;
+
+    sf::RectangleShape rect(size);
+    rect.setPosition(position);
+
+    return rect;
+}
+
+
+void RectTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
+    switch (state) {
+        case PRESSED:
+            is_drawing = true;
+            draw_start = mouse;
+            rect_preview->position = mouse;
+            rect_preview->size = Vector2D();
+            break;
+        case REALEASED:
+            onConfirm(mouse, canvas);
+        default:
+            break;
+    }
+}
+
+
+void RectTool::onMove(const Vector2D &mouse, Canvas &canvas) {
+    sf::RectangleShape rect = createRect(draw_start, mouse);
+    rect_preview->position = rect.getPosition();
+    rect_preview->size = rect.getSize();
+}
+
+
+void RectTool::onConfirm(const Vector2D &mouse, Canvas &canvas) {
+    if (is_drawing) {
+        sf::RectangleShape rect = createRect(draw_start, mouse);
+        rect.setFillColor(canvas.getPalette()->getCurrentColor());
+
+        canvas.getTexture().draw(rect);
+
+        is_drawing = false;
+    }
+}
+
+
+void RectTool::onCancel(const Vector2D &mouse, Canvas &canvas) {
+    is_drawing = false;
+}
+
+
+BaseUI *RectTool::getWidget() {
+    return (is_drawing) ? rect_preview : nullptr;
+}
+
+
+RectTool::~RectTool() {
+    delete rect_preview;
+}
+
+
 Palette::Palette() : tools(), current_tool(0), current_color(sf::Color::Red) {
     tools.push_back(new PencilTool());
+    tools.push_back(new RectTool());
 }
 
 
@@ -227,8 +325,10 @@ void Canvas::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
 
     result.draw(tool_sprite);
 
-    if (palette->getCurrentTool()->getWidget())
+    if (palette->getCurrentTool()->getWidget()) {
+        TransformApplier texture_transform(transforms, texture_offset);
         palette->getCurrentTool()->getWidget()->draw(result, transforms);
+    }
 }
 
 
@@ -237,17 +337,13 @@ int Canvas::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
 
     last_position = Vector2D(mouse_x, mouse_y);
 
-    if (isInsideRect(transforms[0], size, last_position)) {
-        palette->getCurrentTool()->onMove(
-            last_position - transforms[0] + texture_offset,
-            *this
-        );
+    palette->getCurrentTool()->onMove(
+        last_position - transforms[0] + texture_offset,
+        *this
+    );
 
-        if (palette->getCurrentTool()->getWidget())
-            palette->getCurrentTool()->getWidget()->onMouseMove(mouse_x, mouse_y, transforms);
-
-        return HANDLED;
-    }
+    if (palette->getCurrentTool()->getWidget())
+        palette->getCurrentTool()->getWidget()->onMouseMove(mouse_x, mouse_y, transforms);
 
     return UNHANDLED;
 }
@@ -258,8 +354,6 @@ int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vect
 
     TransformApplier add_transform(transforms, position);
 
-    last_position = Vector2D(mouse_x, mouse_y);
-
     if (isInsideRect(transforms[0], size, last_position)) {
         palette->getCurrentTool()->onMainButton(
             CanvasTool::PRESSED, 
@@ -267,8 +361,10 @@ int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vect
             *this
         );
 
-        if (palette->getCurrentTool()->getWidget())
+        if (palette->getCurrentTool()->getWidget()) {
+            TransformApplier texture_transform(transforms, texture_offset);
             palette->getCurrentTool()->getWidget()->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms);
+        }
 
         return HANDLED;
     }
@@ -282,19 +378,15 @@ int Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector
 
     TransformApplier add_transform(transforms, position);
 
-    last_position = Vector2D(mouse_x, mouse_y);
+    palette->getCurrentTool()->onMainButton(
+        CanvasTool::REALEASED, 
+        last_position - transforms[0] + texture_offset,
+        *this
+    );
 
-    if (isInsideRect(transforms[0], size, last_position)) {
-        palette->getCurrentTool()->onMainButton(
-            CanvasTool::REALEASED, 
-            last_position - transforms[0] + texture_offset,
-            *this
-        );
-
-        if (palette->getCurrentTool()->getWidget())
-            palette->getCurrentTool()->getWidget()->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
-
-        return HANDLED;
+    if (palette->getCurrentTool()->getWidget()) {
+        TransformApplier texture_transform(transforms, texture_offset);
+        palette->getCurrentTool()->getWidget()->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
     }
 
     return UNHANDLED;
@@ -328,6 +420,25 @@ int Canvas::onKeyDown(int key_id) {
         default:
             if (palette->getCurrentTool()->getWidget())
                 return palette->getCurrentTool()->getWidget()->onKeyDown(key_id);
+            return UNHANDLED;
+    }
+}
+
+
+int Canvas::onKeyUp(int key_id) {
+    switch (key_id) {
+        case LShift:
+        case RShift:
+            palette->getCurrentTool()->onModifier1(CanvasTool::REALEASED, last_position, *this); return HANDLED;
+        case LControl:
+        case RControl:
+            palette->getCurrentTool()->onModifier2(CanvasTool::REALEASED, last_position, *this); return HANDLED;
+        case LAlt:
+        case RAlt:
+            palette->getCurrentTool()->onModifier3(CanvasTool::REALEASED, last_position, *this); return HANDLED;
+        default:
+            if (palette->getCurrentTool()->getWidget())
+                return palette->getCurrentTool()->getWidget()->onKeyUp(key_id);
             return UNHANDLED;
     }
 }

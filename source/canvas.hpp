@@ -30,7 +30,7 @@ public:
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) = 0;
     virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) = 0;
     virtual void onCancel(const Vector2D &mouse, Canvas &canvas) = 0;
-    virtual BaseUI* getWidget() { return nullptr; };
+    virtual BaseUI *getWidget() { return nullptr; };
 
 
     virtual ~CanvasTool() = default;
@@ -50,6 +50,33 @@ public:
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
     virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
     virtual void onCancel(const Vector2D &mouse, Canvas &canvas) override;
+};
+
+
+/// Tool for drawing rectangle
+class RectTool : public CanvasTool {
+protected:
+    Vector2D draw_start;            ///< Previous mouse click position
+    BaseUI *rect_preview;           ///< Widget that draws preview of the rectangle
+
+
+    /**
+     * \brief Creates SFML rectangle based on two points 
+    */
+    sf::RectangleShape createRect(const Vector2D &p1, const Vector2D &p2) const;
+
+public:
+    RectTool();
+
+
+    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onCancel(const Vector2D &mouse, Canvas &canvas) override;
+    virtual BaseUI *getWidget() override;
+
+
+    virtual ~RectTool() override;
 };
 
 
@@ -168,6 +195,7 @@ public:
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
     virtual int onKeyDown(int key_id) override;
+    virtual int onKeyUp(int key_id) override;
     virtual int onParentResize() override;
 };
 
