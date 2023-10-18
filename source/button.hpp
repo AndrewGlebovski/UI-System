@@ -44,7 +44,8 @@ public:
     /// Button status
     enum BUTTON_STATUS {
         BUTTON_NORMAL   = 1,    ///< Normal button status
-        BUTTON_HOVER    = 2     ///< Mouse is hovering over button
+        BUTTON_HOVER    = 2,    ///< Mouse is hovering over button
+        BUTTON_PRESSED  = 3     ///< Button was clicked but haven't been released yet 
     };
 
     ActionButton(
@@ -56,18 +57,21 @@ public:
     {}
 
 
-    ActionButton(const ActionButton &button) = delete;
-
-
-    ActionButton &operator = (const ActionButton& button) = delete;
+    /**
+     * \note Point position is relative to button position
+    */
+    virtual bool isInsideButton(const Vector2D &point) = 0;
 
 
     virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override = 0;
 
 
-    virtual ~ActionButton() {
-        if (action) delete action;
-    }
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+
+
+    virtual ~ActionButton() override;
 };
 
 
@@ -78,21 +82,21 @@ protected:
     ButtonStyle style;
     sf::Color normal_color;
     sf::Color hover_color;
+    sf::Color pressed_color;
 
 public:
     RectButton(
         const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
         ButtonAction *action_,
-        const sf::String &text_, const ButtonStyle &style_, 
-        const sf::Color &normal_, const sf::Color &hover_
+        const sf::String &text_, const ButtonStyle &style_,
+        const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
     );
 
 
+    virtual bool isInsideButton(const Vector2D &point) override;
+
+
     virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
-
-
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
 };
 
 
@@ -101,18 +105,39 @@ class TextureButton : public ActionButton {
 protected:
     const sf::Texture &normal;
     const sf::Texture &hover;
+    const sf::Texture &pressed;
 
 public:
     TextureButton(
         const Vector2D &position_, int z_index_, BaseUI *parent_,
         ButtonAction *action_,
-        const sf::Texture &normal_, const sf::Texture &hover_
+        const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_
+    );
+
+
+    virtual bool isInsideButton(const Vector2D &point) override;
+
+
+    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+};
+
+
+/// Draws TextureButton with icon in front of it
+class TextureIconButton : public TextureButton {
+protected:
+    const sf::Texture &icon;
+
+public:
+    /**
+     * \note Icon must be the same size as the button texture
+    */
+    TextureIconButton(
+        const Vector2D &position_, int z_index_, BaseUI *parent_,
+        ButtonAction *action_,
+        const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_,
+        const sf::Texture &icon_
     );
 
 
     virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
-
-
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
 };

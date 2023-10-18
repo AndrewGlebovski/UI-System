@@ -81,7 +81,9 @@ public:
         PENCIL_TEXTURE,
         PICKER_TEXTURE,
         RECT_TEXTURE,
-        POLYGON_TEXTURE
+        POLYGON_TEXTURE,
+        NORMAL_TEXTURE,
+        SELECTED_TEXTURE
     };
 
 

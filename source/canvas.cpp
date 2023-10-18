@@ -473,66 +473,80 @@ PaletteView::PaletteView(
     BaseUI(position_, size_, z_index_, parent_), 
     buttons(Vector2D(), size, 0, this), palette(palette_), asset(asset_)
 {
-    buttons.addElement(new TextureButton(
+    buttons.addElement(new TextureIconButton(
         Vector2D(),
         0,
         nullptr,
         new PaletteAction(*palette, Palette::PENCIL_TOOL),
-        asset[PaletteViewAsset::PENCIL_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::SELECTED_TEXTURE],
         asset[PaletteViewAsset::PENCIL_TEXTURE]
     ));
 
-    buttons.addElement(new TextureButton(
+    buttons.addElement(new TextureIconButton(
         Vector2D(94, 0),
         0,
         nullptr,
         new PaletteAction(*palette, Palette::RECT_TOOL),
-        asset[PaletteViewAsset::RECT_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::SELECTED_TEXTURE],
         asset[PaletteViewAsset::RECT_TEXTURE]
     ));
 
-    buttons.addElement(new TextureButton(
+    buttons.addElement(new TextureIconButton(
         Vector2D(0, 94),
         0,
         nullptr,
         new PaletteAction(*palette, Palette::LINE_TOOL),
-        asset[PaletteViewAsset::LINE_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::SELECTED_TEXTURE],
         asset[PaletteViewAsset::LINE_TEXTURE]
     ));
 
-    buttons.addElement(new TextureButton(
+    buttons.addElement(new TextureIconButton(
         Vector2D(94, 94),
         0,
         nullptr,
         new PaletteAction(*palette, Palette::ERASER_TOOL),
-        asset[PaletteViewAsset::ERASER_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::SELECTED_TEXTURE],
         asset[PaletteViewAsset::ERASER_TEXTURE]
     ));
 
-    buttons.addElement(new TextureButton(
+    buttons.addElement(new TextureIconButton(
         Vector2D(0, 188),
         0,
         nullptr,
         new PaletteAction(*palette, Palette::COLOR_PICKER),
-        asset[PaletteViewAsset::PICKER_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::SELECTED_TEXTURE],
         asset[PaletteViewAsset::PICKER_TEXTURE]
     ));
 
-    buttons.addElement(new TextureButton(
+    buttons.addElement(new TextureIconButton(
         Vector2D(94, 188),
         0,
         nullptr,
         new PaletteAction(*palette, Palette::BUCKET_TOOL),
-        asset[PaletteViewAsset::BUCKET_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::SELECTED_TEXTURE],
         asset[PaletteViewAsset::BUCKET_TEXTURE]
     ));
 
-    buttons.addElement(new TextureButton(
+    buttons.addElement(new TextureIconButton(
         Vector2D(0, 282),
         0,
         nullptr,
         new PaletteAction(*palette, Palette::POLYGON_TOOL),
-        asset[PaletteViewAsset::POLYGON_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::SELECTED_TEXTURE],
         asset[PaletteViewAsset::POLYGON_TEXTURE]
     ));
 }
