@@ -20,6 +20,9 @@
 #include "ui-system.hpp"
 
 
+const float EPS = 0.0001f;
+
+
 Container::Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
     BaseUI(position_, size_, z_index_, parent_), elements(), focused(0) {}
 
@@ -183,6 +186,8 @@ Window::Window(
         nullptr,
         *this
     ));
+
+    if (style.outline < EPS) return;
 
     buttons.addElement(new ResizeButton(
         Vector2D(0, style.outline),

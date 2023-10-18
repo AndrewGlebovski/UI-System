@@ -170,13 +170,17 @@ BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_
 
 
 BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset) {
+    WindowStyle subwindow_style(window_style);
+    subwindow_style.outline = 0;
+
+
     Window *subwindow = new Window(
         Vector2D(0, 100),
         Vector2D(218, 451),
         2,
         nullptr,
         "Palette",
-        window_style
+        subwindow_style
     );
 
 
