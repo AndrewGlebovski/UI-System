@@ -168,6 +168,16 @@ Container::~Container() {
 }
 
 
+#define ADD_RESIZE_BUTTON(POSITION, SIZE, TYPE) \
+buttons.addElement(new ResizeButton(            \
+    POSITION,                                   \
+    SIZE,                                       \
+    nullptr,                                    \
+    *this,                                      \
+    TYPE                                        \
+))
+
+
 Window::Window(
     const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_, 
     const sf::String &title_, const WindowStyle &style_
@@ -180,79 +190,29 @@ Window::Window(
     container.position = getAreaPosition() - position;
     container.size = getAreaSize();
 
+    float offset = style.outline;
+
     buttons.addElement(new MoveButton(
-        Vector2D(1, 1) * style.outline,
-        Vector2D(size.x - 2 * style.outline, style.tl_offset.y - style.outline),
+        Vector2D(1, 1) * offset,
+        Vector2D(size.x - 2 * offset, style.tl_offset.y - offset),
         nullptr,
         *this
     ));
 
-    if (style.outline < EPS) return;
+    if (offset < EPS) return;
 
-    buttons.addElement(new ResizeButton(
-        Vector2D(0, style.outline),
-        Vector2D(style.outline, size.y - 2 * style.outline),
-        nullptr,
-        *this,
-        ResizeButton::LEFT
-    ));
-
-    buttons.addElement(new ResizeButton(
-        Vector2D(style.outline, 0),
-        Vector2D(size.x - 2 * style.outline, style.outline),
-        nullptr,
-        *this,
-        ResizeButton::TOP
-    ));
-
-    buttons.addElement(new ResizeButton(
-        Vector2D(style.outline, size.y - style.outline),
-        Vector2D(size.x - 2 * style.outline, style.outline),
-        nullptr,
-        *this,
-        ResizeButton::BOTTOM
-    ));
-
-    buttons.addElement(new ResizeButton(
-        Vector2D(size.x - style.outline, style.outline),
-        Vector2D(style.outline, size.y - 2 * style.outline),
-        nullptr,
-        *this,
-        ResizeButton::RIGHT
-    ));
-
-    buttons.addElement(new ResizeButton(
-        Vector2D(),
-        Vector2D(style.outline, style.outline),
-        nullptr,
-        *this,
-        ResizeButton::TOP_LEFT
-    ));
-
-    buttons.addElement(new ResizeButton(
-        Vector2D(size.x - style.outline, 0),
-        Vector2D(style.outline, style.outline),
-        nullptr,
-        *this,
-        ResizeButton::TOP_RIGHT
-    ));
-
-    buttons.addElement(new ResizeButton(
-        Vector2D(0, size.y - style.outline),
-        Vector2D(style.outline, style.outline),
-        nullptr,
-        *this,
-        ResizeButton::BOTTOM_LEFT
-    ));
-
-    buttons.addElement(new ResizeButton(
-        Vector2D(size.x - style.outline, size.y - style.outline),
-        Vector2D(style.outline, style.outline),
-        nullptr,
-        *this,
-        ResizeButton::BOTTOM_RIGHT
-    ));
+    ADD_RESIZE_BUTTON(Vector2D(0, offset),                          Vector2D(offset, size.y - 2 * offset),  ResizeButton::LEFT);
+    ADD_RESIZE_BUTTON(Vector2D(offset, 0),                          Vector2D(size.x - 2 * offset, offset),  ResizeButton::TOP);
+    ADD_RESIZE_BUTTON(Vector2D(offset, size.y - offset),            Vector2D(size.x - 2 * offset, offset),  ResizeButton::BOTTOM);
+    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, offset),            Vector2D(offset, size.y - 2 * offset),  ResizeButton::RIGHT);
+    ADD_RESIZE_BUTTON(Vector2D(),                                   Vector2D(offset, offset),               ResizeButton::TOP_LEFT);
+    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, 0),                 Vector2D(offset, offset),               ResizeButton::TOP_RIGHT);
+    ADD_RESIZE_BUTTON(Vector2D(0, size.y - offset),                 Vector2D(offset, offset),               ResizeButton::BOTTOM_LEFT);
+    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, size.y - offset),   Vector2D(offset, offset),               ResizeButton::BOTTOM_RIGHT);
 }
+
+
+#undef ADD_RESIZE_BUTTON
 
 
 Vector2D Window::getAreaPosition() const {
@@ -265,15 +225,13 @@ Vector2D Window::getAreaSize() const {
 }
 
 
-struct SpriteInfo {
-    WindowAsset::TEXTURE_ID id;
-    Vector2D position;
-    Vector2D rect_size;
-
-
-    SpriteInfo(WindowAsset::TEXTURE_ID id_, const Vector2D &position_, const Vector2D &rect_size_) :
-        id(id_), position(position_), rect_size(rect_size_) {}
-};
+#define DRAW_TEXTURE(TEXTURE_ID, POSITION, TEXTURE_RECT_SIZE)                   \
+do {                                                                            \
+    tool_sprite.setTexture(style.asset[TEXTURE_ID]);                            \
+    tool_sprite.setTextureRect(sf::IntRect(Vector2D(), TEXTURE_RECT_SIZE));     \
+    tool_sprite.setPosition(POSITION + transforms[0]);                          \
+    result.draw(tool_sprite);                                                   \
+} while(0)
 
 
 void Window::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
@@ -285,26 +243,17 @@ void Window::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
     vec_t center_h = size.y - tl_size.y - br_size.y;
     vec_t center_w = size.x - tl_size.x - br_size.x;
 
-    SpriteInfo sprites[] = {
-        SpriteInfo(WindowAsset::FRAME_TL,       Vector2D(),                                             tl_size),
-        SpriteInfo(WindowAsset::FRAME_L,        Vector2D(0, tl_size.y),                                 Vector2D(tl_size.x, center_h)),
-        SpriteInfo(WindowAsset::FRAME_BL,       Vector2D(0, tl_size.y + center_h),                      Vector2D(tl_size.x, br_size.y)),
-        SpriteInfo(WindowAsset::FRAME_B,        Vector2D(tl_size.x, tl_size.y + center_h),              Vector2D(center_w, br_size.y)),
-        SpriteInfo(WindowAsset::FRAME_BR,       Vector2D(tl_size.x + center_w, tl_size.y + center_h),   br_size),
-        SpriteInfo(WindowAsset::FRAME_R,        Vector2D(tl_size.x + center_w, tl_size.y),              Vector2D(br_size.x, center_h)),
-        SpriteInfo(WindowAsset::FRAME_TR,       Vector2D(tl_size.x + center_w, 0),                      Vector2D(br_size.x, tl_size.y)),
-        SpriteInfo(WindowAsset::TITLE,          Vector2D(tl_size.x, 0),                                 Vector2D(center_w, tl_size.y)),
-        SpriteInfo(WindowAsset::FRAME_CENTER,   tl_size,                                                Vector2D(center_w, center_h)),
-    };
-
     sf::Sprite tool_sprite;
 
-    for (size_t i = 0; i < 9; i++) {
-        tool_sprite.setTexture(style.asset[sprites[i].id]);
-        tool_sprite.setTextureRect(sf::IntRect(Vector2D(), sprites[i].rect_size));
-        tool_sprite.setPosition(sprites[i].position + transforms[0]);
-        result.draw(tool_sprite);
-    }
+    DRAW_TEXTURE(WindowAsset::FRAME_TL,     Vector2D(),                                             tl_size);
+    DRAW_TEXTURE(WindowAsset::FRAME_L,      Vector2D(0, tl_size.y),                                 Vector2D(tl_size.x, center_h));
+    DRAW_TEXTURE(WindowAsset::FRAME_BL,     Vector2D(0, tl_size.y + center_h),                      Vector2D(tl_size.x, br_size.y));
+    DRAW_TEXTURE(WindowAsset::FRAME_B,      Vector2D(tl_size.x, tl_size.y + center_h),              Vector2D(center_w, br_size.y));
+    DRAW_TEXTURE(WindowAsset::FRAME_BR,     Vector2D(tl_size.x + center_w, tl_size.y + center_h),   br_size);
+    DRAW_TEXTURE(WindowAsset::FRAME_R,      Vector2D(tl_size.x + center_w, tl_size.y),              Vector2D(br_size.x, center_h));
+    DRAW_TEXTURE(WindowAsset::FRAME_TR,     Vector2D(tl_size.x + center_w, 0),                      Vector2D(br_size.x, tl_size.y));
+    DRAW_TEXTURE(WindowAsset::TITLE,        Vector2D(tl_size.x, 0),                                 Vector2D(center_w, tl_size.y));
+    DRAW_TEXTURE(WindowAsset::FRAME_CENTER, tl_size,                                                Vector2D(center_w, center_h));
 
     sf::Text text(title, style.font, style.font_size);
     text.setPosition(transforms[0] + style.title_offset);
@@ -317,21 +266,30 @@ void Window::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
 }
 
 
+#undef DRAW_TEXTURE
+
+
 void Window::addElement(BaseUI *ui_element) {
     ASSERT(ui_element, "UI element is nullptr!\n");
     container.addElement(ui_element);
 }
 
 
+#define BROADCAST_MOUSE_EVENT(CALL_FUNC)                                    \
+do {                                                                        \
+    if (buttons.CALL_FUNC == HANDLED)                                       \
+        return HANDLED;                                                     \
+    else if (container.CALL_FUNC == HANDLED)                                \
+        return HANDLED;                                                     \
+    else if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y))) \
+        return HANDLED;                                                     \
+} while(0)
+
+
 int Window::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
     TransformApplier add_transform(transforms, position);
 
-    if (buttons.onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
-        return HANDLED;
-    else if (container.onMouseMove(mouse_x, mouse_y, transforms) == HANDLED)
-        return HANDLED;
-    else if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y)))
-        return HANDLED;
+    BROADCAST_MOUSE_EVENT(onMouseMove(mouse_x, mouse_y, transforms));
 
     return UNHANDLED;
 }
@@ -340,12 +298,7 @@ int Window::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
 int Window::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
     TransformApplier add_transform(transforms, position);
 
-    if (buttons.onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-        return HANDLED;
-    else if (container.onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-        return HANDLED;
-    else if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y)))
-        return HANDLED;
+    BROADCAST_MOUSE_EVENT(onMouseButtonUp(mouse_x, mouse_y, button_id, transforms));
 
     return UNHANDLED;
 }
@@ -354,16 +307,13 @@ int Window::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector
 int Window::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
     TransformApplier add_transform(transforms, position);
 
-    if (buttons.onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-        return HANDLED;
-    else if (container.onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
-        return HANDLED;
-    else if (isInsideRect(transforms[0], size, Vector2D(mouse_x, mouse_y))) {
-        return HANDLED;
-    }
+    BROADCAST_MOUSE_EVENT(onMouseButtonDown(mouse_x, mouse_y, button_id, transforms));
 
     return UNHANDLED;
 }
+
+
+#undef BROADCAST_MOUSE_EVENT
 
 
 int Window::onKeyUp(int key_id) {

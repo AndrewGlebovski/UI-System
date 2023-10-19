@@ -173,7 +173,6 @@ BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteVi
     WindowStyle subwindow_style(window_style);
     subwindow_style.outline = 0;
 
-
     Window *subwindow = new Window(
         Vector2D(0, 100),
         Vector2D(218, 451),
@@ -182,7 +181,6 @@ BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteVi
         "Palette",
         subwindow_style
     );
-
 
     subwindow->addElement(new PaletteView(
         Vector2D(0, 0),

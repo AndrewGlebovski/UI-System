@@ -466,6 +466,19 @@ public:
 };
 
 
+#define ADD_TOOL_BUTTON(TOOL_ID, TOOL_TEXTURE_ID, POSITION)     \
+buttons.addElement(new TextureIconButton(                       \
+    POSITION,                                                   \
+    0,                                                          \
+    nullptr,                                                    \
+    new PaletteAction(*palette, TOOL_ID),                       \
+    asset[PaletteViewAsset::NORMAL_TEXTURE],                    \
+    asset[PaletteViewAsset::NORMAL_TEXTURE],                    \
+    asset[PaletteViewAsset::SELECTED_TEXTURE],                  \
+    asset[TOOL_TEXTURE_ID]                                      \
+))
+
+
 PaletteView::PaletteView(
     const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
     Palette *palette_, const PaletteViewAsset &asset_
@@ -473,83 +486,17 @@ PaletteView::PaletteView(
     BaseUI(position_, size_, z_index_, parent_), 
     buttons(Vector2D(), size, 0, this), palette(palette_), asset(asset_)
 {
-    buttons.addElement(new TextureIconButton(
-        Vector2D(),
-        0,
-        nullptr,
-        new PaletteAction(*palette, Palette::PENCIL_TOOL),
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::SELECTED_TEXTURE],
-        asset[PaletteViewAsset::PENCIL_TEXTURE]
-    ));
-
-    buttons.addElement(new TextureIconButton(
-        Vector2D(94, 0),
-        0,
-        nullptr,
-        new PaletteAction(*palette, Palette::RECT_TOOL),
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::SELECTED_TEXTURE],
-        asset[PaletteViewAsset::RECT_TEXTURE]
-    ));
-
-    buttons.addElement(new TextureIconButton(
-        Vector2D(0, 94),
-        0,
-        nullptr,
-        new PaletteAction(*palette, Palette::LINE_TOOL),
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::SELECTED_TEXTURE],
-        asset[PaletteViewAsset::LINE_TEXTURE]
-    ));
-
-    buttons.addElement(new TextureIconButton(
-        Vector2D(94, 94),
-        0,
-        nullptr,
-        new PaletteAction(*palette, Palette::ERASER_TOOL),
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::SELECTED_TEXTURE],
-        asset[PaletteViewAsset::ERASER_TEXTURE]
-    ));
-
-    buttons.addElement(new TextureIconButton(
-        Vector2D(0, 188),
-        0,
-        nullptr,
-        new PaletteAction(*palette, Palette::COLOR_PICKER),
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::SELECTED_TEXTURE],
-        asset[PaletteViewAsset::PICKER_TEXTURE]
-    ));
-
-    buttons.addElement(new TextureIconButton(
-        Vector2D(94, 188),
-        0,
-        nullptr,
-        new PaletteAction(*palette, Palette::BUCKET_TOOL),
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::SELECTED_TEXTURE],
-        asset[PaletteViewAsset::BUCKET_TEXTURE]
-    ));
-
-    buttons.addElement(new TextureIconButton(
-        Vector2D(0, 282),
-        0,
-        nullptr,
-        new PaletteAction(*palette, Palette::POLYGON_TOOL),
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::SELECTED_TEXTURE],
-        asset[PaletteViewAsset::POLYGON_TEXTURE]
-    ));
+    ADD_TOOL_BUTTON(Palette::PENCIL_TOOL,   PaletteViewAsset::PENCIL_TEXTURE,   Vector2D());
+    ADD_TOOL_BUTTON(Palette::RECT_TOOL,     PaletteViewAsset::RECT_TEXTURE,     Vector2D(94, 0));
+    ADD_TOOL_BUTTON(Palette::LINE_TOOL,     PaletteViewAsset::LINE_TEXTURE,     Vector2D(0, 94));
+    ADD_TOOL_BUTTON(Palette::ERASER_TOOL,   PaletteViewAsset::ERASER_TEXTURE,   Vector2D(94, 94));
+    ADD_TOOL_BUTTON(Palette::COLOR_PICKER,  PaletteViewAsset::PICKER_TEXTURE,   Vector2D(0, 188));
+    ADD_TOOL_BUTTON(Palette::BUCKET_TOOL,   PaletteViewAsset::BUCKET_TEXTURE,   Vector2D(94, 188));
+    ADD_TOOL_BUTTON(Palette::POLYGON_TOOL,  PaletteViewAsset::POLYGON_TEXTURE,  Vector2D(0, 282));
 }
+
+
+#undef ADD_TOOL_BUTTON
 
 
 void PaletteView::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
