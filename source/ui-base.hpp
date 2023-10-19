@@ -61,6 +61,18 @@ private:
     */
     size_t generateId(size_t requested_id);
 
+protected:
+    /**
+     * \brief Returns max possible new_size for child
+    */
+    virtual Vector2D onChildResize(BaseUI *child, const Vector2D &new_size);
+
+
+    /**
+     * \brief Returns max possible new_transform for child
+    */
+    virtual Transform onChildTransform(BaseUI *child, const Transform &new_transform);
+
 public:
     const size_t id;        ///< Element ID that can be used for finding this element in hierarchy
     Transform transform;    ///< Element local transform
@@ -112,15 +124,15 @@ public:
 
 
     /**
-     * \brief Resizes element according to parent area
+     * \brief Sets max possible new_size according to parent
     */
-    virtual void setSize(const Vector2D &new_size);
+    virtual void tryResize(const Vector2D &new_size);
 
 
     /**
-     * \brief Sets element to new position according to parent area
+     * \brief Sets max possible new_transform according to parent
     */
-    virtual void setPosition(const Vector2D &new_position);
+    virtual void tryTransform(const Transform &new_transform);
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) { return UNHANDLED; }

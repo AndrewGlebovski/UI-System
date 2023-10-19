@@ -233,7 +233,7 @@ Vector2D Window::getAreaSize() const {
 do {                                                                            \
     tool_sprite.setTexture(style.asset[TEXTURE_ID]);                            \
     tool_sprite.setTextureRect(sf::IntRect(Vector2D(), TEXTURE_RECT_SIZE));     \
-    tool_sprite.setPosition(POSITION + transforms[0].offset);                          \
+    tool_sprite.setPosition(POSITION + transforms[0].offset);                   \
     result.draw(tool_sprite);                                                   \
 } while(0)
 
@@ -341,9 +341,22 @@ int Window::onTimer(float delta_time) {
 }
 
 
-int Window::onParentResize() {
-    setPosition(transform.offset);
+void Window::tryResize(const Vector2D &new_size) {
+    BaseUI::tryResize(new_size);
 
+    buttons.size = size;
+    buttons.onParentResize();
+
+    container.size = getAreaSize();
+    container.onParentResize();
+}
+
+
+int Window::onParentResize() {
+    // WINDOW MOVES TO KEEP ITS SIZE AS LONG AS POSSIBLE
+    tryTransform(transform);
+
+    // CHECKS IF RESIZE IS NECESSARY
     Vector2D new_size = size;
 
     if (transform.offset.x < 0) {
@@ -356,20 +369,9 @@ int Window::onParentResize() {
         new_size.y = parent->size.y;
     }
 
-    setSize(new_size);
+    tryResize(new_size);
 
     return UNHANDLED;
-}
-
-
-void Window::setSize(const Vector2D &new_size) {
-    BaseUI::setSize(new_size);
-
-    buttons.size = size;
-    buttons.onParentResize();
-
-    container.size = getAreaSize();
-    container.onParentResize();
 }
 
 
@@ -381,7 +383,7 @@ MainWindow::MainWindow(
 {}
 
 
-void MainWindow::setSize(const Vector2D &new_size) {
+void MainWindow::tryResize(const Vector2D &new_size) {
     if (transform.offset.x + new_size.x > SCREEN_W) size.x = SCREEN_W - transform.offset.x;
     else size.x = new_size.x;
     
@@ -396,20 +398,18 @@ void MainWindow::setSize(const Vector2D &new_size) {
 }
 
 
-void MainWindow::setPosition(const Vector2D &new_position) {
-    if (new_position.x < 0)
+void MainWindow::tryTransform(const Transform &new_transform) {
+    transform = new_transform;
+
+    if (new_transform.offset.x < 0)
         transform.offset.x = 0;
-    else if (new_position.x + size.x > SCREEN_W)
+    else if (new_transform.offset.x + size.x > SCREEN_W)
         transform.offset.x = SCREEN_W - size.x;
-    else
-        transform.offset.x = new_position.x;
     
-    if (new_position.y < 0)
+    if (new_transform.offset.y < 0)
         transform.offset.y = 0;
-    else if (new_position.y + size.y > SCREEN_H)
+    else if (new_transform.offset.y + size.y > SCREEN_H)
         transform.offset.y = SCREEN_H - size.y;
-    else
-        transform.offset.y = new_position.y;
 }
 
 
@@ -462,7 +462,7 @@ int MoveButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transform
     Vector2D new_position = window.transform.offset + (Vector2D(mouse_x, mouse_y) - prev_mouse);
     prev_mouse = Vector2D(mouse_x, mouse_y);
 
-    window.setPosition(new_position);
+    window.tryTransform(Transform(new_position));
 
     return HANDLED;
 }
@@ -527,36 +527,36 @@ int ResizeButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transfo
     switch (resize_dir) {
         case LEFT: 
             shift.y = 0;
-            window.setPosition(window.transform.offset + shift);
-            window.setSize(window.size - shift);
+            window.tryTransform(Transform(window.transform.offset + shift));
+            window.tryResize(window.size - shift);
             break;
         case TOP: 
             shift.x = 0;
-            window.setPosition(window.transform.offset + shift);
-            window.setSize(window.size - shift);
+            window.tryTransform(Transform(window.transform.offset + shift));
+            window.tryResize(window.size - shift);
             break;
         case BOTTOM: 
             shift.x = 0;
-            window.setSize(window.size + shift);
+            window.tryResize(window.size + shift);
             break;
         case RIGHT: 
             shift.y = 0;
-            window.setSize(window.size + shift);
+            window.tryResize(window.size + shift);
             break;
         case TOP_LEFT: 
-            window.setPosition(window.transform.offset + shift);
-            window.setSize(window.size - shift);
+            window.tryTransform(Transform(window.transform.offset + shift));
+            window.tryResize(window.size - shift);
             break;
         case TOP_RIGHT: 
-            window.setPosition(window.transform.offset + Vector2D(0, shift.y));
-            window.setSize(window.size + Vector2D(shift.x, -shift.y));
+            window.tryTransform(Transform(window.transform.offset + Vector2D(0, shift.y)));
+            window.tryResize(window.size + Vector2D(shift.x, -shift.y));
             break;
         case BOTTOM_LEFT: 
-            window.setPosition(window.transform.offset + Vector2D(shift.x, 0));
-            window.setSize(window.size + Vector2D(-shift.x, shift.y));
+            window.tryTransform(Transform(window.transform.offset + Vector2D(shift.x, 0)));
+            window.tryResize(window.size + Vector2D(-shift.x, shift.y));
             break;
         case BOTTOM_RIGHT: 
-            window.setSize(window.size + shift);
+            window.tryResize(window.size + shift);
             break;
         default:
             printf("Unknown resize direction!\n"); abort();

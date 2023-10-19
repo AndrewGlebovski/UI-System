@@ -68,37 +68,47 @@ void BaseUI::draw(sf::RenderTexture &result, List<Transform> &transforms) {
 }
 
 
-void BaseUI::setSize(const Vector2D &new_size) {
+Vector2D BaseUI::onChildResize(BaseUI *child, const Vector2D &new_size) {
+    Vector2D allowed_size = new_size;
+
     if (new_size.x < 0)
-        size.x = 0;
-    else if (transform.offset.x + new_size.x > parent->size.x)
-        size.x = parent->size.x - transform.offset.x;
-    else
-        size.x = new_size.x;
+        allowed_size.x = 0;
+    else if (child->transform.offset.x + new_size.x > size.x)
+        allowed_size.x = size.x - child->transform.offset.x;
     
     if (new_size.y < 0)
-        size.y = 0;
-    else if (transform.offset.y + size.y > parent->size.y)
-        size.y = parent->size.y - transform.offset.y;
-    else
-        size.y = new_size.y;
+        allowed_size.y = 0;
+    else if (child->transform.offset.y + new_size.y > size.y)
+        allowed_size.y = size.y - child->transform.offset.y;
+    
+    return allowed_size;
 }
 
 
-void BaseUI::setPosition(const Vector2D &new_position) {
-    if (new_position.x < 0)
-        transform.offset.x = 0;
-    else if (new_position.x + size.x > parent->size.x)
-        transform.offset.x = parent->size.x - size.x;
-    else
-        transform.offset.x = new_position.x;
+Transform BaseUI::onChildTransform(BaseUI *child, const Transform &new_transform) {
+    Transform allowed_transform = new_transform;
+
+    if (new_transform.offset.x < 0)
+        allowed_transform.offset.x = 0;
+    else if (new_transform.offset.x + child->size.x > size.x)
+        allowed_transform.offset.x = size.x - child->size.x;
     
-    if (new_position.y < 0)
-        transform.offset.y = 0;
-    else if (new_position.y + size.y > parent->size.y)
-        transform.offset.y = parent->size.y - size.y;
-    else
-        transform.offset.y = new_position.y;
+    if (new_transform.offset.y < 0)
+        allowed_transform.offset.y = 0;
+    else if (new_transform.offset.y + child->size.y > size.y)
+        allowed_transform.offset.y = size.y - child->size.y;
+    
+    return allowed_transform;
+}
+
+
+void BaseUI::tryResize(const Vector2D &new_size) {
+    size = parent->onChildResize(this, new_size);
+}
+
+
+void BaseUI::tryTransform(const Transform &new_transform) {
+    transform = parent->onChildTransform(this, new_transform);
 }
 
 

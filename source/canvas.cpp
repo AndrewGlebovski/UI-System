@@ -662,7 +662,7 @@ int Canvas::onParentResize() {
     if (new_size.x > parent->size.x - 30) new_size.x = parent->size.x - 30;
     if (new_size.y > parent->size.y - 30) new_size.y = parent->size.y - 30;
 
-    setSize(new_size);
+    tryResize(new_size);
 
     return UNHANDLED;
 }

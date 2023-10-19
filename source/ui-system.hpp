@@ -78,7 +78,7 @@ public:
     void addElement(BaseUI *control);
 
 
-    virtual void setSize(const Vector2D &new_size) override;
+    virtual void tryResize(const Vector2D &new_size) override;
 
 
     const WindowStyle &getStyle() const { return style; }
@@ -109,10 +109,10 @@ public:
     );
 
 
-    virtual void setSize(const Vector2D &new_size) override;
+    virtual void tryResize(const Vector2D &new_size) override;
 
 
-    virtual void setPosition(const Vector2D &new_position) override;
+    virtual void tryTransform(const Transform &new_transform) override;
 
 
     /**

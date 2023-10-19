@@ -101,8 +101,8 @@ int VScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Tr
 int VScrollBar::onParentResize() {
     float prev = scroller.getPosition().y / (size.y - scroller.getSize().y);
 
-    setPosition(Vector2D(parent->size.x - 20, transform.offset.y));
-    setSize(Vector2D(size.x, parent->size.y - 30));
+    tryTransform(Transform(Vector2D(parent->size.x - 20, transform.offset.y)));
+    tryResize(Vector2D(size.x, parent->size.y - 30));
 
     scroller.setSize(Vector2D(size.x, style.scroller_factor * size.y));
     scroller.setPosition(Vector2D(scroller.getPosition().x, prev * (size.y - scroller.getSize().y)));
@@ -200,8 +200,8 @@ int HScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Tr
 int HScrollBar::onParentResize() {
     float prev = scroller.getPosition().x / (size.x - scroller.getSize().x);
 
-    setPosition(Vector2D(transform.offset.x, parent->size.y - 20));
-    setSize(Vector2D(parent->size.x, size.y));
+    tryTransform(Transform(Vector2D(transform.offset.x, parent->size.y - 20)));
+    tryResize(Vector2D(parent->size.x, size.y));
 
     scroller.setSize(Vector2D(style.scroller_factor * size.x, size.y));
     scroller.setPosition(Vector2D(prev * (size.x - scroller.getSize().x), scroller.getPosition().y));
