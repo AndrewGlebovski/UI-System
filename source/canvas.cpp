@@ -97,19 +97,15 @@ private:
     RectTool &tool;     ///< Tool that holds this object
 
 public:
-    RectPreview(
-        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
-        RectTool &tool_
-    ) :
-        BaseUI(position_, size_, z_index_, parent_), tool(tool_)
-    {}
+    RectPreview(RectTool &tool_) :
+        BaseUI(1, Transform(Vector2D()), Vector2D(), 1, nullptr), tool(tool_) {}
     
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override {
-        TransformApplier add_transform(transforms, position);
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
+        TransformApplier add_transform(transforms, transform);
 
         sf::RectangleShape rect(size);
-        rect.setPosition(transforms[0]);
+        rect.setPosition(transforms[0].offset);
         rect.setFillColor(sf::Color(0));
         rect.setOutlineThickness(RECT_PREVIEW_OUTLINE);
         rect.setOutlineColor(PREVIEW_COLOR);
@@ -119,7 +115,7 @@ public:
 
 
 RectTool::RectTool() : draw_start(), rect_preview(nullptr) {
-    rect_preview = new RectPreview(Vector2D(), Vector2D(), 1, nullptr, *this);
+    rect_preview = new RectPreview(*this);
 }
 
 
@@ -143,7 +139,7 @@ void RectTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &ca
         case PRESSED:
             is_drawing = true;
             draw_start = mouse;
-            rect_preview->position = mouse;
+            rect_preview->transform.offset = mouse;
             rect_preview->size = Vector2D();
             break;
         case REALEASED:
@@ -156,7 +152,7 @@ void RectTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &ca
 
 void RectTool::onMove(const Vector2D &mouse, Canvas &canvas) {
     sf::RectangleShape rect = createRect(draw_start, mouse);
-    rect_preview->position = rect.getPosition();
+    rect_preview->transform.offset = rect.getPosition();
     rect_preview->size = rect.getSize();
 }
 
@@ -190,25 +186,24 @@ private:
 
 public:
     /**
-     * \note Position used as line's first point and size as second
+     * \note Transform offset used as line's first point and size as second
     */
-    LinePreview(
-        const Vector2D &point1_, const Vector2D &point2_, int z_index_, BaseUI *parent_,
-        LineTool &tool_
-    ) :
-        BaseUI(point1_, point2_, z_index_, parent_), tool(tool_)
-    {}
+    LinePreview(LineTool &tool_) :
+        BaseUI(1, Transform(Vector2D()), Vector2D(), 1, nullptr), tool(tool_) {}
     
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override {
-        // REMAINDER: position = point1, size = point2
-        drawLine(transforms[0] + position, transforms[0] + size, PREVIEW_COLOR, result);
+    /**
+     * \note Transform offset used as line's first point and size as second
+    */
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
+        // REMAINDER: transform.offset = point1, size = point2
+        drawLine(transforms[0].offset + transform.offset, transforms[0].offset + size, PREVIEW_COLOR, result);
     }
 };
 
 
 LineTool::LineTool() : draw_start(), line_preview(nullptr) {
-    line_preview = new LinePreview(Vector2D(), Vector2D(), 1, nullptr, *this);
+    line_preview = new LinePreview(*this);
 }
 
 
@@ -217,7 +212,7 @@ void LineTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &ca
         case PRESSED:
             is_drawing = true;
             draw_start = mouse;
-            line_preview->position = mouse;
+            line_preview->transform.offset = mouse;
             line_preview->size = mouse;
             break;
         case REALEASED:
@@ -355,11 +350,11 @@ private:
 
 public:
     PolygonPreview(PolygonTool &tool_) :
-        BaseUI(Vector2D(), Vector2D(), 1, nullptr), tool(tool_) {}
+        BaseUI(1, Transform(), Vector2D(), 1, nullptr), tool(tool_) {}
     
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override {
-        drawPolygon(transforms[0], tool.getPoints(), PREVIEW_COLOR, result, sf::PrimitiveType::LineStrip);
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
+        drawPolygon(transforms[0].offset, tool.getPoints(), PREVIEW_COLOR, result, sf::PrimitiveType::LineStrip);
     }
 };
 
@@ -468,7 +463,8 @@ public:
 
 #define ADD_TOOL_BUTTON(TOOL_ID, TOOL_TEXTURE_ID, POSITION)     \
 buttons.addElement(new TextureIconButton(                       \
-    POSITION,                                                   \
+    TOOL_ID + 1,                                                \
+    Transform(POSITION),                                        \
     0,                                                          \
     nullptr,                                                    \
     new PaletteAction(*palette, TOOL_ID),                       \
@@ -480,11 +476,11 @@ buttons.addElement(new TextureIconButton(                       \
 
 
 PaletteView::PaletteView(
-    const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
     Palette *palette_, const PaletteViewAsset &asset_
 ) : 
-    BaseUI(position_, size_, z_index_, parent_), 
-    buttons(Vector2D(), size, 0, this), palette(palette_), asset(asset_)
+    BaseUI(id_, transform_, size_, z_index_, parent_), 
+    buttons(1, Transform(), size, 0, this), palette(palette_), asset(asset_)
 {
     ADD_TOOL_BUTTON(Palette::PENCIL_TOOL,   PaletteViewAsset::PENCIL_TEXTURE,   Vector2D());
     ADD_TOOL_BUTTON(Palette::RECT_TOOL,     PaletteViewAsset::RECT_TEXTURE,     Vector2D(94, 0));
@@ -499,29 +495,29 @@ PaletteView::PaletteView(
 #undef ADD_TOOL_BUTTON
 
 
-void PaletteView::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+void PaletteView::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
 
     buttons.draw(result, transforms);
 }
 
 
-int PaletteView::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+int PaletteView::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
 
     return buttons.onMouseMove(mouse_x, mouse_y, transforms);
 }
 
 
-int PaletteView::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+int PaletteView::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
 
     return buttons.onMouseButtonDown(mouse_x, mouse_y, button_id, transforms);
 }
 
 
-int PaletteView::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+int PaletteView::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
 
     return buttons.onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
 }
@@ -533,10 +529,10 @@ void Canvas::clear_canvas() {
 
 
 Canvas::Canvas(
-    const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
     const char *image_path, Palette *palette_
 ) :
-    BaseUI(position_, size_, z_index_, parent_),
+    BaseUI(id_, transform_, size_, z_index_, parent_),
     texture(), texture_offset(Vector2D(0, 0)),
     palette(palette_), last_position()
 {
@@ -580,8 +576,8 @@ Palette *Canvas::getPalette() {
 }
 
 
-void Canvas::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+void Canvas::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
 
     texture.display();
 
@@ -589,7 +585,7 @@ void Canvas::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
     sf::Vector2i offset_(texture_offset.x, texture_offset.y);
     sf::Vector2i size_(size.x, size.y);
     tool_sprite.setTextureRect(sf::IntRect(offset_, size_));
-    tool_sprite.setPosition(transforms[0]);
+    tool_sprite.setPosition(transforms[0].offset);
 
     result.draw(tool_sprite);
 
@@ -600,13 +596,13 @@ void Canvas::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
 }
 
 
-int Canvas::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+int Canvas::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
 
     last_position = Vector2D(mouse_x, mouse_y);
 
     palette->getCurrentTool()->onMove(
-        last_position - transforms[0] + texture_offset,
+        last_position - transforms[0].offset + texture_offset,
         *this
     );
 
@@ -617,15 +613,15 @@ int Canvas::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
 }
 
 
-int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
+int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     if (button_id != MouseLeft) return UNHANDLED;
 
-    TransformApplier add_transform(transforms, position);
+    TransformApplier add_transform(transforms, transform);
 
-    if (isInsideRect(transforms[0], size, last_position)) {
+    if (isInsideRect(transforms[0].offset, size, last_position)) {
         palette->getCurrentTool()->onMainButton(
             CanvasTool::PRESSED, 
-            last_position - transforms[0] + texture_offset,
+            last_position - transforms[0].offset + texture_offset,
             *this
         );
 
@@ -641,14 +637,14 @@ int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vect
 }
 
 
-int Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
+int Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     if (button_id != MouseLeft) return UNHANDLED;
 
-    TransformApplier add_transform(transforms, position);
+    TransformApplier add_transform(transforms, transform);
 
     palette->getCurrentTool()->onMainButton(
         CanvasTool::REALEASED, 
-        last_position - transforms[0] + texture_offset,
+        last_position - transforms[0].offset + texture_offset,
         *this
     );
 

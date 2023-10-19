@@ -18,10 +18,10 @@
 
 
 VScrollBar::VScrollBar(
-    const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
     ScrollAction *action_, const ScrollBarStyle &style_
 ) :
-    BaseUI(position_, size_, z_index_, parent_),
+    BaseUI(id_, transform_, size_, z_index_, parent_),
     action(action_), style(style_), scroller(Vector2D()), 
     is_moving(false), mouse_prev(Vector2D()) 
 {
@@ -31,27 +31,27 @@ VScrollBar::VScrollBar(
 }
 
 
-void VScrollBar::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+void VScrollBar::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
     
     sf::RectangleShape frame(size);
     frame.setFillColor(style.background_color);
     frame.setOutlineColor(style.frame_color);
     frame.setOutlineThickness(style.frame_outline);
-    frame.setPosition(transforms[0]);
+    frame.setPosition(transforms[0].offset);
     result.draw(frame);
     
     Vector2D scroller_offset = scroller.getPosition();
 
-    scroller.setPosition(transforms[0] + scroller_offset);
+    scroller.setPosition(transforms[0].offset + scroller_offset);
     result.draw(scroller);
 
     scroller.setPosition(scroller_offset);
 }
 
 
-int VScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+int VScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
 
     Vector2D mouse(mouse_x, mouse_y);
 
@@ -74,13 +74,13 @@ int VScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms
 }
 
 
-int VScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+int VScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
 
     Vector2D mouse(mouse_x, mouse_y);
 
-    if (isInsideRect(transforms[0], size, mouse)) {
-        if (isInsideRect(transforms[0] + scroller.getPosition(), scroller.getSize(), mouse)) {
+    if (isInsideRect(transforms[0].offset, size, mouse)) {
+        if (isInsideRect(transforms[0].offset + scroller.getPosition(), scroller.getSize(), mouse)) {
             is_moving = true;
             mouse_prev = mouse;
         }
@@ -92,7 +92,7 @@ int VScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 }
 
 
-int VScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
+int VScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }
@@ -101,7 +101,7 @@ int VScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Ve
 int VScrollBar::onParentResize() {
     float prev = scroller.getPosition().y / (size.y - scroller.getSize().y);
 
-    setPosition(Vector2D(parent->size.x - 20, position.y));
+    setPosition(Vector2D(parent->size.x - 20, transform.offset.y));
     setSize(Vector2D(size.x, parent->size.y - 30));
 
     scroller.setSize(Vector2D(size.x, style.scroller_factor * size.y));
@@ -117,10 +117,10 @@ VScrollBar::~VScrollBar() {
 
 
 HScrollBar::HScrollBar(
-    const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
     ScrollAction *action_, const ScrollBarStyle &style_
 ) :
-    BaseUI(position_, size_, z_index_, parent_),
+    BaseUI(id_, transform_, size_, z_index_, parent_),
     action(action_), style(style_), scroller(Vector2D()), 
     is_moving(false), mouse_prev(Vector2D()) 
 {
@@ -130,27 +130,27 @@ HScrollBar::HScrollBar(
 }
 
 
-void HScrollBar::draw(sf::RenderTexture &result, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+void HScrollBar::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
     
     sf::RectangleShape frame(size);
     frame.setFillColor(style.background_color);
     frame.setOutlineColor(style.frame_color);
     frame.setOutlineThickness(style.frame_outline);
-    frame.setPosition(transforms[0]);
+    frame.setPosition(transforms[0].offset);
     result.draw(frame);
     
     Vector2D scroller_offset = scroller.getPosition();
 
-    scroller.setPosition(transforms[0] + scroller_offset);
+    scroller.setPosition(transforms[0].offset + scroller_offset);
     result.draw(scroller);
 
     scroller.setPosition(scroller_offset);
 }
 
 
-int HScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+int HScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
 
     Vector2D mouse(mouse_x, mouse_y);
 
@@ -173,13 +173,13 @@ int HScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms
 }
 
 
-int HScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
-    TransformApplier add_transform(transforms, position);
+int HScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+    TransformApplier add_transform(transforms, transform);
 
     Vector2D mouse(mouse_x, mouse_y);
 
-    if (isInsideRect(transforms[0], size, mouse)) {
-        if (isInsideRect(transforms[0] + scroller.getPosition(), scroller.getSize(), mouse)) {
+    if (isInsideRect(transforms[0].offset, size, mouse)) {
+        if (isInsideRect(transforms[0].offset + scroller.getPosition(), scroller.getSize(), mouse)) {
             is_moving = true;
             mouse_prev = mouse;
         }
@@ -191,7 +191,7 @@ int HScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 }
 
 
-int HScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) {
+int HScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }
@@ -200,7 +200,7 @@ int HScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Ve
 int HScrollBar::onParentResize() {
     float prev = scroller.getPosition().x / (size.x - scroller.getSize().x);
 
-    setPosition(Vector2D(position.x, parent->size.y - 20));
+    setPosition(Vector2D(transform.offset.x, parent->size.y - 20));
     setSize(Vector2D(parent->size.x, size.y));
 
     scroller.setSize(Vector2D(style.scroller_factor * size.x, size.y));

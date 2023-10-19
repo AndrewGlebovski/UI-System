@@ -7,11 +7,11 @@
 /// Base class for all buttons
 class BaseButton : public BaseUI {
 public:
-    BaseButton(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
-        BaseUI(position_, size_, z_index_, parent_) {}
+    BaseButton(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
+        BaseUI(id_, transform_, size_, z_index_, parent_) {}
 
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override = 0;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override = 0;
 
 
     virtual ~BaseButton() = default;
@@ -49,10 +49,10 @@ public:
     };
 
     ActionButton(
-        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
         ButtonAction *action_
     ) :
-        BaseButton(position_, size_, z_index_, parent_),
+        BaseButton(id_, transform_, size_, z_index_, parent_),
         action(action_), status(BUTTON_NORMAL)
     {}
 
@@ -63,12 +63,12 @@ public:
     virtual bool isInsideButton(const Vector2D &point) = 0;
 
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override = 0;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override = 0;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
 
 
     virtual ~ActionButton() override;
@@ -86,7 +86,7 @@ protected:
 
 public:
     RectButton(
-        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
         ButtonAction *action_,
         const sf::String &text_, const ButtonStyle &style_,
         const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
@@ -96,7 +96,7 @@ public:
     virtual bool isInsideButton(const Vector2D &point) override;
 
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 };
 
 
@@ -109,7 +109,7 @@ protected:
 
 public:
     TextureButton(
-        const Vector2D &position_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, int z_index_, BaseUI *parent_,
         ButtonAction *action_,
         const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_
     );
@@ -118,7 +118,7 @@ public:
     virtual bool isInsideButton(const Vector2D &point) override;
 
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 };
 
 
@@ -132,12 +132,12 @@ public:
      * \note Icon must be the same size as the button texture
     */
     TextureIconButton(
-        const Vector2D &position_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, int z_index_, BaseUI *parent_,
         ButtonAction *action_,
         const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_,
         const sf::Texture &icon_
     );
 
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 };

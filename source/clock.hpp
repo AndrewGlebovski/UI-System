@@ -5,10 +5,10 @@ private:
 
 public:
     Clock(
-        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
         const ClockStyle &style_
     ) :
-        BaseUI(position_, size_, z_index_, parent_),
+        BaseUI(id_, transform_, size_, z_index_, parent_),
         daytime(0), style(style_)
     {
         time_t raw_time = time(NULL);
@@ -17,8 +17,8 @@ public:
     }
 
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override {
-        TransformApplier(transforms, position);
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
+        TransformApplier(transforms, transform);
 
         size_t hours = (daytime / 3600) % 24;
         size_t minutes = (daytime / 60) % 60;
@@ -33,7 +33,7 @@ public:
         sf::FloatRect text_rect = text.getLocalBounds();
         Vector2D text_offset((size.x - text_rect.width) / 2, (size.y - text_rect.height) / 2);
 
-        text.setPosition(transforms[0] + text_offset);
+        text.setPosition(transforms[0].offset + text_offset);
 
         result.draw(text);
     }

@@ -32,7 +32,7 @@ protected:
 
 public:
     VScrollBar(
-        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
 
@@ -43,12 +43,12 @@ public:
     VScrollBar &operator = (const VScrollBar& scrollbar) = delete;
 
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onParentResize() override;
 
 
@@ -67,7 +67,7 @@ protected:
 
 public:
     HScrollBar(
-        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
 
@@ -78,12 +78,12 @@ public:
     HScrollBar &operator = (const HScrollBar& scrollbar) = delete;
 
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onParentResize() override;
 
 

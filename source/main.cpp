@@ -61,7 +61,8 @@ int main() {
     );
 
     MainWindow main_window(
-        Vector2D(0, 0),
+        BaseUI::AUTO_ID,
+        Transform(),
         Vector2D(SCREEN_W, SCREEN_H),
         1,
         "Paint",
@@ -69,7 +70,8 @@ int main() {
     );
 
     main_window.addElement(new Clock(
-        Vector2D(0, 0),
+        BaseUI::AUTO_ID,
+        Transform(),
         Vector2D(100, 50),
         3,
         nullptr,
@@ -85,8 +87,8 @@ int main() {
     sf::RenderTexture result;
     result.create(SCREEN_W, SCREEN_H);
 
-    List<Vector2D> transforms;
-    transforms.push_back(Vector2D());
+    List<Transform> transforms;
+    transforms.push_back(Transform());
 
     sf::Clock timer;
 
@@ -98,7 +100,7 @@ int main() {
                 render_window.close();
             
             main_window.parseEvent(event, transforms);
-            ASSERT(transforms[0].length() < 0.001, "Transform failed!\n");
+            ASSERT(transforms[0].offset.length() < 0.001, "Transform failed!\n");
         }
         
         if (timer.getElapsedTime().asSeconds() > 1) {
@@ -109,7 +111,7 @@ int main() {
         result.clear();
 
         main_window.draw(result, transforms);
-        ASSERT(transforms[0].length() < 0.001, "Transform failed!\n");
+        ASSERT(transforms[0].offset.length() < 0.001, "Transform failed!\n");
 
         result.display();
         sf::Sprite tool_sprite(result.getTexture());
@@ -128,7 +130,8 @@ int main() {
 
 BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
     Window *subwindow = new Window(
-        Vector2D(300, 100),
+        BaseUI::AUTO_ID,
+        Transform(Vector2D(300, 100)),
         Vector2D(800, 600),
         1,
         nullptr,
@@ -137,7 +140,8 @@ BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_
     );
 
     Canvas *canvas = new Canvas(
-        Vector2D(0, 0),
+        BaseUI::AUTO_ID,
+        Transform(),
         subwindow->getAreaSize() - Vector2D(30, 30),
         0,
         nullptr,
@@ -148,7 +152,8 @@ BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_
     subwindow->addElement(canvas);
 
     subwindow->addElement(new VScrollBar(
-        Vector2D(subwindow->getAreaSize().x - 20, 0),
+        BaseUI::AUTO_ID,
+        Transform(Vector2D(subwindow->getAreaSize().x - 20, 0)),
         Vector2D(20, subwindow->getAreaSize().y - 30),
         1,
         nullptr,
@@ -157,7 +162,8 @@ BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_
     ));
 
     subwindow->addElement(new HScrollBar(
-        Vector2D(0, subwindow->getAreaSize().y - 20),
+        BaseUI::AUTO_ID,
+        Transform(Vector2D(0, subwindow->getAreaSize().y - 20)),
         Vector2D(subwindow->getAreaSize().x, 20),
         1,
         nullptr,
@@ -174,7 +180,8 @@ BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteVi
     subwindow_style.outline = 0;
 
     Window *subwindow = new Window(
-        Vector2D(0, 100),
+        BaseUI::AUTO_ID,
+        Transform(Vector2D(0, 100)),
         Vector2D(218, 451),
         2,
         nullptr,
@@ -183,7 +190,8 @@ BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteVi
     );
 
     subwindow->addElement(new PaletteView(
-        Vector2D(0, 0),
+        BaseUI::AUTO_ID,
+        Transform(),
         Vector2D(188, 376),
         1,
         nullptr,

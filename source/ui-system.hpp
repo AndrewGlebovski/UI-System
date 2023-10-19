@@ -11,7 +11,7 @@ private:
     size_t focused;
 
 public:
-    Container(const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_);
+    Container(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_);
 
 
     /**
@@ -24,12 +24,12 @@ public:
     /**
      * \brief Draws elements under his management
     */
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onKeyUp(int key_id) override;
     virtual int onKeyDown(int key_id) override;
     virtual int onTimer(float delta_time) override;
@@ -54,7 +54,7 @@ public:
      * \note Position and size consider title bar and frame
     */
     Window(
-        const Vector2D &position_, const Vector2D &size_, int z_index_, BaseUI *parent_, 
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_, 
         const sf::String &title_, const WindowStyle &style_
     );
 
@@ -87,12 +87,12 @@ public:
     /**
      * \brief Draws window frame, title bar and its content
     */
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onKeyUp(int key_id) override;
     virtual int onKeyDown(int key_id) override;
     virtual int onTimer(float delta_time) override;
@@ -104,7 +104,7 @@ public:
 class MainWindow : public Window {
 public:
     MainWindow(
-        const Vector2D &position_, const Vector2D &size_, int z_index_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_,
         const sf::String &title_, const WindowStyle &style_
     );
 
@@ -118,7 +118,7 @@ public:
     /**
      * \brief Parses SFML event into my own event system
     */
-    void parseEvent(const sf::Event &event, List<Vector2D> &transforms);
+    void parseEvent(const sf::Event &event, List<Transform> &transforms);
 };
 
 
@@ -131,17 +131,17 @@ protected:
 
 public:
     MoveButton(
-        const Vector2D &position_, const Vector2D &size_, BaseUI *parent_, 
+        size_t id_, const Transform &transform_, const Vector2D &size_, BaseUI *parent_, 
         Window &window_
     );
 
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onParentResize() override;
 };
 
@@ -168,16 +168,16 @@ public:
 
 
     ResizeButton(
-        const Vector2D &position_, const Vector2D &size_, BaseUI *parent_, 
+        size_t id_, const Transform &transform_, const Vector2D &size_, BaseUI *parent_, 
         Window &window_, RESIZE_DIRECTION resize_dir_
     );
 
 
-    virtual void draw(sf::RenderTexture &result, List<Vector2D> &transforms) override;
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Vector2D> &transforms) override;
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onParentResize() override;
 };
