@@ -118,6 +118,26 @@ public:
 
 
     /**
+     * \brief Searches UI element in hierarchy using id
+    */
+    virtual BaseUI *findElement(size_t element_id);
+
+
+    /**
+     * \brief Adds child UI element for this
+     * \warning If UI element is not supposed to have children, abort() will be called
+    */
+    virtual size_t addChild(BaseUI *child);
+
+
+    /**
+     * \brief Removes child by its id
+     * \warning If UI element is not supposed to have children, abort() will be called
+    */
+    virtual void removeChild(size_t child_id);
+
+
+    /**
      * \brief Draws red rectangle for debug purposes
     */
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms);

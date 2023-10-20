@@ -462,7 +462,7 @@ public:
 
 
 #define ADD_TOOL_BUTTON(TOOL_ID, TOOL_TEXTURE_ID, POSITION)     \
-buttons.addElement(new TextureIconButton(                       \
+buttons.addChild(new TextureIconButton(                         \
     TOOL_ID + 1,                                                \
     Transform(POSITION),                                        \
     0,                                                          \

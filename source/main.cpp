@@ -69,7 +69,7 @@ int main() {
         window_style
     );
 
-    main_window.addElement(new Clock(
+    main_window.addChild(new Clock(
         BaseUI::AUTO_ID,
         Transform(),
         Vector2D(100, 50),
@@ -80,9 +80,9 @@ int main() {
 
     Palette *palette = new Palette();
 
-    main_window.addElement(openPicture(nullptr, palette, window_style, scrollbar_style));
+    main_window.addChild(openPicture(nullptr, palette, window_style, scrollbar_style));
 
-    main_window.addElement(createPaletteView(palette, window_style, palette_asset));
+    main_window.addChild(createPaletteView(palette, window_style, palette_asset));
     
     sf::RenderTexture result;
     result.create(SCREEN_W, SCREEN_H);
@@ -149,9 +149,9 @@ BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_
         palette
     );
 
-    subwindow->addElement(canvas);
+    subwindow->addChild(canvas);
 
-    subwindow->addElement(new VScrollBar(
+    subwindow->addChild(new VScrollBar(
         BaseUI::AUTO_ID,
         Transform(Vector2D(subwindow->getAreaSize().x - 20, 0)),
         Vector2D(20, subwindow->getAreaSize().y - 30),
@@ -161,7 +161,7 @@ BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_
         scrollbar_style
     ));
 
-    subwindow->addElement(new HScrollBar(
+    subwindow->addChild(new HScrollBar(
         BaseUI::AUTO_ID,
         Transform(Vector2D(0, subwindow->getAreaSize().y - 20)),
         Vector2D(subwindow->getAreaSize().x, 20),
@@ -189,7 +189,7 @@ BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteVi
         subwindow_style
     );
 
-    subwindow->addElement(new PaletteView(
+    subwindow->addChild(new PaletteView(
         BaseUI::AUTO_ID,
         Transform(),
         Vector2D(188, 376),

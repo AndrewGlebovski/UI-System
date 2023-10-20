@@ -29,34 +29,6 @@ Container::Container(size_t id_, const Transform &transform_, const Vector2D &si
     BaseUI(id_, transform_, size_, z_index_, parent_), elements(), focused(0) {}
 
 
-void Container::addElement(BaseUI *ui_element) {
-    ASSERT(ui_element, "UI element is nullptr!\n");
-    ASSERT(isInsideRect(Vector2D(), size, ui_element->transform.offset), "UI element is outside of the container!\n");
-
-    // Set ui child
-    ui_element->parent = this;
-
-    // Container is empty
-    if (elements.getSize() == 0) {
-        elements.push_back(ui_element);
-        focused = 0;
-        return;
-    }
-    // Find place for UI element according to z_index
-    /// TODO: Replace linear search with binary search
-    for (size_t i = 0; i < elements.getSize(); i++)
-        if (ui_element->z_index > elements[i]->z_index) {
-            elements.insert(i, ui_element);
-            focused = i;
-            return;
-        }
-
-    // Element has the biggest z_index
-    elements.push_back(ui_element);
-    focused = elements.getSize() - 1;
-}
-
-
 void Container::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     size_t count = elements.getSize();
     if (count == 0) return;
@@ -70,6 +42,51 @@ void Container::draw(sf::RenderTexture &result, List<Transform> &transforms) {
         elements[i]->draw(result, transforms);
     
     elements[focused]->draw(result, transforms);
+}
+
+
+BaseUI *Container::findElement(size_t element_id) {
+    BaseUI *result = nullptr;
+
+    for (size_t i = 0; i < elements.getSize(); i++)
+        if ((result = elements[i]->findElement(element_id))) return result;
+
+    return BaseUI::findElement(element_id);
+}
+
+
+size_t Container::addChild(BaseUI *child) {
+    ASSERT(child, "Child is nullptr!\n");
+
+    // Set this container as child's parent
+    child->parent = this;
+    // Container is empty
+    if (elements.getSize() == 0) {
+        elements.push_back(child);
+        focused = 0;
+        return child -> getId();
+    }
+    // Find place for UI element according to z_index
+    for (size_t i = 0; i < elements.getSize(); i++) {
+        if (child->z_index > elements[i]->z_index) {
+            elements.insert(i, child);
+            focused = i;
+            return child -> getId();
+        }
+    }
+    // Element has the biggest z_index
+    elements.push_back(child);
+    focused = elements.getSize() - 1;
+    return child -> getId();
+}
+
+
+void Container::removeChild(size_t child_id) {
+    for (size_t i = 0; i < elements.getSize(); i++) {
+        if (elements[i]->getId() == child_id) {
+            elements.remove(i);
+        }
+    }
 }
 
 
@@ -171,7 +188,7 @@ Container::~Container() {
 
 
 #define ADD_RESIZE_BUTTON(POSITION, SIZE, TYPE) \
-buttons.addElement(new ResizeButton(            \
+buttons.addChild(new ResizeButton(              \
     RESIZE_BUTTON_ID,                           \
     Transform(POSITION),                        \
     SIZE,                                       \
@@ -195,7 +212,7 @@ Window::Window(
 
     float offset = style.outline;
 
-    buttons.addElement(new MoveButton(
+    buttons.addChild(new MoveButton(
         MOVE_BUTTON_ID,
         Transform(Vector2D(1, 1) * offset),
         Vector2D(size.x - 2 * offset, style.tl_offset.y - offset),
@@ -273,9 +290,20 @@ void Window::draw(sf::RenderTexture &result, List<Transform> &transforms) {
 #undef DRAW_TEXTURE
 
 
-void Window::addElement(BaseUI *ui_element) {
-    ASSERT(ui_element, "UI element is nullptr!\n");
-    container.addElement(ui_element);
+BaseUI *Window::findElement(size_t element_id) {
+    BaseUI *result = container.findElement(element_id);
+    if (result) return result;
+    return BaseUI::findElement(element_id);
+}
+
+
+size_t Window::addChild(BaseUI *child) {
+    return container.addChild(child);
+}
+
+
+void Window::removeChild(size_t child_id) {
+    container.removeChild(child_id);
 }
 
 

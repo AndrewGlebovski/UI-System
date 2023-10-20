@@ -47,13 +47,29 @@ BaseUI::BaseUI(size_t id_, const Transform &transform_, const Vector2D &size_, i
 size_t BaseUI::generateId(size_t requested_id) {
     if (requested_id != AUTO_ID) return requested_id;
 
-    static size_t available_id = 1;
-    return available_id++;
+    return size_t(this);
 }
 
 
 size_t BaseUI::getId() const {
     return id;
+}
+
+
+BaseUI *BaseUI::findElement(size_t element_id) {
+    return (element_id == getId()) ? this : nullptr;
+}
+
+
+size_t BaseUI::addChild(BaseUI *child) {
+    printf("This element does not support children!\n");
+    abort();
+}
+
+
+void BaseUI::removeChild(size_t child_id) {
+    printf("This element does not support children!\n");
+    abort();
 }
 
 

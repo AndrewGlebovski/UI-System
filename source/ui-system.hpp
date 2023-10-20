@@ -15,16 +15,22 @@ public:
 
 
     /**
-     * \brief Adds new UI element to manager
-     * \warning Elements should be allocated using new and will be deleted by manager
-    */
-    void addElement(BaseUI *control);
-
-
-    /**
      * \brief Draws elements under his management
     */
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+
+
+    BaseUI *findElement(size_t element_id) override;
+
+
+    /**
+     * \brief Adds new UI element to manager
+     * \warning Elements should be allocated using new and will be deleted by manager
+    */
+    size_t addChild(BaseUI *child) override;
+
+
+    void removeChild(size_t child_id) override;
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
@@ -71,11 +77,17 @@ public:
     Vector2D getAreaSize() const;
 
 
+    BaseUI *findElement(size_t element_id) override;
+
+
     /**
-     * \brief Adds new UI element to window
+     * \brief Adds new UI element to manager
      * \warning Elements should be allocated using new and will be deleted by manager
     */
-    void addElement(BaseUI *control);
+    size_t addChild(BaseUI *child) override;
+
+
+    void removeChild(size_t child_id) override;
 
 
     virtual void tryResize(const Vector2D &new_size) override;
