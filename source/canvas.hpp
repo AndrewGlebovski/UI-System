@@ -173,6 +173,9 @@ public:
     Palette();
 
 
+    size_t getCurrentIndex() const { return current_tool; };
+
+
     CanvasTool *getCurrentTool();
 
 
@@ -185,7 +188,7 @@ public:
     void setCurrentColor(const sf::Color &color);
 
 
-    ~Palette();
+    virtual ~Palette();
 };
 
 
@@ -193,10 +196,15 @@ public:
 class PaletteView : public BaseUI {
 protected:
     Container buttons;                  ///< Palette buttonы for tool selection
-
     Palette *palette;                   ///< Palette which this PaletteView affects
-
     const PaletteViewAsset &asset;      ///< Assets for buttons
+    ButtonGroup *group;                 ///< Tool buttons group
+
+
+    /**
+     * \brief Checks which tool is active and sets corresponding button as pressed in group
+    */
+    void updateToolButtons();
 
 public:
     PaletteView(
@@ -205,10 +213,10 @@ public:
     );
 
 
-    PaletteView(const PaletteView &plaette_view) = default;
+    PaletteView(const PaletteView &palette_view) = default;
 
 
-    PaletteView &operator = (const PaletteView &plaette_view) = default;
+    PaletteView &operator = (const PaletteView &palette_view) = default;
 
 
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
@@ -217,6 +225,10 @@ public:
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onKeyDown(int key_id) override;
+
+
+    virtual ~PaletteView();
 };
 
 

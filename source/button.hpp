@@ -34,11 +34,27 @@ public:
 };
 
 
-/// Button that holds action and have status
+class ButtonGroup;
+
+
+/// Button that holds action, can be in group and have status
 class ActionButton : public BaseButton {
 protected:
     ButtonAction *action;
+    ButtonGroup *group;
     int status;
+
+
+    /**
+     * \brief Checks if group != nullptr
+    */
+    bool isInGroup() const;
+
+
+    /**
+     * \brief Checks if group != nullptr and button is pressed
+    */
+    bool isPressedInGroup() const;
 
 public:
     /// Button status
@@ -48,13 +64,21 @@ public:
         BUTTON_PRESSED  = 3     ///< Button was clicked but haven't been released yet 
     };
 
+
+    /**
+     * \brief Creates new button with action
+     * \note If group_ != nullptr then button will join the group_
+    */
     ActionButton(
         size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
-        ButtonAction *action_
-    ) :
-        BaseButton(id_, transform_, size_, z_index_, parent_),
-        action(action_), status(BUTTON_NORMAL)
-    {}
+        ButtonAction *action_, ButtonGroup *group_
+    );
+
+
+    /**
+     * \brief Sets button status
+    */
+    void setStatus(BUTTON_STATUS new_status);
 
 
     /**
@@ -75,6 +99,56 @@ public:
 };
 
 
+/// Only one button is always pressed in group
+class ButtonGroup {
+private:
+    List<ActionButton*> buttons;        ///< Buttons in this group
+    size_t pressed;                     ///< Currently pressed button
+
+
+    /**
+     * \brief Returns index of the button in buttons
+    */
+    size_t getIndex(ActionButton *button) const;
+
+public:
+    /**
+     * \brief Creates empty group
+    */
+    ButtonGroup();
+
+
+    /**
+     * \brief Set pressed button
+    */
+    void setPressed(ActionButton *new_pressed);
+
+
+    /**
+     * \brief Get pressed button
+    */
+    ActionButton *getPressed();
+
+
+    /**
+     * \brief Adds button to this group
+    */
+    void addButton(ActionButton *new_button);
+
+
+    /**
+     * \brief Removes button from this group
+    */
+    void removeButton(ActionButton *button);
+
+
+    /**
+     * \brief Checks if the button is in this group
+    */
+    bool isInGroup(ActionButton *button) const;
+};
+
+
 /// Rectangle button with some text
 class RectButton : public ActionButton {
 protected:
@@ -87,7 +161,7 @@ protected:
 public:
     RectButton(
         size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
-        ButtonAction *action_,
+        ButtonAction *action_, ButtonGroup *group_,
         const sf::String &text_, const ButtonStyle &style_,
         const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
     );
@@ -110,7 +184,7 @@ protected:
 public:
     TextureButton(
         size_t id_, const Transform &transform_, int z_index_, BaseUI *parent_,
-        ButtonAction *action_,
+        ButtonAction *action_, ButtonGroup *group_,
         const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_
     );
 
@@ -133,7 +207,7 @@ public:
     */
     TextureIconButton(
         size_t id_, const Transform &transform_, int z_index_, BaseUI *parent_,
-        ButtonAction *action_,
+        ButtonAction *action_, ButtonGroup *group_,
         const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_,
         const sf::Texture &icon_
     );

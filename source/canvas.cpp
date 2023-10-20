@@ -461,13 +461,22 @@ public:
 };
 
 
+void PaletteView::updateToolButtons() {
+    size_t current_tool = palette->getCurrentIndex();
+    ActionButton *current_button = (ActionButton*) buttons.findElement(current_tool + BaseUI::AUTO_ID + 1);
+
+    if (group->getPressed() != current_button) group->setPressed(current_button);
+}
+
+
 #define ADD_TOOL_BUTTON(TOOL_ID, TOOL_TEXTURE_ID, POSITION)     \
 buttons.addChild(new TextureIconButton(                         \
-    TOOL_ID + 1,                                                \
+    BaseUI::AUTO_ID + TOOL_ID + 1,                              \
     Transform(POSITION),                                        \
     0,                                                          \
     nullptr,                                                    \
     new PaletteAction(*palette, TOOL_ID),                       \
+    group,                                                      \
     asset[PaletteViewAsset::NORMAL_TEXTURE],                    \
     asset[PaletteViewAsset::NORMAL_TEXTURE],                    \
     asset[PaletteViewAsset::SELECTED_TEXTURE],                  \
@@ -478,10 +487,12 @@ buttons.addChild(new TextureIconButton(                         \
 PaletteView::PaletteView(
     size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
     Palette *palette_, const PaletteViewAsset &asset_
-) : 
+) :
     BaseUI(id_, transform_, size_, z_index_, parent_), 
-    buttons(1, Transform(), size, 0, this), palette(palette_), asset(asset_)
+    buttons(1, Transform(), size, 0, this), palette(palette_), asset(asset_), group(nullptr)
 {
+    group = new ButtonGroup();
+
     ADD_TOOL_BUTTON(Palette::PENCIL_TOOL,   PaletteViewAsset::PENCIL_TEXTURE,   Vector2D());
     ADD_TOOL_BUTTON(Palette::RECT_TOOL,     PaletteViewAsset::RECT_TEXTURE,     Vector2D(94, 0));
     ADD_TOOL_BUTTON(Palette::LINE_TOOL,     PaletteViewAsset::LINE_TEXTURE,     Vector2D(0, 94));
@@ -489,6 +500,8 @@ PaletteView::PaletteView(
     ADD_TOOL_BUTTON(Palette::COLOR_PICKER,  PaletteViewAsset::PICKER_TEXTURE,   Vector2D(0, 188));
     ADD_TOOL_BUTTON(Palette::BUCKET_TOOL,   PaletteViewAsset::BUCKET_TEXTURE,   Vector2D(94, 188));
     ADD_TOOL_BUTTON(Palette::POLYGON_TOOL,  PaletteViewAsset::POLYGON_TEXTURE,  Vector2D(0, 282));
+
+    updateToolButtons();
 }
 
 
@@ -497,6 +510,8 @@ PaletteView::PaletteView(
 
 void PaletteView::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
+
+    updateToolButtons();
 
     buttons.draw(result, transforms);
 }
@@ -520,6 +535,25 @@ int PaletteView::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<T
     TransformApplier add_transform(transforms, transform);
 
     return buttons.onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
+}
+
+
+int PaletteView::onKeyDown(int key_id) {
+    switch(key_id) {
+        case Num1: palette->setCurrentTool(Palette::PENCIL_TOOL); return HANDLED;
+        case Num2: palette->setCurrentTool(Palette::RECT_TOOL); return HANDLED;
+        case Num3: palette->setCurrentTool(Palette::LINE_TOOL); return HANDLED;
+        case Num4: palette->setCurrentTool(Palette::ERASER_TOOL); return HANDLED;
+        case Num5: palette->setCurrentTool(Palette::COLOR_PICKER); return HANDLED;
+        case Num6: palette->setCurrentTool(Palette::BUCKET_TOOL); return HANDLED;
+        case Num7: palette->setCurrentTool(Palette::POLYGON_TOOL); return HANDLED;
+        default: return UNHANDLED;
+    }
+}
+
+
+PaletteView::~PaletteView() {
+    if (group) delete group;
 }
 
 
