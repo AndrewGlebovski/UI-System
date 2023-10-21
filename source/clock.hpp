@@ -1,14 +1,14 @@
-class Clock : public BaseUI {
+class Clock : public Widget {
 private:
     size_t daytime;
     ClockStyle style;
 
 public:
     Clock(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         const ClockStyle &style_
     ) :
-        BaseUI(id_, transform_, size_, z_index_, parent_),
+        Widget(id_, transform_, size_, z_index_, parent_),
         daytime(0), style(style_)
     {
         time_t raw_time = time(NULL);

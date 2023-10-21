@@ -22,7 +22,7 @@ public:
 
 
 /// Can be scrolled up and down
-class VScrollBar : public BaseUI {
+class VScrollBar : public Widget {
 protected:
     ScrollAction *action;               ///< Triggers when scroller moves
     ScrollBarStyle style;               ///< Style
@@ -32,7 +32,7 @@ protected:
 
 public:
     VScrollBar(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
 
@@ -57,7 +57,7 @@ public:
 
 
 /// Can be scrolled left and right
-class HScrollBar : public BaseUI {
+class HScrollBar : public Widget {
 protected:
     ScrollAction *action;               ///< Triggers when scroller moves
     ScrollBarStyle style;               ///< Style
@@ -67,7 +67,7 @@ protected:
 
 public:
     HScrollBar(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
 

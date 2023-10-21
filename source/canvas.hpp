@@ -30,7 +30,7 @@ public:
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) {}
     virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
     virtual void onCancel() { is_drawing = false; }
-    virtual BaseUI *getWidget() { return nullptr; };
+    virtual Widget *getWidget() { return nullptr; };
 
 
     virtual ~CanvasTool() = default;
@@ -55,7 +55,7 @@ public:
 class RectTool : public CanvasTool {
 protected:
     Vector2D draw_start;            ///< Previous mouse click position
-    BaseUI *rect_preview;           ///< Widget that draws preview of the rectangle
+    Widget *rect_preview;           ///< Widget that draws preview of the rectangle
 
 
     /**
@@ -70,7 +70,7 @@ public:
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
     virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
-    virtual BaseUI *getWidget() override;
+    virtual Widget *getWidget() override;
 
 
     virtual ~RectTool() override;
@@ -81,7 +81,7 @@ public:
 class LineTool : public CanvasTool {
 protected:
     Vector2D draw_start;            ///< Previous mouse click position
-    BaseUI *line_preview;           ///< Widget that draws preview of the line
+    Widget *line_preview;           ///< Widget that draws preview of the line
 
 public:
     LineTool();
@@ -90,7 +90,7 @@ public:
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
     virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
-    virtual BaseUI *getWidget() override;
+    virtual Widget *getWidget() override;
 
 
     virtual ~LineTool() override;
@@ -129,7 +129,7 @@ public:
 class PolygonTool : public CanvasTool {
 protected:
     List<Vector2D> points;          ///< Points that form polygon
-    BaseUI *polygon_preview;        ///< Widget that draws preview of the polygon
+    Widget *polygon_preview;        ///< Widget that draws preview of the polygon
 
 public:
     PolygonTool();
@@ -141,7 +141,7 @@ public:
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
     virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
     virtual void onCancel() override;
-    virtual BaseUI *getWidget() override;
+    virtual Widget *getWidget() override;
 
 
     virtual ~PolygonTool() override;
@@ -193,7 +193,7 @@ public:
 
 
 /// GUI for Palette
-class PaletteView : public BaseUI {
+class PaletteView : public Widget {
 protected:
     Container buttons;                  ///< Palette buttonы for tool selection
     Palette *palette;                   ///< Palette which this PaletteView affects
@@ -208,7 +208,7 @@ protected:
 
 public:
     PaletteView(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         Palette *palette_, const PaletteViewAsset &asset_
     );
 
@@ -237,7 +237,7 @@ class HScrollCanvas;
 
 
 /// Holds texture to draw on
-class Canvas : public BaseUI {
+class Canvas : public Widget {
 protected:
     sf::RenderTexture texture;
     Vector2D texture_offset;
@@ -261,7 +261,7 @@ public:
      * \brief Creates empty canvas or opens image specified by path
     */
     Canvas(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         const char *image_path, Palette *palette_
     );
 

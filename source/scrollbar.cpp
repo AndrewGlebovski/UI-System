@@ -13,15 +13,15 @@
 #include "list.hpp"
 #include "asset.hpp"
 #include "style.hpp"
-#include "ui-base.hpp"
+#include "widget.hpp"
 #include "scrollbar.hpp"
 
 
 VScrollBar::VScrollBar(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
     ScrollAction *action_, const ScrollBarStyle &style_
 ) :
-    BaseUI(id_, transform_, size_, z_index_, parent_),
+    Widget(id_, transform_, size_, z_index_, parent_),
     action(action_), style(style_), scroller(Vector2D()), 
     is_moving(false), mouse_prev(Vector2D()) 
 {
@@ -117,10 +117,10 @@ VScrollBar::~VScrollBar() {
 
 
 HScrollBar::HScrollBar(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
     ScrollAction *action_, const ScrollBarStyle &style_
 ) :
-    BaseUI(id_, transform_, size_, z_index_, parent_),
+    Widget(id_, transform_, size_, z_index_, parent_),
     action(action_), style(style_), scroller(Vector2D()), 
     is_moving(false), mouse_prev(Vector2D()) 
 {

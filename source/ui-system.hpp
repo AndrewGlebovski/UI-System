@@ -1,40 +1,40 @@
 /**
  * \file
- * \brief Contains UI classes and protypes of their functions 
+ * \brief Contains container and window classes and protypes of their functions 
 */
 
 
-/// Manage UI elements
-class Container : public BaseUI {
+/// Manages widgets
+class Container : public Widget {
 private:
-    List<BaseUI*> elements;         ///< List of UI elements sorted by z-index
-    size_t focused;                 ///< Focused element draws on top and gets events first
-    bool focus_enabled;             ///< Container set focus between elements
+    List<Widget*> widgets;          ///< List of widgets sorted by z-index
+    size_t focused;                 ///< Focused widget draws on top and gets events first
+    bool focus_enabled;             ///< Container set focus between widgets
 
 
-    void removeElement(size_t index);
+    void removeWidget(size_t index);
 
 public:
     Container(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         bool focus_enabled_ = true
     );
 
 
     /**
-     * \brief Draws elements under his management
+     * \brief Draws widgets under his management
     */
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
 
-    virtual BaseUI *findElement(size_t element_id) override;
+    virtual Widget *findWidget(size_t widget_id) override;
 
 
     /**
-     * \brief Adds new UI element to manager
-     * \warning Elements should be allocated using new and will be deleted by manager
+     * \brief Adds new widget to manager
+     * \warning Widgets should be allocated using new and will be deleted by manager
     */
-    virtual size_t addChild(BaseUI *child) override;
+    virtual size_t addChild(Widget *child) override;
 
 
     virtual void removeChild(size_t child_id) override;
@@ -54,8 +54,8 @@ public:
 };
 
 
-/// Frame with UI elements inside
-class Window : public BaseUI {
+/// Frame with widgets inside
+class Window : public Widget {
 protected:
     sf::String title;           ///< Window title
     WindowStyle style;          ///< Window style
@@ -68,7 +68,7 @@ public:
      * \note Position and size consider title bar and frame
     */
     Window(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_, 
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_, 
         const sf::String &title_, const WindowStyle &style_
     );
 
@@ -85,14 +85,14 @@ public:
     Vector2D getAreaSize() const;
 
 
-    virtual BaseUI *findElement(size_t element_id) override;
+    virtual Widget *findWidget(size_t widget_id) override;
 
 
     /**
-     * \brief Adds new UI element to manager
-     * \warning Elements should be allocated using new and will be deleted by manager
+     * \brief Adds new widget to manager
+     * \warning Widgets should be allocated using new and will be deleted by manager
     */
-    virtual size_t addChild(BaseUI *child) override;
+    virtual size_t addChild(Widget *child) override;
 
 
     virtual void removeChild(size_t child_id) override;
@@ -152,7 +152,7 @@ protected:
 
 public:
     MoveButton(
-        size_t id_, const Transform &transform_, const Vector2D &size_, BaseUI *parent_, 
+        size_t id_, const Transform &transform_, const Vector2D &size_, Widget *parent_, 
         Window &window_
     );
 
@@ -189,7 +189,7 @@ public:
 
 
     ResizeButton(
-        size_t id_, const Transform &transform_, const Vector2D &size_, BaseUI *parent_, 
+        size_t id_, const Transform &transform_, const Vector2D &size_, Widget *parent_, 
         Window &window_, RESIZE_DIRECTION resize_dir_
     );
 

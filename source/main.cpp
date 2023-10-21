@@ -6,7 +6,7 @@
 #include "configs.hpp"
 #include "asset.hpp"
 #include "style.hpp"
-#include "ui-base.hpp"
+#include "widget.hpp"
 #include "button.hpp"
 #include "scrollbar.hpp"
 #include "ui-system.hpp"
@@ -15,11 +15,11 @@
 
 
 /// Opens picture on canvas in new subwindow with scrollbars
-BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
+Widget *openPicture(const char *filename, Palette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
 
 
 /// Creates palette view in new subwindow
-BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset);
+Widget *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset);
 
 
 int main() {
@@ -61,7 +61,7 @@ int main() {
     );
 
     MainWindow main_window(
-        BaseUI::AUTO_ID,
+        Widget::AUTO_ID,
         Transform(),
         Vector2D(SCREEN_W, SCREEN_H),
         1,
@@ -70,7 +70,7 @@ int main() {
     );
 
     main_window.addChild(new Clock(
-        BaseUI::AUTO_ID,
+        Widget::AUTO_ID,
         Transform(),
         Vector2D(100, 50),
         3,
@@ -93,7 +93,7 @@ int main() {
     sf::Clock timer;
 
     while (render_window.isOpen()) {
-        if (main_window.getStatus() == BaseUI::DELETE) {
+        if (main_window.getStatus() == Widget::DELETE) {
             render_window.close();
             break;
         }
@@ -137,9 +137,9 @@ int main() {
 }
 
 
-BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
+Widget *openPicture(const char *filename, Palette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
     Window *subwindow = new Window(
-        BaseUI::AUTO_ID,
+        Widget::AUTO_ID,
         Transform(Vector2D(300, 100)),
         Vector2D(800, 600),
         1,
@@ -149,7 +149,7 @@ BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_
     );
 
     Canvas *canvas = new Canvas(
-        BaseUI::AUTO_ID,
+        Widget::AUTO_ID,
         Transform(),
         subwindow->getAreaSize() - Vector2D(30, 30),
         0,
@@ -161,7 +161,7 @@ BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_
     subwindow->addChild(canvas);
 
     subwindow->addChild(new VScrollBar(
-        BaseUI::AUTO_ID,
+        Widget::AUTO_ID,
         Transform(Vector2D(subwindow->getAreaSize().x - 20, 0)),
         Vector2D(20, subwindow->getAreaSize().y - 30),
         1,
@@ -171,7 +171,7 @@ BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_
     ));
 
     subwindow->addChild(new HScrollBar(
-        BaseUI::AUTO_ID,
+        Widget::AUTO_ID,
         Transform(Vector2D(0, subwindow->getAreaSize().y - 20)),
         Vector2D(subwindow->getAreaSize().x, 20),
         1,
@@ -184,12 +184,12 @@ BaseUI *openPicture(const char *filename, Palette *palette, WindowStyle &window_
 }
 
 
-BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset) {
+Widget *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset) {
     WindowStyle subwindow_style(window_style);
     subwindow_style.outline = 0;
 
     Window *subwindow = new Window(
-        BaseUI::AUTO_ID,
+        Widget::AUTO_ID,
         Transform(Vector2D(0, 100)),
         Vector2D(218, 451),
         2,
@@ -199,7 +199,7 @@ BaseUI *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteVi
     );
 
     subwindow->addChild(new PaletteView(
-        BaseUI::AUTO_ID,
+        Widget::AUTO_ID,
         Transform(),
         Vector2D(188, 376),
         1,

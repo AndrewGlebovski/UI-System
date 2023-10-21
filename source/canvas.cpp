@@ -16,7 +16,7 @@
 #include "key-id.hpp"
 #include "asset.hpp"
 #include "style.hpp"
-#include "ui-base.hpp"
+#include "widget.hpp"
 #include "button.hpp"
 #include "scrollbar.hpp"
 #include "ui-system.hpp"
@@ -92,13 +92,13 @@ void PencilTool::onMove(const Vector2D &mouse, Canvas &canvas) {
 
 
 /// Draws preview of the rectangle
-class RectPreview : public BaseUI {
+class RectPreview : public Widget {
 private:
     RectTool &tool;     ///< Tool that holds this object
 
 public:
     RectPreview(RectTool &tool_) :
-        BaseUI(1, Transform(Vector2D()), Vector2D(), 1, nullptr), tool(tool_) {}
+        Widget(1, Transform(Vector2D()), Vector2D(), 1, nullptr), tool(tool_) {}
     
 
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
@@ -169,7 +169,7 @@ void RectTool::onConfirm(const Vector2D &mouse, Canvas &canvas) {
 }
 
 
-BaseUI *RectTool::getWidget() {
+Widget *RectTool::getWidget() {
     return (is_drawing) ? rect_preview : nullptr;
 }
 
@@ -180,7 +180,7 @@ RectTool::~RectTool() {
 
 
 /// Draws preview of the line
-class LinePreview : public BaseUI {
+class LinePreview : public Widget {
 private:
     LineTool &tool;     ///< Tool that holds this object
 
@@ -189,7 +189,7 @@ public:
      * \note Transform offset used as line's first point and size as second
     */
     LinePreview(LineTool &tool_) :
-        BaseUI(1, Transform(Vector2D()), Vector2D(), 1, nullptr), tool(tool_) {}
+        Widget(1, Transform(Vector2D()), Vector2D(), 1, nullptr), tool(tool_) {}
     
 
     /**
@@ -236,7 +236,7 @@ void LineTool::onConfirm(const Vector2D &mouse, Canvas &canvas) {
 }
 
 
-BaseUI *LineTool::getWidget() {
+Widget *LineTool::getWidget() {
     return (is_drawing) ? line_preview : nullptr;
 }
 
@@ -344,13 +344,13 @@ void BucketTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &
 
 
 /// Draws preview of the polygon
-class PolygonPreview : public BaseUI {
+class PolygonPreview : public Widget {
 private:
     PolygonTool &tool;     ///< Tool that holds this object
 
 public:
     PolygonPreview(PolygonTool &tool_) :
-        BaseUI(1, Transform(), Vector2D(), 1, nullptr), tool(tool_) {}
+        Widget(1, Transform(), Vector2D(), 1, nullptr), tool(tool_) {}
     
 
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
@@ -396,7 +396,7 @@ void PolygonTool::onCancel() {
 }
 
 
-BaseUI *PolygonTool::getWidget() {
+Widget *PolygonTool::getWidget() {
     return (is_drawing) ? polygon_preview : nullptr;
 }
 
@@ -463,7 +463,7 @@ public:
 
 void PaletteView::updateToolButtons() {
     size_t current_tool = palette->getCurrentIndex();
-    ActionButton *current_button = (ActionButton*) buttons.findElement(current_tool + BaseUI::AUTO_ID + 1);
+    ActionButton *current_button = (ActionButton*) buttons.findWidget(current_tool + Widget::AUTO_ID + 1);
 
     if (group->getPressed() != current_button) group->setPressed(current_button);
 }
@@ -471,7 +471,7 @@ void PaletteView::updateToolButtons() {
 
 #define ADD_TOOL_BUTTON(TOOL_ID, TOOL_TEXTURE_ID, POSITION)     \
 buttons.addChild(new TextureIconButton(                         \
-    BaseUI::AUTO_ID + TOOL_ID + 1,                              \
+    Widget::AUTO_ID + TOOL_ID + 1,                              \
     Transform(POSITION),                                        \
     0,                                                          \
     nullptr,                                                    \
@@ -485,10 +485,10 @@ buttons.addChild(new TextureIconButton(                         \
 
 
 PaletteView::PaletteView(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
     Palette *palette_, const PaletteViewAsset &asset_
 ) :
-    BaseUI(id_, transform_, size_, z_index_, parent_), 
+    Widget(id_, transform_, size_, z_index_, parent_), 
     buttons(1, Transform(), size, 0, this), palette(palette_), asset(asset_), group(nullptr)
 {
     group = new ButtonGroup();
@@ -563,10 +563,10 @@ void Canvas::clear_canvas() {
 
 
 Canvas::Canvas(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
     const char *image_path, Palette *palette_
 ) :
-    BaseUI(id_, transform_, size_, z_index_, parent_),
+    Widget(id_, transform_, size_, z_index_, parent_),
     texture(), texture_offset(Vector2D(0, 0)),
     palette(palette_), last_position()
 {

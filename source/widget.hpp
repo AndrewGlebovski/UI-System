@@ -1,10 +1,10 @@
 /**
  * \file
- * \brief Contains base UI class and protypes of his functions 
+ * \brief Contains widget class and protypes of his functions 
 */
 
 
-/// Holds transformation of the UI element
+/// Holds transformation of the widget
 struct Transform {
     Vector2D offset;        ///< Offset from parent
 
@@ -53,8 +53,8 @@ public:
 };
 
 
-/// Base class for all UI elements
-class BaseUI {
+/// Base class for all widgets
+class Widget {
 private:
     /**
      * \brief If requested_id != AUTO_ID returns requested_id, otherwise returns unique id
@@ -62,25 +62,25 @@ private:
     size_t generateId(size_t requested_id);
 
 protected:
-    const size_t id;        ///< Element ID that can be used for finding this element in hierarchy
+    const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
     int status;             ///< Shows parent if some actions requiered
 
     /**
      * \brief Returns max possible new_size for child
     */
-    virtual Vector2D onChildResize(BaseUI *child, const Vector2D &new_size);
+    virtual Vector2D onChildResize(Widget *child, const Vector2D &new_size);
 
 
     /**
      * \brief Returns max possible new_transform for child
     */
-    virtual Transform onChildTransform(BaseUI *child, const Transform &new_transform);
+    virtual Transform onChildTransform(Widget *child, const Transform &new_transform);
 
 public:
-    Transform transform;    ///< Element local transform
-    Vector2D size;          ///< UI element size
-    int z_index;            ///< Shows order in which UI elements are drawn
-    BaseUI *parent;         ///< Parent that holds this UI element
+    Transform transform;    ///< Widget local transform
+    Vector2D size;          ///< Widget size
+    int z_index;            ///< Shows order in which widgets are drawn
+    Widget *parent;         ///< Parent that holds this widget
 
 
     /// Pass into constructor to generate new ID
@@ -94,66 +94,66 @@ public:
     };
 
 
-    /// Shows parent if some actions requiered for this UI element
+    /// Shows parent if some actions requiered for this widget
     enum ELEMENT_STATUS {
-        PASS        = 0,    ///< Nothing to be done for this UI element
-        DELETE      = 1     ///< This UI element should be deleted
+        PASS        = 0,    ///< Nothing to be done for this widget
+        DELETE      = 1     ///< This widget should be deleted
     };
 
 
     /**
-     * \brief UI element constructor
+     * \brief Widget constructor
      * \note If id_ != AUTO_ID sets id to id_, otherwise generates "unique" id
     */
-    BaseUI(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_);
+    Widget(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_);
 
 
     /**
      * \brief Default copy constructor
     */
-    BaseUI(const BaseUI&) = default;
+    Widget(const Widget&) = default;
 
 
     /**
      * \brief Default assignment
     */
-    BaseUI &operator = (const BaseUI&) = default;
+    Widget &operator = (const Widget&) = default;
 
 
     /**
-     * \brief Returns UI element id
+     * \brief Returns widget id
     */
     size_t getId() const;
 
 
     /**
-     * \brief Searches UI element in hierarchy using id
+     * \brief Searches widget in hierarchy using id
     */
-    virtual BaseUI *findElement(size_t element_id);
+    virtual Widget *findWidget(size_t widget_id);
 
 
     /**
-     * \brief Adds child UI element for this
-     * \warning If UI element is not supposed to have children, abort() will be called
+     * \brief Adds child widget for this
+     * \warning If widget is not supposed to have children, abort() will be called
     */
-    virtual size_t addChild(BaseUI *child);
+    virtual size_t addChild(Widget *child);
 
 
     /**
      * \brief Removes child by its id
-     * \warning If UI element is not supposed to have children, abort() will be called
+     * \warning If widget is not supposed to have children, abort() will be called
     */
     virtual void removeChild(size_t child_id);
 
 
     /**
-     * \brief Returns UI element status
+     * \brief Returns widget status
     */
     int getStatus() const;
 
 
     /**
-     * \brief Sets UI element status
+     * \brief Sets widget status
     */
     void setStatus(ELEMENT_STATUS new_status);
 
@@ -186,7 +186,7 @@ public:
     virtual void checkChildren() {}
 
 
-    virtual ~BaseUI() {};
+    virtual ~Widget() {};
 };
 
 

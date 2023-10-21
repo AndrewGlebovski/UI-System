@@ -5,10 +5,10 @@
 
 
 /// Base class for all buttons
-class BaseButton : public BaseUI {
+class BaseButton : public Widget {
 public:
-    BaseButton(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
-        BaseUI(id_, transform_, size_, z_index_, parent_) {}
+    BaseButton(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_) :
+        Widget(id_, transform_, size_, z_index_, parent_) {}
 
 
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override = 0;
@@ -70,7 +70,7 @@ public:
      * \note If group_ != nullptr then button will join the group_
     */
     ActionButton(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         ButtonAction *action_, ButtonGroup *group_
     );
 
@@ -160,7 +160,7 @@ protected:
 
 public:
     RectButton(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         ButtonAction *action_, ButtonGroup *group_,
         const sf::String &text_, const ButtonStyle &style_,
         const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
@@ -183,7 +183,7 @@ protected:
 
 public:
     TextureButton(
-        size_t id_, const Transform &transform_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
         ButtonAction *action_, ButtonGroup *group_,
         const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_
     );
@@ -206,7 +206,7 @@ public:
      * \note Icon must be the same size as the button texture
     */
     TextureIconButton(
-        size_t id_, const Transform &transform_, int z_index_, BaseUI *parent_,
+        size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
         ButtonAction *action_, ButtonGroup *group_,
         const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_,
         const sf::Texture &icon_

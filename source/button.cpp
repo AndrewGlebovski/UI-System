@@ -13,12 +13,12 @@
 #include "list.hpp"
 #include "asset.hpp"
 #include "style.hpp"
-#include "ui-base.hpp"
+#include "widget.hpp"
 #include "button.hpp"
 
 
 ActionButton::ActionButton(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
     ButtonAction *action_, ButtonGroup *group_
 ) :
     BaseButton(id_, transform_, size_, z_index_, parent_),
@@ -135,7 +135,7 @@ bool ButtonGroup::isInGroup(ActionButton *button) const {
 
 
 RectButton::RectButton(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
     ButtonAction *action_, ButtonGroup *group_,
     const sf::String &text_, const ButtonStyle &style_,
     const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
@@ -177,7 +177,7 @@ void RectButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
 
 
 TextureButton::TextureButton(
-    size_t id_, const Transform &transform_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
     ButtonAction *action_, ButtonGroup *group_,
     const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_
 ) :
@@ -212,7 +212,7 @@ void TextureButton::draw(sf::RenderTexture &result, List<Transform> &transforms)
 
 
 TextureIconButton::TextureIconButton(
-    size_t id_, const Transform &transform_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
     ButtonAction *action_, ButtonGroup *group_,
     const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_,
     const sf::Texture &icon_

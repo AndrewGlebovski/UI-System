@@ -1,6 +1,6 @@
 /**
  * \file
- * \brief Contains sources of UI classes functions
+ * \brief Contains sources of container and window classes functions
 */
 
 
@@ -15,7 +15,7 @@
 #include "style.hpp"
 #include "configs.hpp"
 #include "key-id.hpp"
-#include "ui-base.hpp"
+#include "widget.hpp"
 #include "button.hpp"
 #include "ui-system.hpp"
 
@@ -23,86 +23,86 @@
 const float MIN_OUTLINE = 0.0001f;                          ///< If outline is smaller then window can not be resized
 const Vector2D CLOSE_OFFSET = Vector2D(-45, 12);            ///< Window close button offset from window top-right corner
 const Vector2D EXPAND_OFFSET = Vector2D(-85, 12);           ///< Window expand button offset from window top-right corner
-const size_t CLOSE_BUTTON_ID = BaseUI::AUTO_ID + 1;         ///< Window append button ID
-const size_t EXPAND_BUTTON_ID = BaseUI::AUTO_ID + 2;        ///< Window close button ID
+const size_t CLOSE_BUTTON_ID = Widget::AUTO_ID + 1;         ///< Window append button ID
+const size_t EXPAND_BUTTON_ID = Widget::AUTO_ID + 2;        ///< Window close button ID
 
 
 Container::Container(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
     bool focus_enabled_
 ) :
-    BaseUI(id_, transform_, size_, z_index_, parent_),
-    elements(), focused(0), focus_enabled(focus_enabled_)
+    Widget(id_, transform_, size_, z_index_, parent_),
+    widgets(), focused(0), focus_enabled(focus_enabled_)
 {}
 
 
 void Container::draw(sf::RenderTexture &result, List<Transform> &transforms) {
-    size_t count = elements.getSize();
+    size_t count = widgets.getSize();
     if (count == 0) return;
 
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = count - 1; i > focused; i--)
-        elements[i]->draw(result, transforms);
+        widgets[i]->draw(result, transforms);
     
     for (size_t i = focused - 1; i < count; i--)
-        elements[i]->draw(result, transforms);
+        widgets[i]->draw(result, transforms);
     
-    elements[focused]->draw(result, transforms);
+    widgets[focused]->draw(result, transforms);
 }
 
 
-BaseUI *Container::findElement(size_t element_id) {
-    BaseUI *result = nullptr;
+Widget *Container::findWidget(size_t widget_id) {
+    Widget *result = nullptr;
 
-    for (size_t i = 0; i < elements.getSize(); i++)
-        if ((result = elements[i]->findElement(element_id))) return result;
+    for (size_t i = 0; i < widgets.getSize(); i++)
+        if ((result = widgets[i]->findWidget(widget_id))) return result;
 
-    return BaseUI::findElement(element_id);
+    return Widget::findWidget(widget_id);
 }
 
 
-size_t Container::addChild(BaseUI *child) {
+size_t Container::addChild(Widget *child) {
     ASSERT(child, "Child is nullptr!\n");
 
     // Set this container as child's parent
     child->parent = this;
     // Container is empty
-    if (elements.getSize() == 0) {
-        elements.push_back(child);
+    if (widgets.getSize() == 0) {
+        widgets.push_back(child);
         focused = 0;
         return child -> getId();
     }
-    // Find place for UI element according to z_index
-    for (size_t i = 0; i < elements.getSize(); i++) {
-        if (child->z_index > elements[i]->z_index) {
-            elements.insert(i, child);
+    // Find place for widget according to z_index
+    for (size_t i = 0; i < widgets.getSize(); i++) {
+        if (child->z_index > widgets[i]->z_index) {
+            widgets.insert(i, child);
             focused = i;
             return child -> getId();
         }
     }
-    // Element has the biggest z_index
-    elements.push_back(child);
-    focused = elements.getSize() - 1;
+    // Widget has the biggest z_index
+    widgets.push_back(child);
+    focused = widgets.getSize() - 1;
     return child -> getId();
 }
 
 
-void Container::removeElement(size_t index) {
-    ASSERT(index < elements.getSize(), "Index is out of range!\n");
+void Container::removeWidget(size_t index) {
+    ASSERT(index < widgets.getSize(), "Index is out of range!\n");
 
     if (index < focused) focused--;
-    else if (index == focused) focused = elements.getSize() - 2;
+    else if (index == focused) focused = widgets.getSize() - 2;
 
-    delete elements[index];
-    elements.remove(index);
+    delete widgets[index];
+    widgets.remove(index);
 }
 
 
 void Container::removeChild(size_t child_id) {
-    for (size_t i = 0; i < elements.getSize(); i++) {
-        if (elements[i]->getId() == child_id) {
-            removeElement(i);
+    for (size_t i = 0; i < widgets.getSize(); i++) {
+        if (widgets[i]->getId() == child_id) {
+            removeWidget(i);
             break;
         }
     }
@@ -115,23 +115,23 @@ void Container::removeChild(size_t child_id) {
 #define CONTAINER_FOR(CALL_FUNC, ...)                                               \
 do {                                                                                \
     if (focus_enabled) {                                                               \
-        if (elements[focused]->CALL_FUNC == HANDLED) return HANDLED;                \
+        if (widgets[focused]->CALL_FUNC == HANDLED) return HANDLED;                \
         \
         for (size_t i = 0; i < focused; i++)                                        \
-            if (elements[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; } \
+            if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; } \
         \
-        for (size_t i = focused + 1; i < elements.getSize(); i++)                   \
-            if (elements[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; } \
+        for (size_t i = focused + 1; i < widgets.getSize(); i++)                   \
+            if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; } \
     }                                                                               \
     else {                                                                          \
-        for (size_t i = 0; i < elements.getSize(); i++)                             \
-            if (elements[i]->CALL_FUNC == HANDLED) return HANDLED;                  \
+        for (size_t i = 0; i < widgets.getSize(); i++)                             \
+            if (widgets[i]->CALL_FUNC == HANDLED) return HANDLED;                  \
     }                                                                               \
 } while(0)
 
 
 int Container::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
-    if (elements.getSize() == 0) return UNHANDLED;
+    if (widgets.getSize() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
 
@@ -142,7 +142,7 @@ int Container::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms
 
 
 int Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
-    if (elements.getSize() == 0) return UNHANDLED;
+    if (widgets.getSize() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
 
@@ -153,7 +153,7 @@ int Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Tra
 
 
 int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
-    if (elements.getSize() == 0) return UNHANDLED;
+    if (widgets.getSize() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
 
@@ -164,7 +164,7 @@ int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<T
 
 
 int Container::onKeyUp(int key_id) {
-    if (elements.getSize() == 0) return UNHANDLED;
+    if (widgets.getSize() == 0) return UNHANDLED;
 
     CONTAINER_FOR(onKeyUp(key_id));
     
@@ -173,7 +173,7 @@ int Container::onKeyUp(int key_id) {
 
 
 int Container::onKeyDown(int key_id) {
-    if (elements.getSize() == 0) return UNHANDLED;
+    if (widgets.getSize() == 0) return UNHANDLED;
 
     CONTAINER_FOR(onKeyDown(key_id));
     
@@ -182,16 +182,16 @@ int Container::onKeyDown(int key_id) {
 
 
 int Container::onTimer(float delta_time) {
-    for (size_t i = 0; i < elements.getSize(); i++)
-        elements[i]->onTimer(delta_time);
+    for (size_t i = 0; i < widgets.getSize(); i++)
+        widgets[i]->onTimer(delta_time);
     
     return UNHANDLED;
 }
 
 
 int Container::onParentResize() {
-    for (size_t i = 0; i < elements.getSize(); i++)
-        elements[i]->onParentResize();
+    for (size_t i = 0; i < widgets.getSize(); i++)
+        widgets[i]->onParentResize();
     
     return UNHANDLED;
 }
@@ -205,14 +205,14 @@ void Container::checkChildren() {
 
     // ELEMENT OF THE LIST CAN BE DELETED IN ITERATION
 
-    while(curr < elements.getSize()) {
-        switch(elements[curr]->getStatus()) {
+    while(curr < widgets.getSize()) {
+        switch(widgets[curr]->getStatus()) {
             case PASS: 
-                elements[curr]->checkChildren();
+                widgets[curr]->checkChildren();
                 curr++;
                 break;
             case DELETE:
-                removeElement(curr);
+                removeWidget(curr);
                 break;
             default:
                 ASSERT(0, "Unknown status!\n");
@@ -222,49 +222,49 @@ void Container::checkChildren() {
 
 
 Container::~Container() {
-    for (size_t i = 0; i < elements.getSize(); i++) {
-        ASSERT(elements[i], "Pointer to UI element is nullptr!\n");
-        delete elements[i];
+    for (size_t i = 0; i < widgets.getSize(); i++) {
+        ASSERT(widgets[i], "Pointer to widget is nullptr!\n");
+        delete widgets[i];
     }
 }
 
 
-/// Sets UI element status as DELETE
+/// Sets widget status as DELETE
 class CloseAction : public ButtonAction {
 private:
-    BaseUI *element;
+    Widget *widget;
 
 public:
-    CloseAction(BaseUI *element_) : element(element_) {}
+    CloseAction(Widget *widget_) : widget(widget_) {}
 
 
     virtual void operator () () {
-        element->setStatus(BaseUI::DELETE);
+        widget->setStatus(Widget::DELETE);
     }
 };
 
 
-/// Maximizes UI element size
+/// Maximizes widget size
 class ExpandAction : public ButtonAction {
 private:
-    BaseUI *element;
+    Widget *widget;
 
 public:
-    ExpandAction(BaseUI *element_) : element(element_) {}
+    ExpandAction(Widget *widget_) : widget(widget_) {}
 
 
     virtual void operator () () {
-        Transform new_transform = element->transform;
+        Transform new_transform = widget->transform;
         new_transform.offset = Vector2D();
-        element->tryTransform(new_transform);
-        element->tryResize(Vector2D(SCREEN_W, SCREEN_H));
+        widget->tryTransform(new_transform);
+        widget->tryResize(Vector2D(SCREEN_W, SCREEN_H));
     }
 };
 
 
 #define ADD_RESIZE_BUTTON(POSITION, SIZE, TYPE) \
 buttons.addChild(new ResizeButton(              \
-    BaseUI::AUTO_ID,                            \
+    Widget::AUTO_ID,                            \
     Transform(POSITION),                        \
     SIZE,                                       \
     nullptr,                                    \
@@ -274,10 +274,10 @@ buttons.addChild(new ResizeButton(              \
 
 
 Window::Window(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_, 
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_, 
     const sf::String &title_, const WindowStyle &style_
 ) :
-    BaseUI(id_, transform_, size_, z_index_, parent_),
+    Widget(id_, transform_, size_, z_index_, parent_),
     title(title_), style(style_),
     buttons(1, Transform(), size, 1, this, false), 
     container(2, Transform(), Vector2D(), 1, this)
@@ -288,7 +288,7 @@ Window::Window(
     float offset = style.outline;
 
     buttons.addChild(new MoveButton(
-        BaseUI::AUTO_ID,
+        Widget::AUTO_ID,
         Transform(Vector2D(1, 1) * offset),
         Vector2D(size.x - 2 * offset, style.tl_offset.y - offset),
         nullptr,
@@ -308,17 +308,6 @@ Window::Window(
         style.asset[WindowAsset::CLOSE_ICON]
     ));
 
-    if (offset < MIN_OUTLINE) return;
-
-    ADD_RESIZE_BUTTON(Vector2D(0, offset),                          Vector2D(offset, size.y - 2 * offset),  ResizeButton::LEFT);
-    ADD_RESIZE_BUTTON(Vector2D(offset, 0),                          Vector2D(size.x - 2 * offset, offset),  ResizeButton::TOP);
-    ADD_RESIZE_BUTTON(Vector2D(offset, size.y - offset),            Vector2D(size.x - 2 * offset, offset),  ResizeButton::BOTTOM);
-    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, offset),            Vector2D(offset, size.y - 2 * offset),  ResizeButton::RIGHT);
-    ADD_RESIZE_BUTTON(Vector2D(),                                   Vector2D(offset, offset),               ResizeButton::TOP_LEFT);
-    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, 0),                 Vector2D(offset, offset),               ResizeButton::TOP_RIGHT);
-    ADD_RESIZE_BUTTON(Vector2D(0, size.y - offset),                 Vector2D(offset, offset),               ResizeButton::BOTTOM_LEFT);
-    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, size.y - offset),   Vector2D(offset, offset),               ResizeButton::BOTTOM_RIGHT);
-
     buttons.addChild(new TextureIconButton(
         EXPAND_BUTTON_ID,
         Transform(Vector2D(size.x, 0) + EXPAND_OFFSET),
@@ -331,6 +320,17 @@ Window::Window(
         style.asset[WindowAsset::BUTTON_PRESSED],
         style.asset[WindowAsset::EXPAND_ICON]
     ));
+
+    if (offset < MIN_OUTLINE) return;
+
+    ADD_RESIZE_BUTTON(Vector2D(0, offset),                          Vector2D(offset, size.y - 2 * offset),  ResizeButton::LEFT);
+    ADD_RESIZE_BUTTON(Vector2D(offset, 0),                          Vector2D(size.x - 2 * offset, offset),  ResizeButton::TOP);
+    ADD_RESIZE_BUTTON(Vector2D(offset, size.y - offset),            Vector2D(size.x - 2 * offset, offset),  ResizeButton::BOTTOM);
+    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, offset),            Vector2D(offset, size.y - 2 * offset),  ResizeButton::RIGHT);
+    ADD_RESIZE_BUTTON(Vector2D(),                                   Vector2D(offset, offset),               ResizeButton::TOP_LEFT);
+    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, 0),                 Vector2D(offset, offset),               ResizeButton::TOP_RIGHT);
+    ADD_RESIZE_BUTTON(Vector2D(0, size.y - offset),                 Vector2D(offset, offset),               ResizeButton::BOTTOM_LEFT);
+    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, size.y - offset),   Vector2D(offset, offset),               ResizeButton::BOTTOM_RIGHT);
 }
 
 
@@ -391,14 +391,14 @@ void Window::draw(sf::RenderTexture &result, List<Transform> &transforms) {
 #undef DRAW_TEXTURE
 
 
-BaseUI *Window::findElement(size_t element_id) {
-    BaseUI *result = container.findElement(element_id);
+Widget *Window::findWidget(size_t widget_id) {
+    Widget *result = container.findWidget(widget_id);
     if (result) return result;
-    return BaseUI::findElement(element_id);
+    return Widget::findWidget(widget_id);
 }
 
 
-size_t Window::addChild(BaseUI *child) {
+size_t Window::addChild(Widget *child) {
     return container.addChild(child);
 }
 
@@ -471,7 +471,7 @@ int Window::onTimer(float delta_time) {
 
 
 void Window::tryResize(const Vector2D &new_size) {
-    BaseUI::tryResize(new_size);
+    Widget::tryResize(new_size);
 
     buttons.size = size;
     buttons.onParentResize();
@@ -479,8 +479,8 @@ void Window::tryResize(const Vector2D &new_size) {
     container.size = getAreaSize();
     container.onParentResize();
 
-    buttons.findElement(CLOSE_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
-    buttons.findElement(EXPAND_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
+    buttons.findWidget(CLOSE_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
+    buttons.findWidget(EXPAND_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
 }
 
 
@@ -535,8 +535,8 @@ void MainWindow::tryResize(const Vector2D &new_size) {
     container.size = getAreaSize();
     container.onParentResize();
 
-    buttons.findElement(CLOSE_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
-    buttons.findElement(EXPAND_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
+    buttons.findWidget(CLOSE_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
+    buttons.findWidget(EXPAND_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
 }
 
 
@@ -574,7 +574,7 @@ void MainWindow::parseEvent(const sf::Event &event, List<Transform> &transforms)
 
 
 MoveButton::MoveButton(
-    size_t id_, const Transform &transform_, const Vector2D &size_, BaseUI *parent_, 
+    size_t id_, const Transform &transform_, const Vector2D &size_, Widget *parent_, 
     Window &window_
 ) :
     BaseButton(id_, transform_, size_, 0, parent_),
@@ -640,7 +640,7 @@ int MoveButton::onParentResize() {
 
 
 ResizeButton::ResizeButton(
-    size_t id_, const Transform &transform_, const Vector2D &size_, BaseUI *parent_, 
+    size_t id_, const Transform &transform_, const Vector2D &size_, Widget *parent_, 
     Window &window_, RESIZE_DIRECTION resize_dir_
 ) :
     BaseButton(id_, transform_, size_, 0, parent_),

@@ -1,13 +1,13 @@
 /**
  * \file
- * \brief Contains sources of base UI class functions
+ * \brief Contains sources of widget class functions
 */
 
 
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "list.hpp"
-#include "ui-base.hpp"
+#include "widget.hpp"
 
 
 Transform::Transform() : offset(Vector2D()) {}
@@ -40,50 +40,50 @@ TransformApplier::~TransformApplier() {
 }
 
 
-BaseUI::BaseUI(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
+Widget::Widget(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_) :
     id(generateId(id_)), status(PASS), transform(transform_), size(size_), z_index(z_index_), parent(parent_) {}
 
 
-size_t BaseUI::generateId(size_t requested_id) {
+size_t Widget::generateId(size_t requested_id) {
     if (requested_id != AUTO_ID) return requested_id;
 
     return size_t(this);
 }
 
 
-size_t BaseUI::getId() const {
+size_t Widget::getId() const {
     return id;
 }
 
 
-BaseUI *BaseUI::findElement(size_t element_id) {
-    return (element_id == getId()) ? this : nullptr;
+Widget *Widget::findWidget(size_t widget_id) {
+    return (widget_id == getId()) ? this : nullptr;
 }
 
 
-size_t BaseUI::addChild(BaseUI *child) {
-    printf("This element does not support children!\n");
+size_t Widget::addChild(Widget *child) {
+    printf("This widget does not support children!\n");
     abort();
 }
 
 
-void BaseUI::removeChild(size_t child_id) {
-    printf("This element does not support children!\n");
+void Widget::removeChild(size_t child_id) {
+    printf("This widget does not support children!\n");
     abort();
 }
 
 
-int BaseUI::getStatus() const {
+int Widget::getStatus() const {
     return status;
 }
 
 
-void BaseUI::setStatus(ELEMENT_STATUS new_status) {
+void Widget::setStatus(ELEMENT_STATUS new_status) {
     status = new_status;
 }
 
 
-void BaseUI::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void Widget::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
     /* DEBUG DRAWING
     sf::RectangleShape rect(Vector2D(25, 25));
@@ -94,7 +94,7 @@ void BaseUI::draw(sf::RenderTexture &result, List<Transform> &transforms) {
 }
 
 
-Vector2D BaseUI::onChildResize(BaseUI *child, const Vector2D &new_size) {
+Vector2D Widget::onChildResize(Widget *child, const Vector2D &new_size) {
     Vector2D allowed_size = new_size;
 
     if (new_size.x < 0)
@@ -111,7 +111,7 @@ Vector2D BaseUI::onChildResize(BaseUI *child, const Vector2D &new_size) {
 }
 
 
-Transform BaseUI::onChildTransform(BaseUI *child, const Transform &new_transform) {
+Transform Widget::onChildTransform(Widget *child, const Transform &new_transform) {
     Transform allowed_transform = new_transform;
 
     if (new_transform.offset.x < 0)
@@ -128,12 +128,12 @@ Transform BaseUI::onChildTransform(BaseUI *child, const Transform &new_transform
 }
 
 
-void BaseUI::tryResize(const Vector2D &new_size) {
+void Widget::tryResize(const Vector2D &new_size) {
     size = parent->onChildResize(this, new_size);
 }
 
 
-void BaseUI::tryTransform(const Transform &new_transform) {
+void Widget::tryTransform(const Transform &new_transform) {
     transform = parent->onChildTransform(this, new_transform);
 }
 
