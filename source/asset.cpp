@@ -91,7 +91,12 @@ WindowAsset::WindowAsset(const char *rootpath) {
         "bottom_right",
         "right",
         "top_right",
-        "center"
+        "center",
+        "button_normal",
+        "button_hover",
+        "button_pressed",
+        "expand_icon",
+        "close_icon"
     };
 
     loadTextures(rootpath, FILES, sizeof(FILES) / 8);

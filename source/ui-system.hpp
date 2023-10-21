@@ -8,10 +8,17 @@
 class Container : public BaseUI {
 private:
     List<BaseUI*> elements;         ///< List of UI elements sorted by z-index
-    size_t focused;
+    size_t focused;                 ///< Focused element draws on top and gets events first
+    bool focus_enabled;             ///< Container set focus between elements
+
+
+    void removeElement(size_t index);
 
 public:
-    Container(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_);
+    Container(
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_,
+        bool focus_enabled_ = true
+    );
 
 
     /**
@@ -20,17 +27,17 @@ public:
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
 
-    BaseUI *findElement(size_t element_id) override;
+    virtual BaseUI *findElement(size_t element_id) override;
 
 
     /**
      * \brief Adds new UI element to manager
      * \warning Elements should be allocated using new and will be deleted by manager
     */
-    size_t addChild(BaseUI *child) override;
+    virtual size_t addChild(BaseUI *child) override;
 
 
-    void removeChild(size_t child_id) override;
+    virtual void removeChild(size_t child_id) override;
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
@@ -40,6 +47,7 @@ public:
     virtual int onKeyDown(int key_id) override;
     virtual int onTimer(float delta_time) override;
     virtual int onParentResize() override;
+    virtual void checkChildren() override;
 
 
     ~Container();
@@ -77,17 +85,17 @@ public:
     Vector2D getAreaSize() const;
 
 
-    BaseUI *findElement(size_t element_id) override;
+    virtual BaseUI *findElement(size_t element_id) override;
 
 
     /**
      * \brief Adds new UI element to manager
      * \warning Elements should be allocated using new and will be deleted by manager
     */
-    size_t addChild(BaseUI *child) override;
+    virtual size_t addChild(BaseUI *child) override;
 
 
-    void removeChild(size_t child_id) override;
+    virtual void removeChild(size_t child_id) override;
 
 
     virtual void tryResize(const Vector2D &new_size) override;
@@ -109,6 +117,7 @@ public:
     virtual int onKeyDown(int key_id) override;
     virtual int onTimer(float delta_time) override;
     virtual int onParentResize() override;
+    virtual void checkChildren() override;
 };
 
 

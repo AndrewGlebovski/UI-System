@@ -60,7 +60,12 @@ public:
         FRAME_BR,               ///< Bottom-right corner texture
         FRAME_R,                ///< Right side texture (will be repeated)
         FRAME_TR,               ///< Top-right corner texture
-        FRAME_CENTER            ///< Center texture (will be repeated)
+        FRAME_CENTER,           ///< Center texture (will be repeated)
+        BUTTON_NORMAL,          ///< Window title buttons normal texture
+        BUTTON_HOVER,           ///< Window title buttons hover texture
+        BUTTON_PRESSED,         ///< Window title buttons pressed texture
+        EXPAND_ICON,            ///< Window expand button icon
+        CLOSE_ICON              ///< Window close button icon
     };
 
 

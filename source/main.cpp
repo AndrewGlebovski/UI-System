@@ -93,11 +93,20 @@ int main() {
     sf::Clock timer;
 
     while (render_window.isOpen()) {
+        if (main_window.getStatus() == BaseUI::DELETE) {
+            render_window.close();
+            break;
+        }
+
+        main_window.checkChildren();
+
         sf::Event event;
 
         while (render_window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
                 render_window.close();
+                break;
+            }
             
             main_window.parseEvent(event, transforms);
             ASSERT(transforms[0].offset.length() < 0.001, "Transform failed!\n");

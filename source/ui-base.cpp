@@ -41,7 +41,7 @@ TransformApplier::~TransformApplier() {
 
 
 BaseUI::BaseUI(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, BaseUI *parent_) :
-    id(generateId(id_)), transform(transform_), size(size_), z_index(z_index_), parent(parent_) {}
+    id(generateId(id_)), status(PASS), transform(transform_), size(size_), z_index(z_index_), parent(parent_) {}
 
 
 size_t BaseUI::generateId(size_t requested_id) {
@@ -70,6 +70,16 @@ size_t BaseUI::addChild(BaseUI *child) {
 void BaseUI::removeChild(size_t child_id) {
     printf("This element does not support children!\n");
     abort();
+}
+
+
+int BaseUI::getStatus() const {
+    return status;
+}
+
+
+void BaseUI::setStatus(ELEMENT_STATUS new_status) {
+    status = new_status;
 }
 
 

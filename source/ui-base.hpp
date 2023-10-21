@@ -62,6 +62,9 @@ private:
     size_t generateId(size_t requested_id);
 
 protected:
+    const size_t id;        ///< Element ID that can be used for finding this element in hierarchy
+    int status;             ///< Shows parent if some actions requiered
+
     /**
      * \brief Returns max possible new_size for child
     */
@@ -74,7 +77,6 @@ protected:
     virtual Transform onChildTransform(BaseUI *child, const Transform &new_transform);
 
 public:
-    const size_t id;        ///< Element ID that can be used for finding this element in hierarchy
     Transform transform;    ///< Element local transform
     Vector2D size;          ///< UI element size
     int z_index;            ///< Shows order in which UI elements are drawn
@@ -89,6 +91,13 @@ public:
     enum EVENT_STATUS {
         UNHANDLED   = 0,    ///< Event was not handled (father broadcasting is required)
         HANDLED     = 1     ///< Event was handled (father broadcasting is not required)
+    };
+
+
+    /// Shows parent if some actions requiered for this UI element
+    enum ELEMENT_STATUS {
+        PASS        = 0,    ///< Nothing to be done for this UI element
+        DELETE      = 1     ///< This UI element should be deleted
     };
 
 
@@ -138,6 +147,18 @@ public:
 
 
     /**
+     * \brief Returns UI element status
+    */
+    int getStatus() const;
+
+
+    /**
+     * \brief Sets UI element status
+    */
+    void setStatus(ELEMENT_STATUS new_status);
+
+
+    /**
      * \brief Draws red rectangle for debug purposes
     */
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms);
@@ -161,7 +182,8 @@ public:
     virtual int onKeyUp(int key_id) { return UNHANDLED; }
     virtual int onKeyDown(int key_id) { return UNHANDLED; }
     virtual int onTimer(float delta_time) { return UNHANDLED; }
-    virtual int onParentResize() { return UNHANDLED; } ;
+    virtual int onParentResize() { return UNHANDLED; }
+    virtual void checkChildren() {}
 
 
     virtual ~BaseUI() {};
