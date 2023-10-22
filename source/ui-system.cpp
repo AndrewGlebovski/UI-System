@@ -14,7 +14,6 @@
 #include "asset.hpp"
 #include "style.hpp"
 #include "configs.hpp"
-#include "key-id.hpp"
 #include "widget.hpp"
 #include "button.hpp"
 #include "ui-system.hpp"
@@ -232,14 +231,19 @@ Container::~Container() {
 /// Sets widget status as DELETE
 class CloseAction : public ButtonAction {
 private:
-    Widget *widget;
+    Widget &widget;
 
 public:
-    CloseAction(Widget *widget_) : widget(widget_) {}
+    CloseAction(Widget &widget_) : widget(widget_) {}
 
 
-    virtual void operator () () {
-        widget->setStatus(Widget::DELETE);
+    virtual void operator () () override {
+        widget.setStatus(Widget::DELETE);
+    }
+
+
+    virtual ButtonAction *clone() override {
+        return new CloseAction(widget);
     }
 };
 
@@ -247,17 +251,22 @@ public:
 /// Maximizes widget size
 class ExpandAction : public ButtonAction {
 private:
-    Widget *widget;
+    Widget &widget;
 
 public:
-    ExpandAction(Widget *widget_) : widget(widget_) {}
+    ExpandAction(Widget &widget_) : widget(widget_) {}
 
 
-    virtual void operator () () {
-        Transform new_transform = widget->transform;
+    virtual void operator () () override {
+        Transform new_transform = widget.transform;
         new_transform.offset = Vector2D();
-        widget->tryTransform(new_transform);
-        widget->tryResize(Vector2D(SCREEN_W, SCREEN_H));
+        widget.tryTransform(new_transform);
+        widget.tryResize(Vector2D(SCREEN_W, SCREEN_H));
+    }
+
+
+    virtual ButtonAction *clone() override {
+        return new ExpandAction(widget);
     }
 };
 
@@ -300,7 +309,7 @@ Window::Window(
         Transform(Vector2D(size.x, 0) + CLOSE_OFFSET),
         2,
         nullptr,
-        new CloseAction(this),
+        new CloseAction(*this),
         nullptr,
         style.asset[WindowAsset::BUTTON_NORMAL],
         style.asset[WindowAsset::BUTTON_HOVER],
@@ -313,7 +322,7 @@ Window::Window(
         Transform(Vector2D(size.x, 0) + EXPAND_OFFSET),
         2,
         nullptr,
-        new ExpandAction(this),
+        new ExpandAction(*this),
         nullptr,
         style.asset[WindowAsset::BUTTON_NORMAL],
         style.asset[WindowAsset::BUTTON_HOVER],

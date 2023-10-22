@@ -29,6 +29,31 @@ ActionButton::ActionButton(
 }
 
 
+ActionButton::ActionButton(const ActionButton &button) :
+    BaseButton(AUTO_ID, button.transform, button.size, button.z_index, button.parent),
+    action(button.action->clone()), group(button.group), status(BUTTON_NORMAL)
+{
+    ASSERT(button.action, "Action is nullptr!\n");
+    if (group) group->addButton(this);
+}
+
+
+ActionButton &ActionButton::operator = (const ActionButton &button)  {
+    if (this != &button) {
+        if (action) delete action;
+
+        transform = button.transform;
+        size = button.size;
+        z_index = button.z_index;
+        parent = button.parent;
+        action = button.action->clone();
+        group = button.group;
+    }
+
+    return *this;
+}
+
+
 bool ActionButton::isInGroup() const { return (group); }
 
 

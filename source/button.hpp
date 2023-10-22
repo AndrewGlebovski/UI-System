@@ -21,6 +21,9 @@ public:
 /// Base class for all button actions
 class ButtonAction {
 public:
+    ButtonAction() = default;
+
+
     /**
      * \brief Does something
     */
@@ -28,8 +31,11 @@ public:
 
 
     /**
-     * \brief Destroyes action
+     * \brief Clones current action
     */
+    virtual ButtonAction *clone() = 0;
+
+
     virtual ~ButtonAction() = default;
 };
 
@@ -73,6 +79,15 @@ public:
         size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         ButtonAction *action_, ButtonGroup *group_
     );
+
+
+    /**
+     * \note AUTO_ID used for generating id
+    */
+    ActionButton(const ActionButton &button);
+
+
+    ActionButton &operator = (const ActionButton &button);
 
 
     /**

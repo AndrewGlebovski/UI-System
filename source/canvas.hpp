@@ -67,6 +67,10 @@ public:
     RectTool();
 
 
+    RectTool(const RectTool &button) = delete;
+    RectTool &operator = (const RectTool &button) = delete;
+
+
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
     virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
     virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
@@ -85,6 +89,10 @@ protected:
 
 public:
     LineTool();
+
+
+    LineTool(const LineTool &button) = delete;
+    LineTool &operator = (const LineTool &button) = delete;
 
 
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
@@ -133,6 +141,10 @@ protected:
 
 public:
     PolygonTool();
+
+
+    PolygonTool(const PolygonTool &button) = delete;
+    PolygonTool &operator = (const PolygonTool &button) = delete;
 
 
     List<Vector2D> &getPoints();

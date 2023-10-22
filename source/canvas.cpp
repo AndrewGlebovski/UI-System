@@ -455,8 +455,13 @@ public:
     PaletteAction(Palette &palette_, int tool_id_) : palette(palette_), tool_id(tool_id_) {}
 
 
-    void operator () () {
+    virtual void operator () () override {
         palette.setCurrentTool(tool_id);
+    }
+
+
+    virtual ButtonAction *clone() override {
+        return new PaletteAction(palette, tool_id);
     }
 };
 
