@@ -105,7 +105,7 @@ public:
         TransformApplier add_transform(transforms, transform);
 
         sf::RectangleShape rect(size);
-        rect.setPosition(transforms[0].offset);
+        rect.setPosition(transforms.front().offset);
         rect.setFillColor(sf::Color(0));
         rect.setOutlineThickness(RECT_PREVIEW_OUTLINE);
         rect.setOutlineColor(PREVIEW_COLOR);
@@ -197,7 +197,7 @@ public:
     */
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
         // REMAINDER: transform.offset = point1, size = point2
-        drawLine(transforms[0].offset + transform.offset, transforms[0].offset + size, PREVIEW_COLOR, result);
+        drawLine(transforms.front().offset + transform.offset, transforms.front().offset + size, PREVIEW_COLOR, result);
     }
 };
 
@@ -354,7 +354,7 @@ public:
     
 
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
-        drawPolygon(transforms[0].offset, tool.getPoints(), PREVIEW_COLOR, result, sf::PrimitiveType::LineStrip);
+        drawPolygon(transforms.front().offset, tool.getPoints(), PREVIEW_COLOR, result, sf::PrimitiveType::LineStrip);
     }
 };
 
@@ -624,7 +624,7 @@ void Canvas::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     sf::Vector2i offset_(texture_offset.x, texture_offset.y);
     sf::Vector2i size_(size.x, size.y);
     tool_sprite.setTextureRect(sf::IntRect(offset_, size_));
-    tool_sprite.setPosition(transforms[0].offset);
+    tool_sprite.setPosition(transforms.front().offset);
 
     result.draw(tool_sprite);
 
@@ -641,7 +641,7 @@ int Canvas::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     last_position = Vector2D(mouse_x, mouse_y);
 
     palette->getCurrentTool()->onMove(
-        last_position - transforms[0].offset + texture_offset,
+        last_position - transforms.front().offset + texture_offset,
         *this
     );
 
@@ -657,10 +657,10 @@ int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tran
 
     TransformApplier add_transform(transforms, transform);
 
-    if (isInsideRect(transforms[0].offset, size, last_position)) {
+    if (isInsideRect(transforms.front().offset, size, last_position)) {
         palette->getCurrentTool()->onMainButton(
             CanvasTool::PRESSED, 
-            last_position - transforms[0].offset + texture_offset,
+            last_position - transforms.front().offset + texture_offset,
             *this
         );
 
@@ -683,7 +683,7 @@ int Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transf
 
     palette->getCurrentTool()->onMainButton(
         CanvasTool::REALEASED, 
-        last_position - transforms[0].offset + texture_offset,
+        last_position - transforms.front().offset + texture_offset,
         *this
     );
 

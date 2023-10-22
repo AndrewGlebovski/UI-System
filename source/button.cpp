@@ -66,7 +66,7 @@ void ActionButton::setStatus(BUTTON_STATUS new_status) { status = new_status; };
 int ActionButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (isInsideButton(Vector2D(mouse_x, mouse_y) - transforms[0].offset)) {
+    if (isInsideButton(Vector2D(mouse_x, mouse_y) - transforms.front().offset)) {
         if (status != BUTTON_PRESSED)
             setStatus(BUTTON_HOVER);
 
@@ -82,7 +82,7 @@ int ActionButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transfo
 int ActionButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (!isInsideButton(Vector2D(mouse_x, mouse_y) - transforms[0].offset)) return UNHANDLED;
+    if (!isInsideButton(Vector2D(mouse_x, mouse_y) - transforms.front().offset)) return UNHANDLED;
 
     setStatus(BUTTON_PRESSED);
     if (isInGroup()) group->setPressed(this);
@@ -95,7 +95,7 @@ int ActionButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, Lis
 int ActionButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (isInsideButton(Vector2D(mouse_x, mouse_y) - transforms[0].offset)) {
+    if (isInsideButton(Vector2D(mouse_x, mouse_y) - transforms.front().offset)) {
         if (!isPressedInGroup()) setStatus(BUTTON_HOVER);
 
         return HANDLED;
@@ -183,7 +183,7 @@ void RectButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     sf::FloatRect text_rect = btn_text.getLocalBounds();
     Vector2D text_offset((size.x - text_rect.width) / 2, (size.y - text_rect.height) / 2);
 
-    btn_text.setPosition(transforms[0].offset + text_offset);
+    btn_text.setPosition(transforms.front().offset + text_offset);
 
     sf::RectangleShape btn_rect(size);
 
@@ -194,7 +194,7 @@ void RectButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
         default: ASSERT(0, "Invalid button status!\n");
     }
 
-    btn_rect.setPosition(transforms[0].offset);
+    btn_rect.setPosition(transforms.front().offset);
 
     result.draw(btn_rect);
     result.draw(btn_text);
@@ -230,7 +230,7 @@ void TextureButton::draw(sf::RenderTexture &result, List<Transform> &transforms)
         default: ASSERT(0, "Invalid button status!\n");
     }
     
-    btn_sprite.setPosition(transforms[0].offset);
+    btn_sprite.setPosition(transforms.front().offset);
 
     result.draw(btn_sprite);
 }
@@ -251,7 +251,7 @@ void TextureIconButton::draw(sf::RenderTexture &result, List<Transform> &transfo
     TextureButton::draw(result, transforms);
 
     sf::Sprite icon_sprite(icon);
-    icon_sprite.setPosition(transforms[0].offset + transform.offset);
+    icon_sprite.setPosition(transforms.front().offset + transform.offset);
     result.draw(icon_sprite);
 }
 

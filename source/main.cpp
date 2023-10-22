@@ -109,7 +109,6 @@ int main() {
             }
             
             main_window.parseEvent(event, transforms);
-            ASSERT(transforms[0].offset.length() < 0.001, "Transform failed!\n");
         }
         
         if (timer.getElapsedTime().asSeconds() > 1) {
@@ -120,7 +119,6 @@ int main() {
         result.clear();
 
         main_window.draw(result, transforms);
-        ASSERT(transforms[0].offset.length() < 0.001, "Transform failed!\n");
 
         result.display();
         sf::Sprite tool_sprite(result.getTexture());

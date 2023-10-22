@@ -38,12 +38,12 @@ void VScrollBar::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     frame.setFillColor(style.background_color);
     frame.setOutlineColor(style.frame_color);
     frame.setOutlineThickness(style.frame_outline);
-    frame.setPosition(transforms[0].offset);
+    frame.setPosition(transforms.front().offset);
     result.draw(frame);
     
     Vector2D scroller_offset = scroller.getPosition();
 
-    scroller.setPosition(transforms[0].offset + scroller_offset);
+    scroller.setPosition(transforms.front().offset + scroller_offset);
     result.draw(scroller);
 
     scroller.setPosition(scroller_offset);
@@ -79,8 +79,8 @@ int VScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 
     Vector2D mouse(mouse_x, mouse_y);
 
-    if (isInsideRect(transforms[0].offset, size, mouse)) {
-        if (isInsideRect(transforms[0].offset + scroller.getPosition(), scroller.getSize(), mouse)) {
+    if (isInsideRect(transforms.front().offset, size, mouse)) {
+        if (isInsideRect(transforms.front().offset + scroller.getPosition(), scroller.getSize(), mouse)) {
             is_moving = true;
             mouse_prev = mouse;
         }
@@ -137,12 +137,12 @@ void HScrollBar::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     frame.setFillColor(style.background_color);
     frame.setOutlineColor(style.frame_color);
     frame.setOutlineThickness(style.frame_outline);
-    frame.setPosition(transforms[0].offset);
+    frame.setPosition(transforms.front().offset);
     result.draw(frame);
     
     Vector2D scroller_offset = scroller.getPosition();
 
-    scroller.setPosition(transforms[0].offset + scroller_offset);
+    scroller.setPosition(transforms.front().offset + scroller_offset);
     result.draw(scroller);
 
     scroller.setPosition(scroller_offset);
@@ -178,8 +178,8 @@ int HScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 
     Vector2D mouse(mouse_x, mouse_y);
 
-    if (isInsideRect(transforms[0].offset, size, mouse)) {
-        if (isInsideRect(transforms[0].offset + scroller.getPosition(), scroller.getSize(), mouse)) {
+    if (isInsideRect(transforms.front().offset, size, mouse)) {
+        if (isInsideRect(transforms.front().offset + scroller.getPosition(), scroller.getSize(), mouse)) {
             is_moving = true;
             mouse_prev = mouse;
         }

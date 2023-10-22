@@ -152,3 +152,15 @@ Vector2D operator * (const Vector2D &a, vec_t arg);
  * \brief Returns Vector2D(a.x / arg, a.y / arg)
 */
 Vector2D operator / (const Vector2D &a, vec_t arg);
+
+
+/**
+ * \brief Checks if A and B are equal
+*/
+bool operator == (const Vector2D &a, const Vector2D &b);
+
+
+/**
+ * \brief Checks if two floats are equal
+*/
+bool isEqual(float a, float b);

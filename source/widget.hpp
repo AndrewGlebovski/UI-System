@@ -31,6 +31,12 @@ struct Transform {
      * \brief Cancels transform
     */
     void cancel(const Transform &transform);
+
+
+    /**
+     * \brief Checks if two transforms are equal 
+    */
+    bool operator == (const Transform &transform);
 };
 
 
@@ -44,6 +50,12 @@ public:
      * \brief Applies local transform and pushes it to the transform stack
     */
     TransformApplier(List<Transform> &transforms_, const Transform &local_transform);
+
+
+    /**
+     * \brief Checks if transform stack is not corrupted
+    */
+    bool verify() const;
 
 
     /**

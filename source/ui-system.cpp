@@ -360,7 +360,7 @@ Vector2D Window::getAreaSize() const {
 do {                                                                            \
     tool_sprite.setTexture(style.asset[TEXTURE_ID]);                            \
     tool_sprite.setTextureRect(sf::IntRect(Vector2D(), TEXTURE_RECT_SIZE));     \
-    tool_sprite.setPosition(POSITION + transforms[0].offset);                   \
+    tool_sprite.setPosition(POSITION + transforms.front().offset);                   \
     result.draw(tool_sprite);                                                   \
 } while(0)
 
@@ -387,7 +387,7 @@ void Window::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     DRAW_TEXTURE(WindowAsset::FRAME_CENTER, tl_size,                                                Vector2D(center_w, center_h));
 
     sf::Text text(title, style.font, style.font_size);
-    text.setPosition(transforms[0].offset + style.title_offset);
+    text.setPosition(transforms.front().offset + style.title_offset);
     text.setFillColor(style.title_color);
 
     result.draw(text);
@@ -423,7 +423,7 @@ do {                                                                            
         return HANDLED;                                                             \
     else if (container.CALL_FUNC == HANDLED)                                        \
         return HANDLED;                                                             \
-    else if (isInsideRect(transforms[0].offset, size, Vector2D(mouse_x, mouse_y)))  \
+    else if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y)))  \
         return HANDLED;                                                             \
 } while(0)
 
@@ -596,7 +596,7 @@ void MoveButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     sf::RectangleShape rect(size);
-    rect.setPosition(transforms[0].offset);
+    rect.setPosition(transforms.front().offset);
     rect.setFillColor(sf::Color::Cyan);
     result.draw(rect);
     */
@@ -622,7 +622,7 @@ int MoveButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transform
 int MoveButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (isInsideRect(transforms[0].offset, size, Vector2D(mouse_x, mouse_y))) {
+    if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y))) {
         is_moving = true;
         prev_mouse = Vector2D(mouse_x, mouse_y);
         return HANDLED;
@@ -662,7 +662,7 @@ void ResizeButton::draw(sf::RenderTexture &result, List<Transform> &transforms) 
     TransformApplier add_transform(transforms, transform);
 
     sf::RectangleShape rect(size);
-    rect.setPosition(transforms[0].offset);
+    rect.setPosition(transforms.front().offset);
     rect.setFillColor(sf::Color::Red);
     result.draw(rect);
     */
@@ -720,7 +720,7 @@ int ResizeButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transfo
 int ResizeButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (isInsideRect(transforms[0].offset, size, Vector2D(mouse_x, mouse_y))) {
+    if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y))) {
         is_moving = true;
         prev_mouse = Vector2D(mouse_x, mouse_y);
         return HANDLED;

@@ -26,16 +26,33 @@ void Transform::cancel(const Transform &transform) {
 }
 
 
+bool Transform::operator == (const Transform &transform) {
+    return (offset == transform.offset);
+}
+
+
 TransformApplier::TransformApplier(List<Transform> &transforms_, const Transform &local_transform) :
     transforms(transforms_)
 {
-    transforms[0].apply(local_transform);
+    ASSERT(verify(), "Transform stack is corrupted!\n");
+    transforms.front().apply(local_transform);
     transforms.push_back(local_transform);
 }
 
 
+bool TransformApplier::verify() const {
+    Transform top;
+
+    for (size_t i = 1; i < transforms.getSize(); i++)
+        top.apply(transforms[i]);
+    
+    return (top == transforms.front());
+}
+
+
 TransformApplier::~TransformApplier() {
-    transforms[0].cancel(transforms[transforms.getSize() - 1]);
+    ASSERT(verify(), "Transform stack is corrupted!\n");
+    transforms.front().cancel(transforms.back());
     transforms.pop_back();
 }
 
@@ -88,7 +105,7 @@ void Widget::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     /* DEBUG DRAWING
     sf::RectangleShape rect(Vector2D(25, 25));
     rect.setFillColor(sf::Color::Red);
-    rect.setPosition(transforms[0].offset);
+    rect.setPosition(transforms.front().offset);
     result.draw(rect);
     */
 }

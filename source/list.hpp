@@ -220,7 +220,36 @@ public:
 
 
     /**
+     * \brief Returns first element
+     * \warning If list is empty, an abort() will be called
+    */
+    T &front() { return (*this)[0]; }
+
+
+    /**
+     * \brief Returns last element
+     * \warning If list is empty, an abort() will be called
+    */
+    T &back() { return (*this)[size - 1]; }
+
+
+    /**
+     * \brief Returns const reference to the first element
+     * \warning If list is empty, an abort() will be called
+    */
+    const T &front() const { return front(); }
+
+
+    /**
+     * \brief Returns const reference to the last element
+     * \warning If list is empty, an abort() will be called
+    */
+    const T &back() const { return back(); }
+
+
+    /**
      * \brief Gives access to value at the given index
+     * \warning If index is out range, an abort() will be called
     */
     T &operator [] (size_t i) {
         ASSERT(buffer, "Buffer is nullptr!\n");
@@ -231,6 +260,7 @@ public:
 
     /**
      * \brief Gives read access to value at the given index
+     * \warning If index is out range, an abort() will be called
     */
     const T &operator [] (size_t i) const {
         ASSERT(buffer, "Buffer is nullptr!\n");

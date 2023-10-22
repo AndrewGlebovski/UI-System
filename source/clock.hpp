@@ -33,7 +33,7 @@ public:
         sf::FloatRect text_rect = text.getLocalBounds();
         Vector2D text_offset((size.x - text_rect.width) / 2, (size.y - text_rect.height) / 2);
 
-        text.setPosition(transforms[0].offset + text_offset);
+        text.setPosition(transforms.front().offset + text_offset);
 
         result.draw(text);
     }

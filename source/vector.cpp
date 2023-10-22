@@ -4,6 +4,9 @@
 #include "vector.hpp"
 
 
+const vec_t EPS = 0.0001f;          ///< Requiered for float comparsion
+
+
 Vector2D::Vector2D() : x(0), y(0) {}
 
 
@@ -118,4 +121,14 @@ Vector2D operator * (const Vector2D &a, vec_t arg) {
 Vector2D operator / (const Vector2D &a, vec_t arg) {
     Vector2D res = a;
     return (res /= arg);
+}
+
+
+bool operator == (const Vector2D &a, const Vector2D &b) {
+    return isEqual(a.x, b.x) && isEqual(a.x, b.x);
+}
+
+
+bool isEqual(float a, float b) {
+    return (fabs(a - b) < EPS);
 }
