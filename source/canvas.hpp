@@ -226,8 +226,6 @@ public:
 
 
     PaletteView(const PaletteView &palette_view) = default;
-
-
     PaletteView &operator = (const PaletteView &palette_view) = default;
 
 
@@ -279,8 +277,6 @@ public:
 
 
     Canvas(const Canvas &canvas) = default;
-
-
     Canvas &operator = (const Canvas &canvas) = default;
 
 
