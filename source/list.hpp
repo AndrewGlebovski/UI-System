@@ -18,22 +18,22 @@ do {                                                                        \
 template<class T>
 class List {
 private:
-    T *buffer;          ///< List buffer
-    size_t size;        ///< Current amount of elements in list
-    size_t capacity;    ///< Current buffer size
+    T *buffer_;         ///< List buffer
+    size_t size_;       ///< Current amount of elements in list
+    size_t capacity_;   ///< Current buffer size
 
 
     /**
      * \brief Calls destructors for buffer elements then free buffer
     */
     void free_buffer() {
-        ASSERT(buffer, "Buffer is nullptr!\n");
+        ASSERT(buffer_, "Buffer is nullptr!\n");
 
-        for(size_t i = 0; i < size; i++) 
-            buffer[i].~T();
+        for(size_t i = 0; i < size_; i++) 
+            buffer_[i].~T();
 
-        free(buffer);
-        buffer = nullptr;
+        free(buffer_);
+        buffer_ = nullptr;
     }
 
 
@@ -50,12 +50,12 @@ private:
      * \brief Allocates buffer at size of new_capacity and sets capacity
     */
     void allocate_buffer(size_t new_capacity) {
-        ASSERT(buffer == nullptr, "Buffer is not nullptr!\n");
+        ASSERT(buffer_ == nullptr, "Buffer is not nullptr!\n");
 
-        buffer = (T*) calloc(new_capacity, sizeof(T));
-        ASSERT(buffer, "Failed to allocate buffer!\n");
+        buffer_ = (T*) calloc(new_capacity, sizeof(T));
+        ASSERT(buffer_, "Failed to allocate buffer!\n");
 
-        capacity = new_capacity;
+        capacity_ = new_capacity;
     }
 
 
@@ -63,16 +63,16 @@ private:
      * \brief Resizes list buffer to new capacity and sets capacity
     */
     void resize_capacity(size_t new_capacity) {
-        ASSERT(buffer, "Buffer is nullptr!\n");
-        capacity = new_capacity;
+        ASSERT(buffer_, "Buffer is nullptr!\n");
+        capacity_ = new_capacity;
 
-        T *new_buffer = (T*) calloc(capacity, sizeof(T));
-        ASSERT(buffer, "Failed to allocate buffer!\n");
+        T *new_buffer = (T*) calloc(capacity_, sizeof(T));
+        ASSERT(buffer_, "Failed to allocate buffer!\n");
 
-        copy_buffer(new_buffer, buffer, size);
+        copy_buffer(new_buffer, buffer_, size_);
 
         free_buffer();
-        buffer = new_buffer;
+        buffer_ = new_buffer;
     }
 
 public:
@@ -80,9 +80,9 @@ public:
      * \brief Creates empty list
     */
     List() :
-        buffer(nullptr), size(0), capacity(1)
+        buffer_(nullptr), size_(0), capacity_(1)
     {
-        allocate_buffer(capacity);
+        allocate_buffer(capacity_);
     }
 
 
@@ -90,12 +90,12 @@ public:
      * \brief Creates list with init_size copies of init_value
     */
     List(size_t init_size, const T &init_value) :
-        buffer(nullptr), size(init_size), capacity(init_size + 1)
+        buffer_(nullptr), size_(init_size), capacity_(init_size + 1)
     {
-        allocate_buffer(capacity);
+        allocate_buffer(capacity_);
 
         for (size_t i = 0; i < init_size; i++)
-            buffer[i] = init_value;
+            buffer_[i] = init_value;
     }
 
 
@@ -103,11 +103,11 @@ public:
      * \brief Copies values from other list to this
     */
     List(const List &list):
-        buffer(nullptr), size(list.size), capacity(list.capacity)
+        buffer_(nullptr), size_(list.size_), capacity_(list.capacity_)
     {
-        allocate_buffer(capacity);
+        allocate_buffer(capacity_);
         
-        copy_buffer(buffer, list.buffer, size);
+        copy_buffer(buffer_, list.buffer_, size_);
     }
 
 
@@ -118,10 +118,10 @@ public:
         if (this != &list) {
             free_buffer();
 
-            size = list.size;
+            size_ = list.size_;
 
-            allocate_buffer(list.capacity);
-            copy_buffer(buffer, list.buffer, size);
+            allocate_buffer(list.capacity_);
+            copy_buffer(buffer_, list.buffer_, size_);
         }
 
         return *this;
@@ -131,8 +131,8 @@ public:
     /**
      * \brief Returns current size of the list
     */
-    size_t getSize() const {
-        return size;
+    size_t size() const {
+        return size_;
     }
 
 
@@ -140,25 +140,25 @@ public:
      * \brief Resizes list if needed
     */
     void resize(size_t new_size, const T &init_value) {
-        ASSERT(buffer, "Buffer is nullptr!\n");
+        ASSERT(buffer_, "Buffer is nullptr!\n");
 
-        if (new_size == size) return;
+        if (new_size == size_) return;
         
-        if (new_size < size) {
-            for(size_t i = new_size; i < size; i++) 
-                buffer[i].~T();
+        if (new_size < size_) {
+            for(size_t i = new_size; i < size_; i++) 
+                buffer_[i].~T();
             
-            size = new_size;
+            size_ = new_size;
             return;
         }
         
-        if (new_size >= capacity)
+        if (new_size >= capacity_)
             resize_capacity(new_size + 1);
 
-        for (size_t i = size; i < new_size; i++)
-            buffer[i] = init_value;
+        for (size_t i = size_; i < new_size; i++)
+            buffer_[i] = init_value;
 
-        size = new_size;
+        size_ = new_size;
     }
 
 
@@ -166,15 +166,15 @@ public:
      * \brief Inserts new element at index position 
     */
     void insert(size_t index, T new_value) {
-        ASSERT(index < size, "Index is out of range!\n");
+        ASSERT(index < size_, "Index is out of range!\n");
 
-        size++;
-        for(size_t i = size - 1; i > index; i--)
-            buffer[i] = buffer[i - 1];
+        size_++;
+        for(size_t i = size_ - 1; i > index; i--)
+            buffer_[i] = buffer_[i - 1];
         
-        buffer[index] = new_value;
+        buffer_[index] = new_value;
     
-        if (size == capacity) resize_capacity(capacity * 2);
+        if (size_ == capacity_) resize_capacity(capacity_ * 2);
     }
 
 
@@ -182,16 +182,16 @@ public:
      * \brief Removes element at index position
     */
     void remove(size_t index) {
-        ASSERT(index < size, "Index is out of range!\n");
+        ASSERT(index < size_, "Index is out of range!\n");
 
-        size--;
-        for(size_t i = index; i < size; i++)
-            buffer[i] = buffer[i + 1];
+        size_--;
+        for(size_t i = index; i < size_; i++)
+            buffer_[i] = buffer_[i + 1];
         
         // Last element duplicate should be destroyed manually
-        buffer[size].~T();
+        buffer_[size_].~T();
         
-        if (size * 4 < capacity) resize_capacity(capacity / 2);
+        if (size_ * 4 < capacity_) resize_capacity(capacity_ / 2);
     }
 
 
@@ -199,11 +199,11 @@ public:
      * \brief Pushes value to the end of the list
     */
     void push_back(const T &new_value) {
-        ASSERT(buffer, "Buffer is nullptr!\n");
+        ASSERT(buffer_, "Buffer is nullptr!\n");
 
-        buffer[size++] = new_value;
+        buffer_[size_++] = new_value;
 
-        if (size == capacity) resize_capacity(capacity * 2);
+        if (size_ == capacity_) resize_capacity(capacity_ * 2);
     }
 
 
@@ -211,11 +211,11 @@ public:
      * \brief Pops last value from list
     */
     void pop_back() {
-        ASSERT(buffer, "Buffer is nullptr!\n");
+        ASSERT(buffer_, "Buffer is nullptr!\n");
 
-        size--;
+        size_--;
 
-        if (size * 4 < capacity) resize_capacity(capacity / 2);
+        if (size_ * 4 < capacity_) resize_capacity(capacity_ / 2);
     }
 
 
@@ -230,7 +230,7 @@ public:
      * \brief Returns last element
      * \warning If list is empty, an abort() will be called
     */
-    T &back() { return (*this)[size - 1]; }
+    T &back() { return (*this)[size_ - 1]; }
 
 
     /**
@@ -252,9 +252,9 @@ public:
      * \warning If index is out range, an abort() will be called
     */
     T &operator [] (size_t i) {
-        ASSERT(buffer, "Buffer is nullptr!\n");
-        ASSERT(i < size, "Index is out of range!\n");
-        return buffer[i];
+        ASSERT(buffer_, "Buffer is nullptr!\n");
+        ASSERT(i < size_, "Index is out of range!\n");
+        return buffer_[i];
     }
 
 
@@ -263,19 +263,19 @@ public:
      * \warning If index is out range, an abort() will be called
     */
     const T &operator [] (size_t i) const {
-        ASSERT(buffer, "Buffer is nullptr!\n");
-        ASSERT(i < size, "Index is out of range!\n");
-        return buffer[i];
+        ASSERT(buffer_, "Buffer is nullptr!\n");
+        ASSERT(i < size_, "Index is out of range!\n");
+        return buffer_[i];
     }
 
 
     /**
-     * \brief Free list buffer and set fields with zeros
+     * \brief Free list buffer and sets fields with zeros
     */
     ~List() {
         free_buffer();
 
-        size = 0;
-        capacity = 0;
+        size_ = 0;
+        capacity_ = 0;
     }
 };

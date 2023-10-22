@@ -36,7 +36,7 @@ Container::Container(
 
 
 void Container::draw(sf::RenderTexture &result, List<Transform> &transforms) {
-    size_t count = widgets.getSize();
+    size_t count = widgets.size();
     if (count == 0) return;
 
     TransformApplier add_transform(transforms, transform);
@@ -54,7 +54,7 @@ void Container::draw(sf::RenderTexture &result, List<Transform> &transforms) {
 Widget *Container::findWidget(size_t widget_id) {
     Widget *result = nullptr;
 
-    for (size_t i = 0; i < widgets.getSize(); i++)
+    for (size_t i = 0; i < widgets.size(); i++)
         if ((result = widgets[i]->findWidget(widget_id))) return result;
 
     return Widget::findWidget(widget_id);
@@ -67,13 +67,13 @@ size_t Container::addChild(Widget *child) {
     // Set this container as child's parent
     child->parent = this;
     // Container is empty
-    if (widgets.getSize() == 0) {
+    if (widgets.size() == 0) {
         widgets.push_back(child);
         focused = 0;
         return child -> getId();
     }
     // Find place for widget according to z_index
-    for (size_t i = 0; i < widgets.getSize(); i++) {
+    for (size_t i = 0; i < widgets.size(); i++) {
         if (child->z_index > widgets[i]->z_index) {
             widgets.insert(i, child);
             focused = i;
@@ -82,16 +82,16 @@ size_t Container::addChild(Widget *child) {
     }
     // Widget has the biggest z_index
     widgets.push_back(child);
-    focused = widgets.getSize() - 1;
+    focused = widgets.size() - 1;
     return child -> getId();
 }
 
 
 void Container::removeWidget(size_t index) {
-    ASSERT(index < widgets.getSize(), "Index is out of range!\n");
+    ASSERT(index < widgets.size(), "Index is out of range!\n");
 
     if (index < focused) focused--;
-    else if (index == focused) focused = widgets.getSize() - 2;
+    else if (index == focused) focused = widgets.size() - 2;
 
     delete widgets[index];
     widgets.remove(index);
@@ -99,7 +99,7 @@ void Container::removeWidget(size_t index) {
 
 
 void Container::removeChild(size_t child_id) {
-    for (size_t i = 0; i < widgets.getSize(); i++) {
+    for (size_t i = 0; i < widgets.size(); i++) {
         if (widgets[i]->getId() == child_id) {
             removeWidget(i);
             break;
@@ -119,18 +119,18 @@ do {                                                                            
         for (size_t i = 0; i < focused; i++)                                        \
             if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; } \
         \
-        for (size_t i = focused + 1; i < widgets.getSize(); i++)                   \
+        for (size_t i = focused + 1; i < widgets.size(); i++)                   \
             if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; } \
     }                                                                               \
     else {                                                                          \
-        for (size_t i = 0; i < widgets.getSize(); i++)                             \
+        for (size_t i = 0; i < widgets.size(); i++)                             \
             if (widgets[i]->CALL_FUNC == HANDLED) return HANDLED;                  \
     }                                                                               \
 } while(0)
 
 
 int Container::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
-    if (widgets.getSize() == 0) return UNHANDLED;
+    if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
 
@@ -141,7 +141,7 @@ int Container::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms
 
 
 int Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
-    if (widgets.getSize() == 0) return UNHANDLED;
+    if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
 
@@ -152,7 +152,7 @@ int Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Tra
 
 
 int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
-    if (widgets.getSize() == 0) return UNHANDLED;
+    if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
 
@@ -163,7 +163,7 @@ int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<T
 
 
 int Container::onKeyUp(int key_id) {
-    if (widgets.getSize() == 0) return UNHANDLED;
+    if (widgets.size() == 0) return UNHANDLED;
 
     CONTAINER_FOR(onKeyUp(key_id));
     
@@ -172,7 +172,7 @@ int Container::onKeyUp(int key_id) {
 
 
 int Container::onKeyDown(int key_id) {
-    if (widgets.getSize() == 0) return UNHANDLED;
+    if (widgets.size() == 0) return UNHANDLED;
 
     CONTAINER_FOR(onKeyDown(key_id));
     
@@ -181,7 +181,7 @@ int Container::onKeyDown(int key_id) {
 
 
 int Container::onTimer(float delta_time) {
-    for (size_t i = 0; i < widgets.getSize(); i++)
+    for (size_t i = 0; i < widgets.size(); i++)
         widgets[i]->onTimer(delta_time);
     
     return UNHANDLED;
@@ -189,7 +189,7 @@ int Container::onTimer(float delta_time) {
 
 
 int Container::onParentResize() {
-    for (size_t i = 0; i < widgets.getSize(); i++)
+    for (size_t i = 0; i < widgets.size(); i++)
         widgets[i]->onParentResize();
     
     return UNHANDLED;
@@ -204,7 +204,7 @@ void Container::checkChildren() {
 
     // ELEMENT OF THE LIST CAN BE DELETED IN ITERATION
 
-    while(curr < widgets.getSize()) {
+    while(curr < widgets.size()) {
         switch(widgets[curr]->getStatus()) {
             case PASS: 
                 widgets[curr]->checkChildren();
@@ -221,7 +221,7 @@ void Container::checkChildren() {
 
 
 Container::~Container() {
-    for (size_t i = 0; i < widgets.getSize(); i++) {
+    for (size_t i = 0; i < widgets.size(); i++) {
         ASSERT(widgets[i], "Pointer to widget is nullptr!\n");
         delete widgets[i];
     }

@@ -113,10 +113,10 @@ ActionButton::~ActionButton() {
 
 
 size_t ButtonGroup::getIndex(ActionButton *button) const {
-    for (size_t i = 0; i < buttons.getSize(); i++)
+    for (size_t i = 0; i < buttons.size(); i++)
         if (buttons[i] == button) return i;
     
-    return buttons.getSize();
+    return buttons.size();
 }
 
 
@@ -125,7 +125,7 @@ ButtonGroup::ButtonGroup() : buttons(), pressed(0) {}
 
 void ButtonGroup::setPressed(ActionButton *new_pressed) {
     size_t index = getIndex(new_pressed);
-    if (index < buttons.getSize()) {
+    if (index < buttons.size()) {
         buttons[pressed]->setStatus(ActionButton::BUTTON_NORMAL);
         buttons[index]->setStatus(ActionButton::BUTTON_PRESSED);
         pressed = index;
@@ -140,14 +140,14 @@ void ButtonGroup::addButton(ActionButton *new_button) {
     if (!isInGroup(new_button)) {
         buttons.push_back(new_button);
 
-        if (buttons.getSize() == 1) setPressed(new_button);
+        if (buttons.size() == 1) setPressed(new_button);
     }
 }
 
 
 void ButtonGroup::removeButton(ActionButton *button) {
     size_t index = getIndex(button);
-    if (index < buttons.getSize()) {
+    if (index < buttons.size()) {
         if (index == pressed) setPressed(buttons[0]);
         buttons.remove(index);
     }
@@ -155,7 +155,7 @@ void ButtonGroup::removeButton(ActionButton *button) {
 
 
 bool ButtonGroup::isInGroup(ActionButton *button) const {
-    return (getIndex(button) < buttons.getSize()); 
+    return (getIndex(button) < buttons.size()); 
 }
 
 

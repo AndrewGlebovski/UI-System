@@ -43,7 +43,7 @@ TransformApplier::TransformApplier(List<Transform> &transforms_, const Transform
 bool TransformApplier::verify() const {
     Transform top;
 
-    for (size_t i = 1; i < transforms.getSize(); i++)
+    for (size_t i = 1; i < transforms.size(); i++)
         top.apply(transforms[i]);
     
     return (top == transforms.front());

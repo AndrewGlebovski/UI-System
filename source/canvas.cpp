@@ -50,12 +50,12 @@ void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf
 
 
 void drawPolygon(const Vector2D &offset, const List<Vector2D> &points, const sf::Color &color, sf::RenderTexture &result, sf::PrimitiveType type) {
-    sf::Vertex *polygon = new sf::Vertex[points.getSize()];
+    sf::Vertex *polygon = new sf::Vertex[points.size()];
 
-    for (size_t i = 0; i < points.getSize(); i++)
+    for (size_t i = 0; i < points.size(); i++)
         polygon[i] = sf::Vertex(points[i] + offset, color);
 
-    result.draw(polygon, points.getSize(), type);
+    result.draw(polygon, points.size(), type);
 
     delete polygon;
 }
@@ -309,9 +309,9 @@ void BucketTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &
         dfs.push_back(mouse);
         image.setPixel(mouse.x, mouse.y, color);
         
-        while (dfs.getSize()) {
-            Vector2D pixel = dfs[dfs.getSize() - 1];
-            dfs.remove(dfs.getSize() - 1);
+        while (dfs.size()) {
+            Vector2D pixel = dfs[dfs.size() - 1];
+            dfs.remove(dfs.size() - 1);
 
             if (pixel.x > 0.5 && image.getPixel(pixel.x - 1, pixel.y) == origin) {
                 dfs.push_back(Vector2D(pixel.x - 1, pixel.y));
@@ -372,7 +372,7 @@ List<Vector2D> &PolygonTool::getPoints() {
 void PolygonTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
     if (state == PRESSED) {
         is_drawing = true;
-        if (points.getSize() && (points[0] - mouse).length() < POLYGON_EPSILON)
+        if (points.size() && (points[0] - mouse).length() < POLYGON_EPSILON)
             onConfirm(mouse, canvas);
         else
             points.push_back(mouse);
@@ -441,7 +441,7 @@ void Palette::setCurrentColor(const sf::Color &color)  {
 
 
 Palette::~Palette() {
-    for (size_t i = 0; i < tools.getSize(); i++)
+    for (size_t i = 0; i < tools.size(); i++)
         delete tools[i];
 }
 
