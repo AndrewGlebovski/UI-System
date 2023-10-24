@@ -561,6 +561,51 @@ ToolPaletteView::~ToolPaletteView() {
 }
 
 
+size_t CanvasGroup::getIndex(Canvas *canvas) const {
+    for (size_t i = 0; i < canvases.size(); i++)
+        if (canvases[i] == canvas) return i;
+    
+    return canvases.size();
+}
+
+
+CanvasGroup::CanvasGroup() : canvases(), active(0) {}
+
+
+void CanvasGroup::setActive(Canvas *new_active) {
+    size_t index = getIndex(new_active);
+    if (index < canvases.size()) active = index;
+}
+
+
+Canvas *CanvasGroup::getActive() {
+    return canvases[active];
+}
+
+
+void CanvasGroup::addCanvas(Canvas *new_canvas) {
+    if (!isInGroup(new_canvas)) {
+        canvases.push_back(new_canvas);
+
+        if (canvases.size() == 1) setActive(new_canvas);
+    }
+}
+
+
+void CanvasGroup::removeCanvas(Canvas *canvas) {
+    size_t index = getIndex(canvas);
+    if (index < canvases.size()) {
+        if (index == active) setActive(canvases[0]);
+        canvases.remove(index);
+    }
+}
+
+
+bool CanvasGroup::isInGroup(Canvas *canvas) const {
+    return (getIndex(canvas) < canvases.size()); 
+}
+
+
 void Canvas::clear_canvas() {
     texture.clear(CANVAS_BACKGROUND);
 }
@@ -568,12 +613,15 @@ void Canvas::clear_canvas() {
 
 Canvas::Canvas(
     size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
-    const char *image_path, ToolPalette *palette_
+    const char *image_path, ToolPalette *palette_, CanvasGroup *group_
 ) :
     Widget(id_, transform_, size_, z_index_, parent_),
     texture(), texture_offset(Vector2D(0, 0)),
-    palette(palette_), last_position(), is_focused(false)
+    palette(palette_), last_position(), group(group_)
 {
+    ASSERT(group, "Canvas must be assigned to group!\n");
+    group->addCanvas(this);
+
     Vector2D texture_size = size;
 
     if (image_path) {
@@ -614,6 +662,12 @@ ToolPalette *Canvas::getPalette() {
 }
 
 
+bool Canvas::isActive() const {
+    ASSERT(group, "Canvas must be assigned to group!\n");
+    return (this == group->getActive());
+}
+
+
 void Canvas::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
@@ -627,7 +681,7 @@ void Canvas::draw(sf::RenderTexture &result, List<Transform> &transforms) {
 
     result.draw(tool_sprite);
 
-    if (palette->getCurrentTool()->getWidget()) {
+    if (isActive() && palette->getCurrentTool()->getWidget()) {
         TransformApplier texture_transform(transforms, texture_offset);
         palette->getCurrentTool()->getWidget()->draw(result, transforms);
     }
@@ -668,6 +722,9 @@ int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tran
             palette->getCurrentTool()->getWidget()->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms);
         }
 
+        ASSERT(group, "Canvas must be assigned to group!\n");
+        group->setActive(this);
+        
         return HANDLED;
     }
 

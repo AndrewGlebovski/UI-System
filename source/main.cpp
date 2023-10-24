@@ -15,7 +15,7 @@
 
 
 /// Opens picture on canvas in new subwindow with scrollbars
-Widget *openPicture(const char *filename, ToolPalette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
+Widget *openPicture(const char *filename, ToolPalette *palette, CanvasGroup *group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
 
 
 /// Creates palette view in new subwindow
@@ -79,9 +79,10 @@ int main() {
     ));
 
     ToolPalette *palette = new ToolPalette();
+    CanvasGroup *canvas_group = new CanvasGroup();
 
-    main_window.addChild(openPicture(nullptr, palette, window_style, scrollbar_style));
-
+    main_window.addChild(openPicture(nullptr, palette, canvas_group, window_style, scrollbar_style));
+    main_window.addChild(openPicture(nullptr, palette, canvas_group, window_style, scrollbar_style));
     main_window.addChild(createToolPaletteView(palette, window_style, palette_asset));
     
     sf::RenderTexture result;
@@ -135,7 +136,7 @@ int main() {
 }
 
 
-Widget *openPicture(const char *filename, ToolPalette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
+Widget *openPicture(const char *filename, ToolPalette *palette, CanvasGroup *group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
     Window *subwindow = new Window(
         Widget::AUTO_ID,
         Transform(Vector2D(300, 100)),
@@ -153,7 +154,8 @@ Widget *openPicture(const char *filename, ToolPalette *palette, WindowStyle &win
         0,
         nullptr,
         filename,
-        palette
+        palette,
+        group
     );
 
     subwindow->addChild(canvas);

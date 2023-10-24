@@ -244,6 +244,56 @@ public:
 
 class VScrollCanvas;
 class HScrollCanvas;
+class Canvas;
+
+
+class CanvasGroup {
+private:
+    List<Canvas*> canvases;     ///< Canvases in this group
+    size_t active;              ///< Currently active canvas
+
+
+    /**
+     * \brief Returns index of the canvas in list
+    */
+    size_t getIndex(Canvas *canvas) const;
+
+public:
+    /**
+     * \brief Creates empty group
+    */
+    CanvasGroup();
+
+
+    /**
+     * \brief Sets active canvas
+    */
+    void setActive(Canvas *new_active);
+
+
+    /**
+     * \brief Returns active canvas
+    */
+    Canvas *getActive();
+
+
+    /**
+     * \brief Adds canvas to this group
+    */
+    void addCanvas(Canvas *new_canvas);
+
+
+    /**
+     * \brief Removes canvas from this group
+    */
+    void removeCanvas(Canvas *canvas);
+
+
+    /**
+     * \brief Checks if the canvas is in this group
+    */
+    bool isInGroup(Canvas *canvas) const;
+};
 
 
 /// Holds texture to draw on
@@ -253,7 +303,7 @@ protected:
     Vector2D texture_offset;
     ToolPalette *palette;
     Vector2D last_position;
-    bool is_focused;
+    CanvasGroup *group;
 
 
     /**
@@ -271,7 +321,7 @@ public:
     */
     Canvas(
         size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
-        const char *image_path, ToolPalette *palette_
+        const char *image_path, ToolPalette *palette_, CanvasGroup *group_
     );
 
 
@@ -289,6 +339,9 @@ public:
 
 
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+
+
+    bool isActive() const;
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
