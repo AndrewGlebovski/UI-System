@@ -405,7 +405,7 @@ PolygonTool::~PolygonTool() {
 }
 
 
-Palette::Palette() : tools(TOOLS_SIZE, nullptr), current_tool(PENCIL_TOOL), current_color(sf::Color::Red) {
+ToolPalette::ToolPalette() : tools(TOOLS_SIZE, nullptr), current_tool(PENCIL_TOOL), current_color(sf::Color::Red) {
     tools[PENCIL_TOOL] = new PencilTool();
     tools[RECT_TOOL] = new RectTool();
     tools[LINE_TOOL] = new LineTool();
@@ -416,12 +416,12 @@ Palette::Palette() : tools(TOOLS_SIZE, nullptr), current_tool(PENCIL_TOOL), curr
 }
 
 
-CanvasTool *Palette::getCurrentTool() {
+CanvasTool *ToolPalette::getCurrentTool() {
     return tools[current_tool];
 }
 
 
-void Palette::setCurrentTool(size_t index) {
+void ToolPalette::setCurrentTool(size_t index) {
     if (index < TOOLS_SIZE) {
         tools[current_tool]->onCancel();
         current_tool = index;
@@ -429,17 +429,17 @@ void Palette::setCurrentTool(size_t index) {
 }
 
 
-const sf::Color &Palette::getCurrentColor() const {
+const sf::Color &ToolPalette::getCurrentColor() const {
     return current_color;
 }
 
 
-void Palette::setCurrentColor(const sf::Color &color)  {
+void ToolPalette::setCurrentColor(const sf::Color &color)  {
     current_color = color;
 }
 
 
-Palette::~Palette() {
+ToolPalette::~ToolPalette() {
     for (size_t i = 0; i < tools.size(); i++)
         delete tools[i];
 }
@@ -447,11 +447,11 @@ Palette::~Palette() {
 
 class PaletteAction : public ButtonAction {
 protected:
-    Palette &palette;
+    ToolPalette &palette;
     int tool_id;
 
 public:
-    PaletteAction(Palette &palette_, int tool_id_) : palette(palette_), tool_id(tool_id_) {}
+    PaletteAction(ToolPalette &palette_, int tool_id_) : palette(palette_), tool_id(tool_id_) {}
 
 
     virtual void operator () () override {
@@ -465,7 +465,7 @@ public:
 };
 
 
-void PaletteView::updateToolButtons() {
+void ToolPaletteView::updateToolButtons() {
     size_t current_tool = palette->getCurrentIndex();
     ActionButton *current_button = (ActionButton*) buttons.findWidget(current_tool + Widget::AUTO_ID + 1);
 
@@ -488,22 +488,22 @@ buttons.addChild(new TextureIconButton(                         \
 ))
 
 
-PaletteView::PaletteView(
+ToolPaletteView::ToolPaletteView(
     size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
-    Palette *palette_, const PaletteViewAsset &asset_
+    ToolPalette *palette_, const PaletteViewAsset &asset_
 ) :
     Widget(id_, transform_, size_, z_index_, parent_), 
     buttons(1, Transform(), size, 0, this), palette(palette_), asset(asset_), group(nullptr)
 {
     group = new ButtonGroup();
 
-    ADD_TOOL_BUTTON(Palette::PENCIL_TOOL,   PaletteViewAsset::PENCIL_TEXTURE,   Vector2D());
-    ADD_TOOL_BUTTON(Palette::RECT_TOOL,     PaletteViewAsset::RECT_TEXTURE,     Vector2D(94, 0));
-    ADD_TOOL_BUTTON(Palette::LINE_TOOL,     PaletteViewAsset::LINE_TEXTURE,     Vector2D(0, 94));
-    ADD_TOOL_BUTTON(Palette::ERASER_TOOL,   PaletteViewAsset::ERASER_TEXTURE,   Vector2D(94, 94));
-    ADD_TOOL_BUTTON(Palette::COLOR_PICKER,  PaletteViewAsset::PICKER_TEXTURE,   Vector2D(0, 188));
-    ADD_TOOL_BUTTON(Palette::BUCKET_TOOL,   PaletteViewAsset::BUCKET_TEXTURE,   Vector2D(94, 188));
-    ADD_TOOL_BUTTON(Palette::POLYGON_TOOL,  PaletteViewAsset::POLYGON_TEXTURE,  Vector2D(0, 282));
+    ADD_TOOL_BUTTON(ToolPalette::PENCIL_TOOL,   PaletteViewAsset::PENCIL_TEXTURE,   Vector2D());
+    ADD_TOOL_BUTTON(ToolPalette::RECT_TOOL,     PaletteViewAsset::RECT_TEXTURE,     Vector2D(94, 0));
+    ADD_TOOL_BUTTON(ToolPalette::LINE_TOOL,     PaletteViewAsset::LINE_TEXTURE,     Vector2D(0, 94));
+    ADD_TOOL_BUTTON(ToolPalette::ERASER_TOOL,   PaletteViewAsset::ERASER_TEXTURE,   Vector2D(94, 94));
+    ADD_TOOL_BUTTON(ToolPalette::COLOR_PICKER,  PaletteViewAsset::PICKER_TEXTURE,   Vector2D(0, 188));
+    ADD_TOOL_BUTTON(ToolPalette::BUCKET_TOOL,   PaletteViewAsset::BUCKET_TEXTURE,   Vector2D(94, 188));
+    ADD_TOOL_BUTTON(ToolPalette::POLYGON_TOOL,  PaletteViewAsset::POLYGON_TEXTURE,  Vector2D(0, 282));
 
     updateToolButtons();
 }
@@ -512,7 +512,7 @@ PaletteView::PaletteView(
 #undef ADD_TOOL_BUTTON
 
 
-void PaletteView::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void ToolPaletteView::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     updateToolButtons();
@@ -521,42 +521,42 @@ void PaletteView::draw(sf::RenderTexture &result, List<Transform> &transforms) {
 }
 
 
-int PaletteView::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+int ToolPaletteView::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     return buttons.onMouseMove(mouse_x, mouse_y, transforms);
 }
 
 
-int PaletteView::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+int ToolPaletteView::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     return buttons.onMouseButtonDown(mouse_x, mouse_y, button_id, transforms);
 }
 
 
-int PaletteView::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+int ToolPaletteView::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     return buttons.onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
 }
 
 
-int PaletteView::onKeyDown(int key_id) {
+int ToolPaletteView::onKeyDown(int key_id) {
     switch(key_id) {
-        case Num1: palette->setCurrentTool(Palette::PENCIL_TOOL); return HANDLED;
-        case Num2: palette->setCurrentTool(Palette::RECT_TOOL); return HANDLED;
-        case Num3: palette->setCurrentTool(Palette::LINE_TOOL); return HANDLED;
-        case Num4: palette->setCurrentTool(Palette::ERASER_TOOL); return HANDLED;
-        case Num5: palette->setCurrentTool(Palette::COLOR_PICKER); return HANDLED;
-        case Num6: palette->setCurrentTool(Palette::BUCKET_TOOL); return HANDLED;
-        case Num7: palette->setCurrentTool(Palette::POLYGON_TOOL); return HANDLED;
+        case Num1: palette->setCurrentTool(ToolPalette::PENCIL_TOOL); return HANDLED;
+        case Num2: palette->setCurrentTool(ToolPalette::RECT_TOOL); return HANDLED;
+        case Num3: palette->setCurrentTool(ToolPalette::LINE_TOOL); return HANDLED;
+        case Num4: palette->setCurrentTool(ToolPalette::ERASER_TOOL); return HANDLED;
+        case Num5: palette->setCurrentTool(ToolPalette::COLOR_PICKER); return HANDLED;
+        case Num6: palette->setCurrentTool(ToolPalette::BUCKET_TOOL); return HANDLED;
+        case Num7: palette->setCurrentTool(ToolPalette::POLYGON_TOOL); return HANDLED;
         default: return UNHANDLED;
     }
 }
 
 
-PaletteView::~PaletteView() {
+ToolPaletteView::~ToolPaletteView() {
     if (group) delete group;
 }
 
@@ -568,11 +568,11 @@ void Canvas::clear_canvas() {
 
 Canvas::Canvas(
     size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
-    const char *image_path, Palette *palette_
+    const char *image_path, ToolPalette *palette_
 ) :
     Widget(id_, transform_, size_, z_index_, parent_),
     texture(), texture_offset(Vector2D(0, 0)),
-    palette(palette_), last_position()
+    palette(palette_), last_position(), is_focused(false)
 {
     Vector2D texture_size = size;
 
@@ -609,7 +609,7 @@ sf::RenderTexture &Canvas::getTexture() {
 }
 
 
-Palette *Canvas::getPalette() {
+ToolPalette *Canvas::getPalette() {
     return palette;
 }
 

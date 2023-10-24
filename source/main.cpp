@@ -15,11 +15,11 @@
 
 
 /// Opens picture on canvas in new subwindow with scrollbars
-Widget *openPicture(const char *filename, Palette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
+Widget *openPicture(const char *filename, ToolPalette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
 
 
 /// Creates palette view in new subwindow
-Widget *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset);
+Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset);
 
 
 int main() {
@@ -78,11 +78,11 @@ int main() {
         clock_style
     ));
 
-    Palette *palette = new Palette();
+    ToolPalette *palette = new ToolPalette();
 
     main_window.addChild(openPicture(nullptr, palette, window_style, scrollbar_style));
 
-    main_window.addChild(createPaletteView(palette, window_style, palette_asset));
+    main_window.addChild(createToolPaletteView(palette, window_style, palette_asset));
     
     sf::RenderTexture result;
     result.create(SCREEN_W, SCREEN_H);
@@ -135,7 +135,7 @@ int main() {
 }
 
 
-Widget *openPicture(const char *filename, Palette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
+Widget *openPicture(const char *filename, ToolPalette *palette, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
     Window *subwindow = new Window(
         Widget::AUTO_ID,
         Transform(Vector2D(300, 100)),
@@ -182,7 +182,7 @@ Widget *openPicture(const char *filename, Palette *palette, WindowStyle &window_
 }
 
 
-Widget *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset) {
+Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset) {
     WindowStyle subwindow_style(window_style);
     subwindow_style.outline = 0;
 
@@ -192,11 +192,11 @@ Widget *createPaletteView(Palette *palette, WindowStyle &window_style, PaletteVi
         Vector2D(218, 451),
         2,
         nullptr,
-        "Palette",
+        "Tools",
         subwindow_style
     );
 
-    subwindow->addChild(new PaletteView(
+    subwindow->addChild(new ToolPaletteView(
         Widget::AUTO_ID,
         Transform(),
         Vector2D(188, 376),

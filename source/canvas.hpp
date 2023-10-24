@@ -161,7 +161,7 @@ public:
 
 
 /// Handles tools and colors for canvas
-class Palette {
+class ToolPalette {
 protected:
     List<CanvasTool*> tools;
     size_t current_tool;
@@ -182,7 +182,7 @@ public:
     };
 
 
-    Palette();
+    ToolPalette();
 
 
     size_t getCurrentIndex() const { return current_tool; };
@@ -200,15 +200,15 @@ public:
     void setCurrentColor(const sf::Color &color);
 
 
-    virtual ~Palette();
+    virtual ~ToolPalette();
 };
 
 
-/// GUI for Palette
-class PaletteView : public Widget {
+/// GUI for ToolPalette
+class ToolPaletteView : public Widget {
 protected:
-    Container buttons;                  ///< Palette buttonы for tool selection
-    Palette *palette;                   ///< Palette which this PaletteView affects
+    Container buttons;                  ///< ToolPalette buttons for tool selection
+    ToolPalette *palette;               ///< ToolPalette which this ToolPaletteView affects
     const PaletteViewAsset &asset;      ///< Assets for buttons
     ButtonGroup *group;                 ///< Tool buttons group
 
@@ -219,14 +219,14 @@ protected:
     void updateToolButtons();
 
 public:
-    PaletteView(
+    ToolPaletteView(
         size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
-        Palette *palette_, const PaletteViewAsset &asset_
+        ToolPalette *palette_, const PaletteViewAsset &asset_
     );
 
 
-    PaletteView(const PaletteView &palette_view) = default;
-    PaletteView &operator = (const PaletteView &palette_view) = default;
+    ToolPaletteView(const ToolPaletteView &palette_view) = default;
+    ToolPaletteView &operator = (const ToolPaletteView &palette_view) = default;
 
 
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
@@ -238,7 +238,7 @@ public:
     virtual int onKeyDown(int key_id) override;
 
 
-    virtual ~PaletteView();
+    virtual ~ToolPaletteView();
 };
 
 
@@ -251,10 +251,9 @@ class Canvas : public Widget {
 protected:
     sf::RenderTexture texture;
     Vector2D texture_offset;
-
-    Palette *palette;
-
+    ToolPalette *palette;
     Vector2D last_position;
+    bool is_focused;
 
 
     /**
@@ -272,7 +271,7 @@ public:
     */
     Canvas(
         size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
-        const char *image_path, Palette *palette_
+        const char *image_path, ToolPalette *palette_
     );
 
 
@@ -286,7 +285,7 @@ public:
     sf::RenderTexture &getTexture();
 
 
-    Palette *getPalette();
+    ToolPalette *getPalette();
 
 
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
