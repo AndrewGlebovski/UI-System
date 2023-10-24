@@ -38,6 +38,7 @@ protected:
     WindowStyle style;          ///< Window style
     Container buttons;          ///< Window title bar and resize buttons
     Container container;        ///< Window content manager
+    Menu *menu;                 ///< Window menu
 
 public:
     /**
@@ -50,6 +51,10 @@ public:
     );
 
 
+    Window(const Window &window) = delete;
+    Window &operator = (const Window &window) = delete;
+
+
     /**
      * \brief Returns position of the window inside area
     */
@@ -60,6 +65,12 @@ public:
      * \brief Returns position of the window inside area
     */
     Vector2D getAreaSize() const;
+
+
+    void setMenu(Menu *menu_);
+
+
+    Menu *getMenu();
 
 
     virtual Widget *findWidget(size_t widget_id) override;
@@ -95,6 +106,9 @@ public:
     virtual int onTimer(float delta_time) override;
     virtual int onParentResize() override;
     virtual void checkChildren() override;
+
+
+    virtual ~Window();
 };
 
 

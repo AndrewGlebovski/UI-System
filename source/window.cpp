@@ -16,6 +16,7 @@
 #include "widget.hpp"
 #include "container.hpp"
 #include "button.hpp"
+#include "menu.hpp"
 #include "window.hpp"
 
 
@@ -24,8 +25,6 @@ const Vector2D CLOSE_OFFSET = Vector2D(-45, 12);            ///< Window close bu
 const Vector2D EXPAND_OFFSET = Vector2D(-85, 12);           ///< Window expand button offset from window top-right corner
 const size_t CLOSE_BUTTON_ID = Widget::AUTO_ID + 1;         ///< Window append button ID
 const size_t EXPAND_BUTTON_ID = Widget::AUTO_ID + 2;        ///< Window close button ID
-
-
 
 
 /// Invisible button for moving windows
@@ -150,7 +149,8 @@ Window::Window(
     Widget(id_, transform_, size_, z_index_, parent_),
     title(title_), style(style_),
     buttons(1, Transform(), size, 1, this, false), 
-    container(2, Transform(), Vector2D(), 1, this)
+    container(2, Transform(), Vector2D(), 1, this),
+    menu(nullptr)
 {
     container.transform.offset = getAreaPosition() - transform.offset;
     container.size = getAreaSize();
@@ -208,12 +208,16 @@ Window::Window(
 
 
 Vector2D Window::getAreaPosition() const {
-    return transform.offset + style.tl_offset;
+    Vector2D area_position = transform.offset + style.tl_offset;
+    if (menu) area_position.y += menu->size.y;
+    return area_position;
 }
 
 
 Vector2D Window::getAreaSize() const {
-    return size - style.tl_offset - style.br_offset;
+    Vector2D area_size = size - style.tl_offset - style.br_offset;
+    if (menu) area_size.y -= menu->size.y;
+    return area_size;
 }
 
 
@@ -255,10 +259,31 @@ void Window::draw(sf::RenderTexture &result, List<Transform> &transforms) {
 
     container.draw(result, transforms);
     buttons.draw(result, transforms);
+
+    if (menu) menu->draw(result, transforms);
 }
 
 
 #undef DRAW_TEXTURE
+
+
+void Window::setMenu(Menu *menu_) {
+    if (menu) delete menu;
+
+    menu = menu_;
+    menu->transform.offset = style.tl_offset;
+    menu->parent = this;
+    menu->size.x = getAreaSize().x;
+
+    container.transform.offset = getAreaPosition() - transform.offset;
+    container.size = getAreaSize();
+    container.onParentResize();
+}
+
+
+Menu *Window::getMenu() {
+    return menu;
+}
 
 
 Widget *Window::findWidget(size_t widget_id) {
@@ -281,6 +306,8 @@ void Window::removeChild(size_t child_id) {
 #define BROADCAST_MOUSE_EVENT(CALL_FUNC)                                            \
 do {                                                                                \
     if (buttons.CALL_FUNC == HANDLED)                                               \
+        return HANDLED;                                                             \
+    if (menu && menu->CALL_FUNC == HANDLED)                                         \
         return HANDLED;                                                             \
     else if (container.CALL_FUNC == HANDLED)                                        \
         return HANDLED;                                                             \
@@ -351,6 +378,8 @@ void Window::tryResize(const Vector2D &new_size) {
 
     buttons.findWidget(CLOSE_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
     buttons.findWidget(EXPAND_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
+
+    if (menu) menu->size.x = getAreaSize().x;
 }
 
 
@@ -379,6 +408,11 @@ int Window::onParentResize() {
 
 void Window::checkChildren() {
     container.checkChildren();
+}
+
+
+Window::~Window() {
+    if (menu) delete menu;
 }
 
 

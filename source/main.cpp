@@ -9,9 +9,29 @@
 #include "container.hpp"
 #include "button.hpp"
 #include "scrollbar.hpp"
+#include "menu.hpp"
 #include "window.hpp"
 #include "canvas.hpp"
 #include "clock.hpp"
+
+
+class PrintAction : public ButtonAction {
+private:
+    const char *message;
+
+public:
+    PrintAction(const char *message_) : message(message_) {}
+
+
+    PrintAction(const PrintAction &action) = delete;
+    PrintAction &operator = (const PrintAction &action) = delete;
+
+
+    virtual void operator () () { printf("%s", message); }
+
+
+    virtual ButtonAction *clone() { return new PrintAction(message); }
+};
 
 
 /// Opens picture on canvas in new subwindow with scrollbars
@@ -54,6 +74,17 @@ int main() {
         SCROLLBAR_SCROLLER_FACTOR
     );
 
+    MenuStyle menu_style(
+        font,
+        25,
+        sf::Color::Black,
+        sf::Color::White,
+        sf::Color::White,
+        sf::Color(0xd4d0c8ff),
+        sf::Color(0x000080ff),
+        sf::Color(0x000080ff)
+    );
+
     ClockStyle clock_style(
         sf::Color::Black,
         20,
@@ -69,6 +100,26 @@ int main() {
         window_style
     );
 
+    Menu *main_menu = new Menu(
+        Widget::AUTO_ID,
+        Transform(),
+        1,
+        nullptr,
+        menu_style
+    );
+
+    main_menu->addMenuButton("File");
+    main_menu->addMenuButton("Edit");
+    main_menu->addMenuButton("View");
+    main_menu->addButton(0, "Load", new PrintAction("Load!\n"));
+    main_menu->addButton(0, "Save", new PrintAction("Save!\n"));
+    main_menu->addButton(1, "Find", new PrintAction("Find!\n"));
+    main_menu->addButton(1, "Replace", new PrintAction("Replace!\n"));
+    main_menu->addButton(2, "Theme", new PrintAction("Theme!\n"));
+    main_menu->addButton(2, "Layout", new PrintAction("Layout!\n"));
+
+    main_window.setMenu(main_menu);
+
     main_window.addChild(new Clock(
         Widget::AUTO_ID,
         Transform(),
@@ -81,7 +132,6 @@ int main() {
     ToolPalette *palette = new ToolPalette();
     CanvasGroup *canvas_group = new CanvasGroup();
 
-    main_window.addChild(openPicture(nullptr, palette, canvas_group, window_style, scrollbar_style));
     main_window.addChild(openPicture(nullptr, palette, canvas_group, window_style, scrollbar_style));
     main_window.addChild(createToolPaletteView(palette, window_style, palette_asset));
     
