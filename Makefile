@@ -18,12 +18,12 @@ all: $(BIN_DIR) $(EXE_NAME)
 
 
 # Завершение сборки
-$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o ui-system.o widget.o canvas.o button.o scrollbar.o asset.o) 
+$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o window.o widget.o canvas.o button.o scrollbar.o asset.o container.o) 
 	$(COMPILER) $^ -o $(EXE_NAME) -lsfml-graphics -lsfml-window -lsfml-system
 
 
 # Предварительная сборка main.cpp
-$(BIN_DIR)/main.o: $(addprefix $(SRC_DIR)/, main.cpp configs.hpp ui-system.hpp vector.hpp list.hpp widget.hpp button.hpp scrollbar.hpp canvas.hpp asset.hpp clock.hpp)
+$(BIN_DIR)/main.o: $(addprefix $(SRC_DIR)/, main.cpp configs.hpp window.hpp vector.hpp list.hpp widget.hpp button.hpp scrollbar.hpp canvas.hpp asset.hpp clock.hpp container.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
@@ -32,8 +32,8 @@ $(BIN_DIR)/vector.o: $(addprefix $(SRC_DIR)/, vector.cpp vector.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
-# Предварительная сборка ui-system.cpp
-$(BIN_DIR)/ui-system.o: $(addprefix $(SRC_DIR)/, ui-system.cpp ui-system.hpp vector.hpp list.hpp widget.hpp button.hpp configs.hpp)
+# Предварительная сборка window.cpp
+$(BIN_DIR)/window.o: $(addprefix $(SRC_DIR)/, window.cpp window.hpp vector.hpp list.hpp widget.hpp button.hpp configs.hpp container.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
@@ -43,7 +43,7 @@ $(BIN_DIR)/widget.o: $(addprefix $(SRC_DIR)/, widget.cpp widget.hpp vector.hpp l
 
 
 # Предварительная сборка canvas.cpp
-$(BIN_DIR)/canvas.o: $(addprefix $(SRC_DIR)/, canvas.cpp canvas.hpp vector.hpp list.hpp widget.hpp key-id.hpp configs.hpp button.hpp ui-system.hpp)
+$(BIN_DIR)/canvas.o: $(addprefix $(SRC_DIR)/, canvas.cpp canvas.hpp vector.hpp list.hpp widget.hpp key-id.hpp configs.hpp button.hpp container.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
@@ -59,6 +59,11 @@ $(BIN_DIR)/scrollbar.o: $(addprefix $(SRC_DIR)/, scrollbar.cpp scrollbar.hpp vec
 
 # Предварительная сборка asset.cpp
 $(BIN_DIR)/asset.o: $(addprefix $(SRC_DIR)/, asset.cpp asset.hpp)
+	$(COMPILER) $(FLAGS) -c $< -o $@
+
+
+# Предварительная сборка container.cpp
+$(BIN_DIR)/container.o: $(addprefix $(SRC_DIR)/, container.cpp container.hpp vector.hpp list.hpp widget.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 

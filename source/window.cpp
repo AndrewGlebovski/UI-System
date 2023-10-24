@@ -1,6 +1,6 @@
 /**
  * \file
- * \brief Contains sources of container and window classes functions
+ * \brief Contains sources of window class functions
 */
 
 
@@ -14,8 +14,9 @@
 #include "asset.hpp"
 #include "configs.hpp"
 #include "widget.hpp"
+#include "container.hpp"
 #include "button.hpp"
-#include "ui-system.hpp"
+#include "window.hpp"
 
 
 const float MIN_OUTLINE = 0.0001f;                          ///< If outline is smaller then window can not be resized
@@ -25,206 +26,67 @@ const size_t CLOSE_BUTTON_ID = Widget::AUTO_ID + 1;         ///< Window append b
 const size_t EXPAND_BUTTON_ID = Widget::AUTO_ID + 2;        ///< Window close button ID
 
 
-Container::Container(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
-    bool focus_enabled_
-) :
-    Widget(id_, transform_, size_, z_index_, parent_),
-    widgets(), focused(0), focus_enabled(focus_enabled_)
-{}
 
 
-void Container::draw(sf::RenderTexture &result, List<Transform> &transforms) {
-    size_t count = widgets.size();
-    if (count == 0) return;
+/// Invisible button for moving windows
+class MoveButton : public BaseButton {
+protected:
+    Window &window;         ///< Window to move
+    Vector2D prev_mouse;    ///< Previous mouse click position
+    bool is_moving;         ///< If moving is active
 
-    TransformApplier add_transform(transforms, transform);
-
-    for (size_t i = count - 1; i > focused; i--)
-        widgets[i]->draw(result, transforms);
-    
-    for (size_t i = focused - 1; i < count; i--)
-        widgets[i]->draw(result, transforms);
-    
-    widgets[focused]->draw(result, transforms);
-}
+public:
+    MoveButton(
+        size_t id_, const Transform &transform_, const Vector2D &size_, Widget *parent_, 
+        Window &window_
+    );
 
 
-Widget *Container::findWidget(size_t widget_id) {
-    Widget *result = nullptr;
-
-    for (size_t i = 0; i < widgets.size(); i++)
-        if ((result = widgets[i]->findWidget(widget_id))) return result;
-
-    return Widget::findWidget(widget_id);
-}
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
 
-size_t Container::addChild(Widget *child) {
-    ASSERT(child, "Child is nullptr!\n");
-
-    // Set this container as child's parent
-    child->parent = this;
-    // Container is empty
-    if (widgets.size() == 0) {
-        widgets.push_back(child);
-        focused = 0;
-        return child -> getId();
-    }
-    // Find place for widget according to z_index
-    for (size_t i = 0; i < widgets.size(); i++) {
-        if (child->z_index > widgets[i]->z_index) {
-            widgets.insert(i, child);
-            focused = i;
-            return child -> getId();
-        }
-    }
-    // Widget has the biggest z_index
-    widgets.push_back(child);
-    focused = widgets.size() - 1;
-    return child -> getId();
-}
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onParentResize() override;
+};
 
 
-void Container::removeWidget(size_t index) {
-    ASSERT(index < widgets.size(), "Index is out of range!\n");
+/// Invisible button for resizing windows
+class ResizeButton : public BaseButton {
+protected:
+    Window &window;         ///< Window to move
+    Vector2D prev_mouse;    ///< Previous mouse click position
+    bool is_moving;         ///< If moving is active
+    const int resize_dir;   ///< Resize direction
 
-    if (index < focused) focused--;
-    else if (index == focused) focused = widgets.size() - 2;
-
-    delete widgets[index];
-    widgets.remove(index);
-}
-
-
-void Container::removeChild(size_t child_id) {
-    for (size_t i = 0; i < widgets.size(); i++) {
-        if (widgets[i]->getId() == child_id) {
-            removeWidget(i);
-            break;
-        }
-    }
-}
-
-
-/**
- * \brief Special define for short loops inside container's event handler
-*/
-#define CONTAINER_FOR(CALL_FUNC, ...)                                               \
-do {                                                                                \
-    if (focus_enabled) {                                                               \
-        if (widgets[focused]->CALL_FUNC == HANDLED) return HANDLED;                \
-        \
-        for (size_t i = 0; i < focused; i++)                                        \
-            if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; } \
-        \
-        for (size_t i = focused + 1; i < widgets.size(); i++)                   \
-            if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; } \
-    }                                                                               \
-    else {                                                                          \
-        for (size_t i = 0; i < widgets.size(); i++)                             \
-            if (widgets[i]->CALL_FUNC == HANDLED) return HANDLED;                  \
-    }                                                                               \
-} while(0)
+public:
+    enum RESIZE_DIRECTION {
+        LEFT,
+        TOP,
+        BOTTOM,
+        RIGHT,
+        TOP_LEFT,
+        TOP_RIGHT,
+        BOTTOM_LEFT,
+        BOTTOM_RIGHT
+    };
 
 
-int Container::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
-    if (widgets.size() == 0) return UNHANDLED;
-
-    TransformApplier add_transform(transforms, transform);
-
-    CONTAINER_FOR(onMouseMove(mouse_x, mouse_y, transforms));
-    
-    return UNHANDLED;
-}
+    ResizeButton(
+        size_t id_, const Transform &transform_, const Vector2D &size_, Widget *parent_, 
+        Window &window_, RESIZE_DIRECTION resize_dir_
+    );
 
 
-int Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
-    if (widgets.size() == 0) return UNHANDLED;
-
-    TransformApplier add_transform(transforms, transform);
-
-    CONTAINER_FOR(onMouseButtonUp(mouse_x, mouse_y, button_id, transforms));
-    
-    return UNHANDLED;
-}
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
 
-int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
-    if (widgets.size() == 0) return UNHANDLED;
-
-    TransformApplier add_transform(transforms, transform);
-
-    CONTAINER_FOR(onMouseButtonDown(mouse_x, mouse_y, button_id, transforms), focused = i);
-    
-    return UNHANDLED;
-}
-
-
-int Container::onKeyUp(int key_id) {
-    if (widgets.size() == 0) return UNHANDLED;
-
-    CONTAINER_FOR(onKeyUp(key_id));
-    
-    return UNHANDLED;
-}
-
-
-int Container::onKeyDown(int key_id) {
-    if (widgets.size() == 0) return UNHANDLED;
-
-    CONTAINER_FOR(onKeyDown(key_id));
-    
-    return UNHANDLED;
-}
-
-
-int Container::onTimer(float delta_time) {
-    for (size_t i = 0; i < widgets.size(); i++)
-        widgets[i]->onTimer(delta_time);
-    
-    return UNHANDLED;
-}
-
-
-int Container::onParentResize() {
-    for (size_t i = 0; i < widgets.size(); i++)
-        widgets[i]->onParentResize();
-    
-    return UNHANDLED;
-}
-
-
-#undef CONTAINER_FOR
-
-
-void Container::checkChildren() {
-    size_t curr = 0;
-
-    // ELEMENT OF THE LIST CAN BE DELETED IN ITERATION
-
-    while(curr < widgets.size()) {
-        switch(widgets[curr]->getStatus()) {
-            case PASS: 
-                widgets[curr]->checkChildren();
-                curr++;
-                break;
-            case DELETE:
-                removeWidget(curr);
-                break;
-            default:
-                ASSERT(0, "Unknown status!\n");
-        }
-    }
-}
-
-
-Container::~Container() {
-    for (size_t i = 0; i < widgets.size(); i++) {
-        ASSERT(widgets[i], "Pointer to widget is nullptr!\n");
-        delete widgets[i];
-    }
-}
+    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual int onParentResize() override;
+};
 
 
 /// Sets widget status as DELETE
