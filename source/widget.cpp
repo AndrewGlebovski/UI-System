@@ -95,7 +95,7 @@ int Widget::getStatus() const {
 }
 
 
-void Widget::setStatus(ELEMENT_STATUS new_status) {
+void Widget::setStatus(WIDGET_STATUS new_status) {
     status = new_status;
 }
 

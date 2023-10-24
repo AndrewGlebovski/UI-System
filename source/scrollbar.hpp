@@ -21,6 +21,27 @@ public:
 };
 
 
+/// Contains scroll bar style
+class ScrollBarStyle {
+public:
+    sf::Color frame_color;          ///< Frame color
+    vec_t frame_outline;            ///< Frame outline thickness
+    sf::Color background_color;     ///< Background color
+    sf::Color scroller_color;       ///< Scroller
+    vec_t scroller_factor;          ///< Scroller height = factor * scrollbar.size
+
+    ScrollBarStyle(
+        const sf::Color &frame_color_, vec_t frame_outline_,
+        const sf::Color &background_color_,
+        const sf::Color &scroller_color_, vec_t scroller_factor_
+    ) :
+        frame_color(frame_color_), frame_outline(frame_outline_),
+        background_color(background_color_),
+        scroller_color(scroller_color_), scroller_factor(scroller_factor_) 
+    {}
+};
+
+
 /// Base class for scroll bars
 class ScrollBar : public Widget {
 protected:

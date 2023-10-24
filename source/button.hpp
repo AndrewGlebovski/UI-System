@@ -93,7 +93,7 @@ public:
     /**
      * \brief Sets button status
     */
-    void setStatus(BUTTON_STATUS new_status);
+    void setButtonStatus(BUTTON_STATUS new_status);
 
 
     /**
@@ -161,6 +161,31 @@ public:
      * \brief Checks if the button is in this group
     */
     bool isInGroup(ActionButton *button) const;
+};
+
+
+/// Contains rect button style
+class ButtonStyle {
+public:
+    const sf::Font &font;       ///< Font
+    unsigned font_size;         ///< Font size
+    sf::Color font_normal;      ///< Font color normal
+    sf::Color font_hover;       ///< Font color hover
+    sf::Color font_pressed;     ///< Font color pressed
+
+
+    ButtonStyle(
+        const sf::Font &font_,
+        unsigned font_size_,
+        const sf::Color &font_normal_,
+        const sf::Color &font_hover_,
+        const sf::Color &font_pressed_
+    ) :
+        font(font_), font_size(font_size_),
+        font_normal(font_normal_),
+        font_hover(font_hover_),
+        font_pressed(font_pressed_)
+    {}
 };
 
 

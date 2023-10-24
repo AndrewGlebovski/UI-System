@@ -52,7 +52,7 @@ enum KEY_ID {
     RShift,       ///< The right Shift key
     RAlt,         ///< The right Alt key
     RSystem,      ///< The right OS specific key: window (Windows and Linux), apple (MacOS X), ...
-    Menu,         ///< The Menu key
+    MenuKey,      ///< The Menu key
     LBracket,     ///< The [ key
     RBracket,     ///< The ] key
     Semicolon,    ///< The ; key

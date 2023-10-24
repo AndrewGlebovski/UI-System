@@ -12,7 +12,6 @@
 #include "vector.hpp"
 #include "list.hpp"
 #include "asset.hpp"
-#include "style.hpp"
 #include "widget.hpp"
 #include "button.hpp"
 
@@ -24,7 +23,6 @@ ActionButton::ActionButton(
     BaseButton(id_, transform_, size_, z_index_, parent_),
     action(action_), group(group_), status(BUTTON_NORMAL)
 {
-    ASSERT(action, "Action is nullptr!\n");
     if (group) group->addButton(this);
 }
 
@@ -33,7 +31,6 @@ ActionButton::ActionButton(const ActionButton &button) :
     BaseButton(AUTO_ID, button.transform, button.size, button.z_index, button.parent),
     action(button.action->clone()), group(button.group), status(BUTTON_NORMAL)
 {
-    ASSERT(button.action, "Action is nullptr!\n");
     if (group) group->addButton(this);
 }
 
@@ -60,7 +57,7 @@ bool ActionButton::isInGroup() const { return (group); }
 bool ActionButton::isPressedInGroup() const { return isInGroup() && group->getPressed() == this; }
 
 
-void ActionButton::setStatus(BUTTON_STATUS new_status) { status = new_status; };
+void ActionButton::setButtonStatus(BUTTON_STATUS new_status) { status = new_status; };
 
 
 int ActionButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
@@ -68,12 +65,12 @@ int ActionButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transfo
 
     if (isInsideButton(Vector2D(mouse_x, mouse_y) - transforms.front().offset)) {
         if (status != BUTTON_PRESSED)
-            setStatus(BUTTON_HOVER);
+            setButtonStatus(BUTTON_HOVER);
 
         return HANDLED;
     }
     
-    if (!isPressedInGroup()) setStatus(BUTTON_NORMAL);
+    if (!isPressedInGroup()) setButtonStatus(BUTTON_NORMAL);
 
     return UNHANDLED;
 }
@@ -84,10 +81,10 @@ int ActionButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, Lis
 
     if (!isInsideButton(Vector2D(mouse_x, mouse_y) - transforms.front().offset)) return UNHANDLED;
 
-    setStatus(BUTTON_PRESSED);
+    setButtonStatus(BUTTON_PRESSED);
     if (isInGroup()) group->setPressed(this);
 
-    (*action)();
+    if (action) (*action)();
     return HANDLED;
 }
 
@@ -96,12 +93,12 @@ int ActionButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideButton(Vector2D(mouse_x, mouse_y) - transforms.front().offset)) {
-        if (!isPressedInGroup()) setStatus(BUTTON_HOVER);
+        if (!isPressedInGroup()) setButtonStatus(BUTTON_HOVER);
 
         return HANDLED;
     }
     
-    if (!isPressedInGroup()) setStatus(BUTTON_NORMAL);
+    if (!isPressedInGroup()) setButtonStatus(BUTTON_NORMAL);
 
     return UNHANDLED;
 }
@@ -126,8 +123,8 @@ ButtonGroup::ButtonGroup() : buttons(), pressed(0) {}
 void ButtonGroup::setPressed(ActionButton *new_pressed) {
     size_t index = getIndex(new_pressed);
     if (index < buttons.size()) {
-        buttons[pressed]->setStatus(ActionButton::BUTTON_NORMAL);
-        buttons[index]->setStatus(ActionButton::BUTTON_PRESSED);
+        buttons[pressed]->setButtonStatus(ActionButton::BUTTON_NORMAL);
+        buttons[index]->setButtonStatus(ActionButton::BUTTON_PRESSED);
         pressed = index;
     }
 }
@@ -188,9 +185,18 @@ void RectButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     sf::RectangleShape btn_rect(size);
 
     switch(status) {
-        case BUTTON_NORMAL: btn_rect.setFillColor(normal_color); break;
-        case BUTTON_HOVER: btn_rect.setFillColor(hover_color); break;
-        case BUTTON_PRESSED: btn_rect.setFillColor(pressed_color); break;
+        case BUTTON_NORMAL:
+            btn_rect.setFillColor(normal_color);
+            btn_text.setFillColor(style.font_normal);
+            break;
+        case BUTTON_HOVER:
+            btn_rect.setFillColor(hover_color);
+            btn_text.setFillColor(style.font_hover);
+            break;
+        case BUTTON_PRESSED:
+            btn_rect.setFillColor(pressed_color);
+            btn_text.setFillColor(style.font_pressed);
+            break;
         default: ASSERT(0, "Invalid button status!\n");
     }
 

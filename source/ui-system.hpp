@@ -54,6 +54,33 @@ public:
 };
 
 
+/// Controls how window looks
+class WindowStyle {
+public:
+    sf::Color title_color;      ///< Title color
+    Vector2D title_offset;      ///< Title offset from top-left corner
+    unsigned font_size;         ///< Title font size
+    const sf::Font &font;       ///< Title font
+    const WindowAsset &asset;   ///< Textures used in window
+    float outline;              ///< Describes size of window resizing buttons
+    Vector2D tl_offset;         ///< Window inner area offset from top-left corner
+    Vector2D br_offset;         ///< Window inner area offset from bottom-right corner
+
+
+    WindowStyle(
+        const sf::Color &title_color_, const Vector2D &title_offset_,
+        unsigned font_size_, const sf::Font &font_,
+        const WindowAsset &asset_, float outline_, 
+        const Vector2D &tl_offset_, const Vector2D &br_offset_
+    ) :
+        title_color(title_color_), title_offset(title_offset_),
+        font_size(font_size_), font(font_),
+        asset(asset_), outline(outline_),
+        tl_offset(tl_offset_), br_offset(br_offset_)
+    {}
+};
+
+
 /// Frame with widgets inside
 class Window : public Widget {
 protected:

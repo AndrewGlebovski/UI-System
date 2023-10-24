@@ -12,7 +12,6 @@
 #include "vector.hpp"
 #include "list.hpp"
 #include "asset.hpp"
-#include "style.hpp"
 #include "widget.hpp"
 #include "scrollbar.hpp"
 

@@ -77,6 +77,7 @@ protected:
     const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
     int status;             ///< Shows parent if some actions requiered
 
+
     /**
      * \brief Returns max possible new_size for child
     */
@@ -107,7 +108,7 @@ public:
 
 
     /// Shows parent if some actions requiered for this widget
-    enum ELEMENT_STATUS {
+    enum WIDGET_STATUS {
         PASS        = 0,    ///< Nothing to be done for this widget
         DELETE      = 1     ///< This widget should be deleted
     };
@@ -167,7 +168,7 @@ public:
     /**
      * \brief Sets widget status
     */
-    void setStatus(ELEMENT_STATUS new_status);
+    void setStatus(WIDGET_STATUS new_status);
 
 
     /**
