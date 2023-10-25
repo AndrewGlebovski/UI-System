@@ -242,9 +242,97 @@ public:
 };
 
 
-class VScrollCanvas;
-class HScrollCanvas;
-class Canvas;
+class FilterMask {
+private:
+    bool *mask;
+    size_t width;
+    size_t height;
+
+public:
+    FilterMask();
+
+
+    FilterMask(const FilterMask &mask) = delete;
+    FilterMask &operator = (const FilterMask &mask) = delete;
+
+
+    void initMask(size_t width_, size_t height_);
+
+
+    bool getPixelMask(size_t x, size_t y) const;
+
+
+    size_t getWidth() const;
+
+
+    size_t getHeight() const;
+
+
+    void setPixelMask(size_t x, size_t y, bool flag);
+    
+    
+    void fill(bool value);
+    
+    
+    void invert();
+
+
+    ~FilterMask();
+};
+
+
+class CanvasFilter {
+public:
+    virtual void applyFilter(Canvas &canvas) const = 0;
+
+
+    virtual ~CanvasFilter() = default;
+};
+
+
+class IntensityFilter : public CanvasFilter {
+private:
+    int intensity;
+
+
+    unsigned char clip(int channel) const;
+
+public:
+    IntensityFilter(char intensity_);
+
+
+    virtual void applyFilter(Canvas &canvas) const override;
+};
+
+
+class FilterPalette {
+private:
+    List<CanvasFilter*> filters;
+    size_t last_filter;
+
+public:
+    /// Tools avalaible for the palette
+    enum FILTERS {
+        LIGHTEN_FILTER,     ///< Increase intensity
+        DARKEN_FILTER,      ///< Decrease intensity
+        FILTERS_SIZE        ///< Filters size (this field must always be last!)
+    };
+
+
+    FilterPalette();
+
+
+    CanvasFilter *getLastFilter();
+
+
+    void setLastFilter(FILTERS filter_id);
+
+
+    CanvasFilter *getFilter(FILTERS filter_id);
+
+
+    size_t getFilterCount() const;
+};
 
 
 class CanvasGroup {
@@ -296,6 +384,27 @@ public:
 };
 
 
+class FilterAction : public ButtonAction {
+private:
+    FilterPalette::FILTERS filter_id;
+    FilterPalette &palette;
+    CanvasGroup &group;
+
+public:
+    FilterAction(FilterPalette::FILTERS filter_id_, FilterPalette &palette_, CanvasGroup &group_);
+
+
+    virtual void operator () () override;
+
+
+    virtual FilterAction *clone() override;
+};
+
+
+class VScrollCanvas;
+class HScrollCanvas;
+
+
 /// Holds texture to draw on
 class Canvas : public Widget {
 protected:
@@ -304,6 +413,7 @@ protected:
     ToolPalette *palette;
     Vector2D last_position;
     CanvasGroup *group;
+    FilterMask filter_mask;
 
 
     /**
@@ -336,6 +446,9 @@ public:
 
 
     ToolPalette *getPalette();
+
+
+    FilterMask &getFilterMask();
 
 
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;

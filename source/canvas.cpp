@@ -30,12 +30,18 @@ const sf::Color CANVAS_BACKGROUND = sf::Color::White;   ///< Canvas background c
 const float POLYGON_EPSILON = 25;                       ///< Maximal distance for points of polygon to form it
 
 
+// ============================================================================
+
+
 /// Draws line on the texture
 void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf::RenderTexture &result);
 
 
 /// Draws polygon or polyline based on the primitive type
 void drawPolygon(const Vector2D &offset, const List<Vector2D> &points, const sf::Color &color, sf::RenderTexture &result, sf::PrimitiveType type);
+
+
+// ============================================================================
 
 
 void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf::RenderTexture &result) {
@@ -58,6 +64,9 @@ void drawPolygon(const Vector2D &offset, const List<Vector2D> &points, const sf:
 
     delete polygon;
 }
+
+
+// ============================================================================
 
 
 PencilTool::PencilTool() : prev_position() {}
@@ -88,6 +97,9 @@ void PencilTool::onMove(const Vector2D &mouse, Canvas &canvas) {
         canvas.getTexture().draw(line, 2, sf::Lines);
     }
 }
+
+
+// ============================================================================
 
 
 /// Draws preview of the rectangle
@@ -178,6 +190,9 @@ RectTool::~RectTool() {
 }
 
 
+// ============================================================================
+
+
 /// Draws preview of the line
 class LinePreview : public Widget {
 private:
@@ -245,6 +260,9 @@ LineTool::~LineTool() {
 }
 
 
+// ============================================================================
+
+
 EraserTool::EraserTool() : prev_position() {}
 
 
@@ -290,12 +308,18 @@ void EraserTool::onMove(const Vector2D &mouse, Canvas &canvas) {
 }
 
 
+// ============================================================================
+
+
 void ColorPicker::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
     if (state == PRESSED) {
         // VERY SLOW (TEXTURE PIXELS COPIES TO AN IMAGE)
         canvas.getPalette()->setCurrentColor(canvas.getTexture().getTexture().copyToImage().getPixel(mouse.x, mouse.y));
     }
 }
+
+
+// ============================================================================
 
 
 void BucketTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
@@ -340,6 +364,9 @@ void BucketTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &
         canvas.getTexture().draw(tool_sprite);
     }
 }
+
+
+// ============================================================================
 
 
 /// Draws preview of the polygon
@@ -405,6 +432,9 @@ PolygonTool::~PolygonTool() {
 }
 
 
+// ============================================================================
+
+
 ToolPalette::ToolPalette() : tools(TOOLS_SIZE, nullptr), current_tool(PENCIL_TOOL), current_color(sf::Color::Red) {
     tools[PENCIL_TOOL] = new PencilTool();
     tools[RECT_TOOL] = new RectTool();
@@ -445,6 +475,9 @@ ToolPalette::~ToolPalette() {
 }
 
 
+// ============================================================================
+
+
 class PaletteAction : public ButtonAction {
 protected:
     ToolPalette &palette;
@@ -463,6 +496,9 @@ public:
         return new PaletteAction(palette, tool_id);
     }
 };
+
+
+// ============================================================================
 
 
 void ToolPaletteView::updateToolButtons() {
@@ -561,6 +597,119 @@ ToolPaletteView::~ToolPaletteView() {
 }
 
 
+// ============================================================================
+
+
+FilterMask::FilterMask() : mask(nullptr), width(0), height(0) {}
+
+
+void FilterMask::initMask(size_t width_, size_t height_) {
+    width = width_;
+    height = height_;
+    mask = new bool[width * height];
+    ASSERT(mask, "Failed to allocate mask!\n");
+}
+
+
+bool FilterMask::getPixelMask(size_t x, size_t y) const {
+    ASSERT(x < width, "X is out of range!\n");
+    ASSERT(y < height, "Y is out of range!\n");
+    return mask[y * width + x];
+}
+
+
+size_t FilterMask::getWidth() const { return width; }
+
+
+size_t FilterMask::getHeight() const { return height; }
+
+
+void FilterMask::setPixelMask(size_t x, size_t y, bool flag) {
+    ASSERT(x < width, "X is out of range!\n");
+    ASSERT(y < height, "Y is out of range!\n");
+    mask[y * width + x] = flag;
+}
+
+
+void FilterMask::fill(bool value) {
+    size_t mask_size = width * height;
+    for (size_t i = 0; i < mask_size; i++)
+        mask[i] = value;
+}
+
+
+void FilterMask::invert() {
+    size_t mask_size = width * height;
+    for (size_t i = 0; i < mask_size; i++)
+        mask[i] = !mask[i];
+}
+
+
+FilterMask::~FilterMask() {
+    ASSERT(mask, "Mask is nullptr!\n");
+    delete mask;
+}
+
+
+// ============================================================================
+
+
+unsigned char IntensityFilter::clip(int channel) const {
+    if (channel + intensity < 0) return 0;
+    if (channel + intensity > 255) return 255;
+    return channel + intensity;
+}
+
+
+IntensityFilter::IntensityFilter(char intensity_) : intensity(intensity_) {}
+
+
+void IntensityFilter::applyFilter(Canvas &canvas) const {
+    FilterMask &mask = canvas.getFilterMask();
+    sf::Image image = canvas.getTexture().getTexture().copyToImage();
+
+    ASSERT(image.getSize().x == mask.getWidth(), "Invalid mask size!\n");
+    ASSERT(image.getSize().y == mask.getHeight(), "Invalid mask size!\n");
+    
+    for (size_t y = 0; y < mask.getHeight(); y++) {
+        for (size_t x = 0; x < mask.getWidth(); x++) {
+            sf::Color origin(image.getPixel(x, y));
+            image.setPixel(x, y, sf::Color(clip(origin.r), clip(origin.g), clip(origin.b)));
+        }
+    }
+    
+    sf::Texture tool_texture;
+    tool_texture.loadFromImage(image);
+
+    sf::Sprite tool_sprite(tool_texture);
+    canvas.getTexture().draw(tool_sprite);
+}
+
+
+// ============================================================================
+
+
+FilterPalette::FilterPalette() : filters(FILTERS_SIZE, nullptr), last_filter(0) {
+    filters[LIGHTEN_FILTER] = new IntensityFilter(20);
+    filters[DARKEN_FILTER] = new IntensityFilter(-20);
+}
+
+
+CanvasFilter *FilterPalette::getLastFilter() { return filters[last_filter]; }
+
+
+void FilterPalette::setLastFilter(FILTERS filter_id) { last_filter = filter_id; }
+
+
+CanvasFilter *FilterPalette::getFilter(FILTERS filter_id) { return filters[filter_id]; }
+
+
+size_t FilterPalette::getFilterCount() const { return FILTERS_SIZE; }
+
+
+// ============================================================================
+
+
 size_t CanvasGroup::getIndex(Canvas *canvas) const {
     for (size_t i = 0; i < canvases.size(); i++)
         if (canvases[i] == canvas) return i;
@@ -606,6 +755,25 @@ bool CanvasGroup::isInGroup(Canvas *canvas) const {
 }
 
 
+// ============================================================================
+
+
+FilterAction::FilterAction(FilterPalette::FILTERS filter_id_, FilterPalette &palette_, CanvasGroup &group_) : 
+    filter_id(filter_id_), palette(palette_), group(group_) {}
+
+
+void FilterAction::operator () () {
+    palette.getFilter(filter_id)->applyFilter(*group.getActive());
+    palette.setLastFilter(filter_id);
+}
+
+
+FilterAction *FilterAction::clone() { return new FilterAction(filter_id, palette, group); }
+
+
+// ============================================================================
+
+
 void Canvas::clear_canvas() {
     texture.clear(CANVAS_BACKGROUND);
 }
@@ -617,8 +785,9 @@ Canvas::Canvas(
 ) :
     Widget(id_, transform_, size_, z_index_, parent_),
     texture(), texture_offset(Vector2D(0, 0)),
-    palette(palette_), last_position(), group(group_)
+    palette(palette_), last_position(), group(group_), filter_mask()
 {
+    ASSERT(palette, "Canvas must have palette!\n");
     ASSERT(group, "Canvas must be assigned to group!\n");
     group->addCanvas(this);
 
@@ -638,11 +807,18 @@ Canvas::Canvas(
 
             texture.draw(tool_sprite);
 
+            filter_mask.initMask(texture.getSize().x, texture.getSize().y);
+            filter_mask.fill(true);
+
             return;
         }
     }
 
     texture.create(size.x, size.y);
+
+    filter_mask.initMask(texture.getSize().x, texture.getSize().y);
+    filter_mask.fill(true);
+
     clear_canvas();
 }
 
@@ -652,14 +828,16 @@ Vector2D Canvas::getTextureSize() const {
 }
 
 
-sf::RenderTexture &Canvas::getTexture() {
-    return texture;
-}
+sf::RenderTexture &Canvas::getTexture() { return texture; }
 
 
 ToolPalette *Canvas::getPalette() {
+    ASSERT(palette, "Canvas must have palette!\n");
     return palette;
 }
+
+
+FilterMask &Canvas::getFilterMask() { return filter_mask; }
 
 
 bool Canvas::isActive() const {
@@ -801,6 +979,9 @@ int Canvas::onKeyUp(int key_id) {
             return UNHANDLED;
     }
 }
+
+
+// ============================================================================
 
 
 #pragma GCC diagnostic pop
