@@ -984,4 +984,37 @@ int Canvas::onKeyUp(int key_id) {
 // ============================================================================
 
 
+FilterHotkey::FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_) :
+    Widget(AUTO_ID, Transform(), Vector2D(), 0, parent_),
+    palette(palette_), group(group_), ctrl_pressed(false)
+{}
+
+
+int FilterHotkey::onKeyDown(int key_id) {
+    switch (key_id) {
+        case F: 
+            palette.getLastFilter()->applyFilter(*group.getActive()); return HANDLED;
+        case LControl:
+        case RControl:
+            ctrl_pressed = true; return HANDLED;
+        default:
+            return UNHANDLED;
+    }
+}
+
+
+int FilterHotkey::onKeyUp(int key_id) {
+    switch (key_id) {
+        case LControl:
+        case RControl:
+            ctrl_pressed = false; return HANDLED;
+        default:
+            return UNHANDLED;
+    }
+}
+
+
+// ============================================================================
+
+
 #pragma GCC diagnostic pop

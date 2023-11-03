@@ -108,6 +108,12 @@ int main() {
         clock_style
     ));
 
+    main_window.addChild(new FilterHotkey(
+        &main_window,
+        *filter_palette,
+        *canvas_group
+    ));
+
     main_window.addChild(openPicture(nullptr, palette, canvas_group, window_style, scrollbar_style));
     main_window.addChild(createToolPaletteView(palette, window_style, palette_asset));
     

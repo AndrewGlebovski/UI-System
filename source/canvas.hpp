@@ -305,13 +305,14 @@ public:
 };
 
 
+/// Contains filters and remembers last used one 
 class FilterPalette {
 private:
     List<CanvasFilter*> filters;
     size_t last_filter;
 
 public:
-    /// Tools avalaible for the palette
+    /// Filters avalaible for the palette
     enum FILTERS {
         LIGHTEN_FILTER,     ///< Increase intensity
         DARKEN_FILTER,      ///< Decrease intensity
@@ -466,6 +467,7 @@ public:
 };
 
 
+/// Moves canvas texture in vertical direction
 class VScrollCanvas : public ScrollAction {
 protected:
     Canvas &canvas;
@@ -480,6 +482,7 @@ public:
 };
 
 
+/// Moves canvas texture in horizontal direction
 class HScrollCanvas : public ScrollAction {
 protected:
     Canvas &canvas;
@@ -491,4 +494,22 @@ public:
     virtual void operator () (vec_t param) override {
         canvas.texture_offset.x = param * (canvas.getTextureSize().x - canvas.size.x);
     }
+};
+
+
+/// Supports hot keys for applying filters
+class FilterHotkey : public Widget {
+private:
+    FilterPalette &palette;
+    CanvasGroup &group;
+    bool ctrl_pressed;
+
+public:
+    FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_);
+
+
+    virtual int onKeyDown(int key_id) override;
+
+
+    virtual int onKeyUp(int key_id) override;
 };
