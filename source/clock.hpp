@@ -21,6 +21,7 @@ class Clock : public Widget {
 private:
     size_t daytime;
     ClockStyle style;
+    float time_passed;
 
 public:
     Clock(
@@ -28,7 +29,7 @@ public:
         const ClockStyle &style_
     ) :
         Widget(id_, transform_, size_, z_index_, parent_),
-        daytime(0), style(style_)
+        daytime(0), style(style_), time_passed(0)
     {
         time_t raw_time = time(NULL);
         struct tm *time_info = localtime(&raw_time);
@@ -58,9 +59,14 @@ public:
     }
 
 
-    virtual int onTimer(float delta_daytime) override {
-        daytime++;
-        daytime %= 24 * 60 * 60;
+    virtual int onTimer(float delta_time) override {
+        time_passed += delta_time;
+
+        if (time_passed > 1) {
+            time_passed = 0;
+            daytime++;
+            daytime %= 24 * 60 * 60;
+        }
 
         return UNHANDLED;
     }

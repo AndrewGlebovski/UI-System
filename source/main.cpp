@@ -13,6 +13,7 @@
 #include "window.hpp"
 #include "canvas.hpp"
 #include "clock.hpp"
+#include "line-edit.hpp"
 
 
 /// Opens picture on canvas in new subwindow with scrollbars
@@ -72,6 +73,16 @@ int main() {
         font
     );
 
+    LineEditStyle line_edit_style(
+        font,
+        20,
+        sf::Color::Black,
+        sf::Color::White,
+        sf::Color::Black,
+        2.5,
+        0.75
+    );
+
     MainWindow main_window(
         Widget::AUTO_ID,
         Transform(),
@@ -114,6 +125,16 @@ int main() {
         *canvas_group
     ));
 
+    main_window.addChild(new LineEdit(
+        Widget::AUTO_ID,
+        Transform(Vector2D(200, 20)),
+        Vector2D(200, 30),
+        0,
+        nullptr,
+        line_edit_style,
+        15
+    ));
+
     main_window.addChild(openPicture(nullptr, palette, canvas_group, window_style, scrollbar_style));
     main_window.addChild(createToolPaletteView(palette, window_style, palette_asset));
     
@@ -144,10 +165,8 @@ int main() {
             main_window.parseEvent(event, transforms);
         }
         
-        if (timer.getElapsedTime().asSeconds() > 1) {
-            main_window.onTimer(timer.getElapsedTime().asSeconds());
-            timer.restart();
-        }
+        main_window.onTimer(timer.getElapsedTime().asSeconds());
+        timer.restart();
 
         result.clear();
 

@@ -947,13 +947,13 @@ int Canvas::onKeyDown(int key_id) {
             palette->getCurrentTool()->onCancel(); return HANDLED;
         case LShift:
         case RShift:
-            palette->getCurrentTool()->onModifier1(CanvasTool::PRESSED, last_position, *this); return HANDLED;
+            palette->getCurrentTool()->onModifier1(CanvasTool::PRESSED, last_position, *this); return UNHANDLED;
         case LControl:
         case RControl:
-            palette->getCurrentTool()->onModifier2(CanvasTool::PRESSED, last_position, *this); return HANDLED;
+            palette->getCurrentTool()->onModifier2(CanvasTool::PRESSED, last_position, *this); return UNHANDLED;
         case LAlt:
         case RAlt:
-            palette->getCurrentTool()->onModifier3(CanvasTool::PRESSED, last_position, *this); return HANDLED;
+            palette->getCurrentTool()->onModifier3(CanvasTool::PRESSED, last_position, *this); return UNHANDLED;
         default:
             if (palette->getCurrentTool()->getWidget())
                 return palette->getCurrentTool()->getWidget()->onKeyDown(key_id);
@@ -966,13 +966,13 @@ int Canvas::onKeyUp(int key_id) {
     switch (key_id) {
         case LShift:
         case RShift:
-            palette->getCurrentTool()->onModifier1(CanvasTool::REALEASED, last_position, *this); return HANDLED;
+            palette->getCurrentTool()->onModifier1(CanvasTool::REALEASED, last_position, *this); return UNHANDLED;
         case LControl:
         case RControl:
-            palette->getCurrentTool()->onModifier2(CanvasTool::REALEASED, last_position, *this); return HANDLED;
+            palette->getCurrentTool()->onModifier2(CanvasTool::REALEASED, last_position, *this); return UNHANDLED;
         case LAlt:
         case RAlt:
-            palette->getCurrentTool()->onModifier3(CanvasTool::REALEASED, last_position, *this); return HANDLED;
+            palette->getCurrentTool()->onModifier3(CanvasTool::REALEASED, last_position, *this); return UNHANDLED;
         default:
             if (palette->getCurrentTool()->getWidget())
                 return palette->getCurrentTool()->getWidget()->onKeyUp(key_id);
