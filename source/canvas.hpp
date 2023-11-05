@@ -67,8 +67,8 @@ public:
     RectTool();
 
 
-    RectTool(const RectTool &button) = delete;
-    RectTool &operator = (const RectTool &button) = delete;
+    RectTool(const RectTool &rect_tool) = delete;
+    RectTool &operator = (const RectTool &rect_tool) = delete;
 
 
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
@@ -91,8 +91,8 @@ public:
     LineTool();
 
 
-    LineTool(const LineTool &button) = delete;
-    LineTool &operator = (const LineTool &button) = delete;
+    LineTool(const LineTool &line_tool) = delete;
+    LineTool &operator = (const LineTool &line_tool) = delete;
 
 
     virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
@@ -143,8 +143,8 @@ public:
     PolygonTool();
 
 
-    PolygonTool(const PolygonTool &button) = delete;
-    PolygonTool &operator = (const PolygonTool &button) = delete;
+    PolygonTool(const PolygonTool &polygon_tool) = delete;
+    PolygonTool &operator = (const PolygonTool &polygon_tool) = delete;
 
 
     List<Vector2D> &getPoints();
@@ -157,6 +157,30 @@ public:
 
 
     virtual ~PolygonTool() override;
+};
+
+
+/// Draws text on the canvas
+class TextTool : public CanvasTool {
+protected:
+    sf::Font text_font;             ///< Text font
+    LineEdit *text_preview;         ///< Widget that draws preview of the polygon
+
+public:
+    TextTool();
+
+
+    TextTool(const TextTool &text_tool) = delete;
+    TextTool &operator = (const TextTool &text_tool) = delete;
+
+
+    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onCancel() override;
+    virtual Widget *getWidget() override;
+
+
+    virtual ~TextTool() override;
 };
 
 
@@ -178,6 +202,7 @@ public:
         COLOR_PICKER,       ///< Color picker
         BUCKET_TOOL,        ///< Bucket tool
         POLYGON_TOOL,       ///< Polygon tool
+        TEXT_TOOL,          ///< Text tool
         TOOLS_SIZE          ///< Tools size (this field must always be last!)
     };
 
@@ -463,6 +488,7 @@ public:
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onKeyDown(int key_id) override;
     virtual int onKeyUp(int key_id) override;
+    virtual int onTimer(float delta_time) override;
     virtual int onParentResize() override;
 };
 

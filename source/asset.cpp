@@ -126,7 +126,8 @@ PaletteViewAsset::PaletteViewAsset(const char *rootpath) {
         "rect",
         "polygon",
         "normal",
-        "selected"
+        "selected",
+        "text"
     };
 
     loadTextures(rootpath, FILES, sizeof(FILES) / 8);

@@ -19,6 +19,7 @@
 #include "container.hpp"
 #include "button.hpp"
 #include "scrollbar.hpp"
+#include "line-edit.hpp"
 #include "canvas.hpp"
 
 
@@ -28,6 +29,8 @@ const int ERASER_STEP = 100;                            ///< Amount of spheres t
 const float ERASER_RADIUS = 25;                         ///< Eraser sphere radius
 const sf::Color CANVAS_BACKGROUND = sf::Color::White;   ///< Canvas background color
 const float POLYGON_EPSILON = 25;                       ///< Maximal distance for points of polygon to form it
+const unsigned TEXT_SIZE = 20;                          ///< Text tool font size
+const size_t TEXT_MAX_LENGTH = 256;                     ///< Text tool text max length
 
 
 // ============================================================================
@@ -435,6 +438,71 @@ PolygonTool::~PolygonTool() {
 // ============================================================================
 
 
+TextTool::TextTool() : text_font(), text_preview(nullptr) {
+    text_font.loadFromFile(FONT_FILE);
+
+    LineEditStyle style(
+        text_font,
+        TEXT_SIZE,
+        PREVIEW_COLOR,
+        sf::Color(0),
+        PREVIEW_COLOR,
+        sf::Color(0),
+        0
+    );
+
+    text_preview = new LineEdit(
+        Widget::AUTO_ID,
+        Transform(),
+        Vector2D(0, TEXT_SIZE + TEXT_OFFSET * 2),
+        0,
+        nullptr,
+        style,
+        TEXT_MAX_LENGTH
+    );
+}
+
+
+void TextTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {
+    if (state == PRESSED) {
+        is_drawing = true;
+        text_preview->transform.offset = mouse;
+    }
+}
+
+
+void TextTool::onConfirm(const Vector2D &mouse, Canvas &canvas) {
+    if (is_drawing) {
+        sf::Text text(text_preview->getString(), text_font, TEXT_SIZE);
+        text.setPosition(text_preview->transform.offset + Vector2D(TEXT_OFFSET, TEXT_OFFSET));
+        text.setFillColor(canvas.getPalette()->getCurrentColor());
+        canvas.getTexture().draw(text);
+        is_drawing = false;
+    }
+
+    text_preview->setString("");
+}
+
+
+void TextTool::onCancel() {
+    is_drawing = false;
+    text_preview->setString("");
+}
+
+
+Widget *TextTool::getWidget() {
+    return (is_drawing) ? text_preview : nullptr;
+}
+
+
+TextTool::~TextTool() {
+    delete text_preview;
+}
+
+
+// ============================================================================
+
+
 ToolPalette::ToolPalette() : tools(TOOLS_SIZE, nullptr), current_tool(PENCIL_TOOL), current_color(sf::Color::Red) {
     tools[PENCIL_TOOL] = new PencilTool();
     tools[RECT_TOOL] = new RectTool();
@@ -443,6 +511,7 @@ ToolPalette::ToolPalette() : tools(TOOLS_SIZE, nullptr), current_tool(PENCIL_TOO
     tools[COLOR_PICKER] = new ColorPicker();
     tools[BUCKET_TOOL] = new BucketTool();
     tools[POLYGON_TOOL] = new PolygonTool();
+    tools[TEXT_TOOL] = new TextTool();
 }
 
 
@@ -540,6 +609,7 @@ ToolPaletteView::ToolPaletteView(
     ADD_TOOL_BUTTON(ToolPalette::COLOR_PICKER,  PaletteViewAsset::PICKER_TEXTURE,   Vector2D(0, 188));
     ADD_TOOL_BUTTON(ToolPalette::BUCKET_TOOL,   PaletteViewAsset::BUCKET_TEXTURE,   Vector2D(94, 188));
     ADD_TOOL_BUTTON(ToolPalette::POLYGON_TOOL,  PaletteViewAsset::POLYGON_TEXTURE,  Vector2D(0, 282));
+    ADD_TOOL_BUTTON(ToolPalette::TEXT_TOOL,     PaletteViewAsset::TEXT_TEXTURE,     Vector2D(94, 282));
 
     updateToolButtons();
 }
@@ -587,6 +657,7 @@ int ToolPaletteView::onKeyDown(int key_id) {
         case Num5: palette->setCurrentTool(ToolPalette::COLOR_PICKER); return HANDLED;
         case Num6: palette->setCurrentTool(ToolPalette::BUCKET_TOOL); return HANDLED;
         case Num7: palette->setCurrentTool(ToolPalette::POLYGON_TOOL); return HANDLED;
+        case Num8: palette->setCurrentTool(ToolPalette::TEXT_TOOL); return HANDLED;
         default: return UNHANDLED;
     }
 }
@@ -604,6 +675,8 @@ FilterMask::FilterMask() : mask(nullptr), width(0), height(0) {}
 
 
 void FilterMask::initMask(size_t width_, size_t height_) {
+    if (mask) delete[] mask;
+
     width = width_;
     height = height_;
     mask = new bool[width * height];
@@ -876,8 +949,10 @@ int Canvas::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
         *this
     );
 
-    if (palette->getCurrentTool()->getWidget())
-        palette->getCurrentTool()->getWidget()->onMouseMove(mouse_x, mouse_y, transforms);
+    if (palette->getCurrentTool()->getWidget()) {
+        TransformApplier texture_transform(transforms, texture_offset);
+        return palette->getCurrentTool()->getWidget()->onMouseMove(mouse_x, mouse_y, transforms);
+    }
 
     return UNHANDLED;
 }
@@ -889,6 +964,9 @@ int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tran
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideRect(transforms.front().offset, size, last_position)) {
+        ASSERT(group, "Canvas must be assigned to group!\n");
+        group->setActive(this);
+
         palette->getCurrentTool()->onMainButton(
             CanvasTool::PRESSED, 
             last_position - transforms.front().offset + texture_offset,
@@ -899,9 +977,6 @@ int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tran
             TransformApplier texture_transform(transforms, texture_offset);
             palette->getCurrentTool()->getWidget()->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms);
         }
-
-        ASSERT(group, "Canvas must be assigned to group!\n");
-        group->setActive(this);
         
         return HANDLED;
     }
@@ -923,7 +998,7 @@ int Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transf
 
     if (palette->getCurrentTool()->getWidget()) {
         TransformApplier texture_transform(transforms, texture_offset);
-        palette->getCurrentTool()->getWidget()->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
+        return palette->getCurrentTool()->getWidget()->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
     }
 
     return UNHANDLED;
@@ -944,21 +1019,26 @@ int Canvas::onParentResize() {
 int Canvas::onKeyDown(int key_id) {
     switch (key_id) {
         case Escape: 
-            palette->getCurrentTool()->onCancel(); return HANDLED;
+            palette->getCurrentTool()->onCancel(); break;
+        case Enter: 
+            palette->getCurrentTool()->onConfirm(last_position, *this); break;
         case LShift:
         case RShift:
-            palette->getCurrentTool()->onModifier1(CanvasTool::PRESSED, last_position, *this); return UNHANDLED;
+            palette->getCurrentTool()->onModifier1(CanvasTool::PRESSED, last_position, *this); break;
         case LControl:
         case RControl:
-            palette->getCurrentTool()->onModifier2(CanvasTool::PRESSED, last_position, *this); return UNHANDLED;
+            palette->getCurrentTool()->onModifier2(CanvasTool::PRESSED, last_position, *this); break;
         case LAlt:
         case RAlt:
-            palette->getCurrentTool()->onModifier3(CanvasTool::PRESSED, last_position, *this); return UNHANDLED;
+            palette->getCurrentTool()->onModifier3(CanvasTool::PRESSED, last_position, *this); break;
         default:
-            if (palette->getCurrentTool()->getWidget())
-                return palette->getCurrentTool()->getWidget()->onKeyDown(key_id);
-            return UNHANDLED;
+            break;
     }
+
+    if (palette->getCurrentTool()->getWidget())
+        return palette->getCurrentTool()->getWidget()->onKeyDown(key_id);
+    
+    return UNHANDLED;
 }
 
 
@@ -966,18 +1046,29 @@ int Canvas::onKeyUp(int key_id) {
     switch (key_id) {
         case LShift:
         case RShift:
-            palette->getCurrentTool()->onModifier1(CanvasTool::REALEASED, last_position, *this); return UNHANDLED;
+            palette->getCurrentTool()->onModifier1(CanvasTool::REALEASED, last_position, *this); break;
         case LControl:
         case RControl:
-            palette->getCurrentTool()->onModifier2(CanvasTool::REALEASED, last_position, *this); return UNHANDLED;
+            palette->getCurrentTool()->onModifier2(CanvasTool::REALEASED, last_position, *this); break;
         case LAlt:
         case RAlt:
-            palette->getCurrentTool()->onModifier3(CanvasTool::REALEASED, last_position, *this); return UNHANDLED;
+            palette->getCurrentTool()->onModifier3(CanvasTool::REALEASED, last_position, *this); break;
         default:
-            if (palette->getCurrentTool()->getWidget())
-                return palette->getCurrentTool()->getWidget()->onKeyUp(key_id);
-            return UNHANDLED;
+            break;
     }
+
+    if (palette->getCurrentTool()->getWidget())
+        return palette->getCurrentTool()->getWidget()->onKeyUp(key_id);
+    
+    return UNHANDLED;
+}
+
+
+int Canvas::onTimer(float delta_time) {
+    if (palette->getCurrentTool()->getWidget())
+        palette->getCurrentTool()->getWidget()->onTimer(delta_time);
+    
+    return UNHANDLED;
 }
 
 
@@ -993,7 +1084,12 @@ FilterHotkey::FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup
 int FilterHotkey::onKeyDown(int key_id) {
     switch (key_id) {
         case F: 
-            palette.getLastFilter()->applyFilter(*group.getActive()); return HANDLED;
+            if (ctrl_pressed) {
+                palette.getLastFilter()->applyFilter(*group.getActive());
+                return HANDLED;
+            }
+
+            return UNHANDLED;
         case LControl:
         case RControl:
             ctrl_pressed = true; return HANDLED;

@@ -88,7 +88,8 @@ public:
         RECT_TEXTURE,
         POLYGON_TEXTURE,
         NORMAL_TEXTURE,
-        SELECTED_TEXTURE
+        SELECTED_TEXTURE,
+        TEXT_TEXTURE
     };
 
 

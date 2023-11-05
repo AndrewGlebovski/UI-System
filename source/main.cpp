@@ -8,12 +8,12 @@
 #include "widget.hpp"
 #include "container.hpp"
 #include "button.hpp"
+#include "line-edit.hpp"
 #include "scrollbar.hpp"
 #include "menu.hpp"
 #include "window.hpp"
 #include "canvas.hpp"
 #include "clock.hpp"
-#include "line-edit.hpp"
 
 
 /// Opens picture on canvas in new subwindow with scrollbars
@@ -73,16 +73,6 @@ int main() {
         font
     );
 
-    LineEditStyle line_edit_style(
-        font,
-        20,
-        sf::Color::Black,
-        sf::Color::White,
-        sf::Color::Black,
-        sf::Color::Black,
-        1
-    );
-
     MainWindow main_window(
         Widget::AUTO_ID,
         Transform(),
@@ -123,16 +113,6 @@ int main() {
         &main_window,
         *filter_palette,
         *canvas_group
-    ));
-
-    main_window.addChild(new LineEdit(
-        Widget::AUTO_ID,
-        Transform(Vector2D(200, 20)),
-        Vector2D(200, 30),
-        0,
-        nullptr,
-        line_edit_style,
-        15
     ));
 
     main_window.addChild(openPicture(nullptr, palette, canvas_group, window_style, scrollbar_style));
