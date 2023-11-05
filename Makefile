@@ -43,7 +43,7 @@ $(BIN_DIR)/widget.o: $(addprefix $(SRC_DIR)/, widget.cpp widget.hpp vector.hpp l
 
 
 # Предварительная сборка canvas.cpp
-$(BIN_DIR)/canvas.o: $(addprefix $(SRC_DIR)/, canvas.cpp canvas.hpp vector.hpp list.hpp widget.hpp key-id.hpp configs.hpp button.hpp container.hpp)
+$(BIN_DIR)/canvas.o: $(addprefix $(SRC_DIR)/, canvas.cpp canvas.hpp vector.hpp list.hpp widget.hpp key-id.hpp configs.hpp button.hpp container.hpp line-edit.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
@@ -73,7 +73,7 @@ $(BIN_DIR)/menu.o: $(addprefix $(SRC_DIR)/, menu.cpp menu.hpp button.hpp vector.
 
 
 # Предварительная сборка line-edit.cpp
-$(BIN_DIR)/line-edit.o: $(addprefix $(SRC_DIR)/, line-edit.cpp line-edit.hpp vector.hpp list.hpp widget.hpp)
+$(BIN_DIR)/line-edit.o: $(addprefix $(SRC_DIR)/, line-edit.cpp line-edit.hpp vector.hpp list.hpp widget.hpp configs.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 

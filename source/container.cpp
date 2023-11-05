@@ -102,18 +102,18 @@ void Container::removeChild(size_t child_id) {
 */
 #define CONTAINER_FOR(CALL_FUNC, ...)                                               \
 do {                                                                                \
-    if (focus_enabled) {                                                               \
-        if (widgets[focused]->CALL_FUNC == HANDLED) return HANDLED;                \
+    if (focus_enabled) {                                                            \
+        if (widgets[focused]->CALL_FUNC == HANDLED) return HANDLED;                 \
         \
         for (size_t i = 0; i < focused; i++)                                        \
-            if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; } \
+            if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; }  \
         \
-        for (size_t i = focused + 1; i < widgets.size(); i++)                   \
-            if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; } \
+        for (size_t i = focused + 1; i < widgets.size(); i++)                       \
+            if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; }  \
     }                                                                               \
     else {                                                                          \
-        for (size_t i = 0; i < widgets.size(); i++)                             \
-            if (widgets[i]->CALL_FUNC == HANDLED) return HANDLED;                  \
+        for (size_t i = 0; i < widgets.size(); i++)                                 \
+            if (widgets[i]->CALL_FUNC == HANDLED) return HANDLED;                   \
     }                                                                               \
 } while(0)
 

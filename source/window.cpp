@@ -347,15 +347,15 @@ int Window::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tran
 
 
 int Window::onKeyUp(int key_id) {
-    buttons.onKeyUp(key_id);
-    container.onKeyUp(key_id);
+    if (buttons.onKeyUp(key_id) == HANDLED) return HANDLED;
+    if (container.onKeyUp(key_id) == HANDLED) return HANDLED;
     return UNHANDLED;
 }
 
 
 int Window::onKeyDown(int key_id) {
-    buttons.onKeyDown(key_id);
-    container.onKeyDown(key_id);
+    if (buttons.onKeyDown(key_id) == HANDLED) return HANDLED;
+    if (container.onKeyDown(key_id) == HANDLED) return HANDLED;
     return UNHANDLED;
 }
 

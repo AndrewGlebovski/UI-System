@@ -79,8 +79,8 @@ int main() {
         sf::Color::Black,
         sf::Color::White,
         sf::Color::Black,
-        2.5,
-        0.75
+        sf::Color::Black,
+        1
     );
 
     MainWindow main_window(

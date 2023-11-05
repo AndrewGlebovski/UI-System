@@ -23,6 +23,13 @@ const size_t SCROLLBAR_BACKGROUND_COLOR = 0xffffffff;
 const size_t SCROLLBAR_SCROLLER_COLOR = 0x000000ff;
 const float SCROLLBAR_SCROLLER_FACTOR = 0.1f;
 
+// PREDEFINED VALUES FOR LINE EDIT
+
+const float CURSOR_WIDTH = 2.5;             ///< Cursor width
+const float CURSOR_BLINK_TIME = 0.75f;      ///< Time required to passed between cursor blink states
+const float TEXT_OFFSET = 5;                ///< Text offset from the LineEdit top-left corner
+const float CURSOR_OFFSET = 2;              ///< Cursor position offset from LineEdit top
+
 /// Path to window textures root directory
 #define WINDOW_ASSET_DIR "assets/textures/window"
 

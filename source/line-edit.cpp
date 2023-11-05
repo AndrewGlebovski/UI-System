@@ -4,12 +4,21 @@
 */
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
+
+
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "list.hpp"
 #include "key-id.hpp"
+#include "configs.hpp"
 #include "widget.hpp"
 #include "line-edit.hpp"
+
+
+// ============================================================================
 
 
 LineEdit::LineEdit(
@@ -18,8 +27,14 @@ LineEdit::LineEdit(
 ) :
     Widget(id_, transform_, size_, z_index_, parent_),
     str(""), style(style_), is_typing(false), max_length(max_length_),
-    shift_pressed(false), is_cursor_hidden(false), blink_time(0)
+    shift_pressed(false), is_cursor_hidden(false), blink_time(0), cursor_pos(0)
 {}
+
+
+void LineEdit::setCursorVisible() {
+    is_cursor_hidden = false;
+    blink_time = 0;
+}
 
 
 bool LineEdit::isCorrectKey(int key_id) const {
@@ -46,6 +61,17 @@ const char *LineEdit::getString() const {
 
 void LineEdit::setString(const char *new_str) {
     str.assign(new_str);
+    cursor_pos = 0;
+}
+
+
+const LineEditStyle &LineEdit::getStyle() const {
+    return style;
+}
+
+
+void LineEdit::setStyle(const LineEditStyle &new_style) {
+    style = new_style;
 }
 
 
@@ -55,19 +81,19 @@ void LineEdit::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     sf::RectangleShape rect(size);
     rect.setFillColor(style.background_color);
     rect.setPosition(transforms.front().offset);
-    rect.setOutlineThickness(-1);
-    rect.setOutlineColor(sf::Color::Black);
+    rect.setOutlineThickness(style.border_thickness);
+    rect.setOutlineColor(style.border_color);
     result.draw(rect);
 
-    sf::Text text(str.data(), style.font, style.font_size);
+    sf::Text text(str.data(), style.getFont(), style.font_size);
     text.setFillColor(style.font_color);
-    text.setPosition(transforms.front().offset + Vector2D(5, 5));
+    text.setPosition(transforms.front().offset + Vector2D(TEXT_OFFSET, TEXT_OFFSET));
     result.draw(text);
 
     if (is_typing && !is_cursor_hidden) {
-        sf::RectangleShape cursor(Vector2D(style.cursor_width, size.y + 4));
-        cursor.setFillColor(sf::Color::Black);
-        cursor.setPosition(transforms.front().offset + Vector2D(text.getLocalBounds().width + 6, -2));
+        sf::RectangleShape cursor(Vector2D(CURSOR_WIDTH, size.y + CURSOR_OFFSET * 2));
+        cursor.setFillColor(style.cursor_color);
+        cursor.setPosition(Vector2D(text.findCharacterPos(cursor_pos).x, transforms.front().offset.y - CURSOR_OFFSET));
         result.draw(cursor);
     }
 }
@@ -89,30 +115,43 @@ int LineEdit::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tr
 int LineEdit::onKeyDown(int key_id) {
     switch (key_id) {
         case Escape: 
-            is_typing = false; return HANDLED;
-        case Backspace:
-            if (is_typing && str.length() > 0) {
-                str.pop_back();
-                is_cursor_hidden = false;
-                blink_time = 0;
-                return HANDLED;
-            }
-
-            return UNHANDLED;
         case Enter: 
             is_typing = false; return HANDLED;
+        case Left:
+            if (cursor_pos > 0) cursor_pos--;
+            setCursorVisible();
+            return HANDLED;
+        case Right:
+            if (cursor_pos < str.length()) cursor_pos++;
+            setCursorVisible();
+            return HANDLED;
+        case Backspace:
+            if (is_typing && str.length() > 0 && cursor_pos > 0) {
+                str.erase(str.begin() + cursor_pos - 1);
+                cursor_pos--;
+                setCursorVisible();
+            }
+            return (is_typing) ? HANDLED : UNHANDLED;
+        case Delete:
+            if (is_typing && str.length() > 0 && cursor_pos < str.length()) {
+                str.erase(str.begin() + cursor_pos);
+                setCursorVisible();
+            }
+            return (is_typing) ? HANDLED : UNHANDLED;
         case LShift:
         case RShift:
             shift_pressed = true; return UNHANDLED;
         default:
             if (is_typing && isCorrectKey(key_id) && str.length() < max_length) {
-                str.push_back(convertKey(key_id));
-                is_cursor_hidden = false;
-                blink_time = 0;
-                return HANDLED;
+                if (cursor_pos == str.length())
+                    str.push_back(convertKey(key_id));
+                else
+                    str.insert(str.begin() + cursor_pos, convertKey(key_id));
+                
+                cursor_pos++;
+                setCursorVisible();
             }
-
-            return UNHANDLED;
+            return (is_typing) ? HANDLED : UNHANDLED;
     }
 }
 
@@ -131,10 +170,16 @@ int LineEdit::onKeyUp(int key_id) {
 int LineEdit::onTimer(float delta_time) {
     blink_time += delta_time;
 
-    if (blink_time > style.blink_time) {
+    if (blink_time > CURSOR_BLINK_TIME) {
         is_cursor_hidden = !is_cursor_hidden;
         blink_time = 0;
     }
 
     return UNHANDLED;
 }
+
+
+// ============================================================================
+
+
+#pragma GCC diagnostic pop
