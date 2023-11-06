@@ -439,7 +439,7 @@ PolygonTool::~PolygonTool() {
 
 
 TextTool::TextTool() : text_font(), text_preview(nullptr) {
-    text_font.loadFromFile(FONT_FILE);
+    ASSERT(text_font.loadFromFile(FONT_FILE), "Failed to load font!\n");
 
     LineEditStyle style(
         text_font,

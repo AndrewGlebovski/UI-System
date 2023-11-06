@@ -40,13 +40,39 @@ protected:
     Container container;        ///< Window content manager
     Menu *menu;                 ///< Window menu
 
+
+    /**
+     * \brief Adds buttons for managing window
+    */
+    void addButtons();
+
+    /**
+     * \brief Adds close button to window
+    */
+    void addCloseButton();
+
+    /**
+     * \brief Adds expand button to window
+    */
+    void addExpandButton();
+
+    /**
+     * \brief Adds move button to window
+    */
+    void addMoveButton();
+
+    /**
+     * \brief Adds resize buttons to window
+    */
+    void addResizeButtons();
+
 public:
     /**
      * \brief Contstructs window
      * \note Position and size consider title bar and frame
     */
     Window(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_, 
+        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         const sf::String &title_, const WindowStyle &style_
     );
 
@@ -67,18 +93,28 @@ public:
     Vector2D getAreaSize() const;
 
 
+    /**
+     * \brief Adds menu to window or replaces existing one
+     * \warning Menu must be allocated using new and will be deleted by window
+    */
     void setMenu(Menu *menu_);
 
 
+    /**
+     * \brief Returns pointer to menu
+    */
     Menu *getMenu();
 
 
+    /**
+     * \brief Finds pointer to widget inside window container
+    */
     virtual Widget *findWidget(size_t widget_id) override;
 
 
     /**
-     * \brief Adds new widget to manager
-     * \warning Widgets should be allocated using new and will be deleted by manager
+     * \brief Adds new widget to window container
+     * \warning Widgets should be allocated using new and will be deleted by window
     */
     virtual size_t addChild(Widget *child) override;
 
