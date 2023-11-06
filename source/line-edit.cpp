@@ -40,15 +40,18 @@ void LineEdit::setCursorVisible() {
 bool LineEdit::isCorrectKey(int key_id) const {
     if (key_id >= A && key_id <= Z) return true;
     if (key_id >= Num0 && key_id <= Num9) return true;
-    if (shift_pressed && key_id == Subtract) return true;
-
+    if (!shift_pressed && key_id == Slash) return true;
+    if (!shift_pressed && key_id == Period) return true;
+    if (shift_pressed && key_id == Hyphen) return true;
     return false;
 }
 
 
 char LineEdit::convertKey(int key_id) const {
     if (key_id >= Num0 && key_id <= Num9) return key_id - Num0 + '0';
-    if (key_id == Subtract) return '_';
+    if (key_id == Hyphen) return '_';
+    if (key_id == Period) return '.';
+    if (key_id == Slash) return '/';
     if (shift_pressed) return key_id + 'A';
     return key_id + 'a';
 }
