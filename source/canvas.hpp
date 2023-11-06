@@ -440,12 +440,7 @@ protected:
     Vector2D last_position;
     CanvasGroup *group;
     FilterMask filter_mask;
-
-
-    /**
-     * \brief Clears canvas with white color
-    */
-    void clear_canvas();
+    std::string filename;
 
 public:
     friend VScrollCanvas;
@@ -453,35 +448,83 @@ public:
 
 
     /**
-     * \brief Creates empty canvas or opens image specified by path
+     * \brief Creates empty canvas
     */
     Canvas(
         size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
-        const char *image_path, ToolPalette *palette_, CanvasGroup *group_
+        ToolPalette &palette_, CanvasGroup &group_
     );
-
 
     Canvas(const Canvas &canvas) = default;
     Canvas &operator = (const Canvas &canvas) = default;
 
+    /**
+     * \brief Clears canvas with background color
+    */
+    void clearCanvas();
 
+    /**
+     * \brief Creates image with the given size filled with background color
+    */
+    void createImage(size_t width, size_t height);
+
+    /**
+     * \brief Opens image file
+     * \note If file fails to open, nothing happens
+    */
+    void openImage(const char *filename_);
+
+    /**
+     * \brief Saves texture to current image file
+     * \warning Assert will be called if image is not open
+    */
+    void saveImage() const;
+
+    /**
+     * \brief Saves texture to path
+    */
+    void saveImageAs(const char *filename_) const;
+
+    /**
+     * \brief Returns path to current image
+     * \note Returns nullptr if image is not open
+    */
+    const char *getFilename() const;
+
+    /**
+     * \brief Returns true if image is open
+    */
+    bool isImageOpen() const;
+
+    /**
+     * \brief Returns size of the texture
+    */
     Vector2D getTextureSize() const;
 
-
+    /**
+     * \brief Returns reference to texture
+    */
     sf::RenderTexture &getTexture();
 
-
+    /**
+     * \brief Returns palette that this canvas is using
+    */
     ToolPalette *getPalette();
 
-
+    /**
+     * \brief Returns canvas filter mask
+    */
     FilterMask &getFilterMask();
 
-
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
-
-
+    /**
+     * \brief Returns true if canvas is active in his group
+    */
     bool isActive() const;
 
+    /**
+     * \brief Draws canvas inner texture
+    */
+    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
@@ -490,6 +533,11 @@ public:
     virtual int onKeyUp(int key_id) override;
     virtual int onTimer(float delta_time) override;
     virtual int onParentResize() override;
+
+    /**
+     * \brief Removes canvas from his group
+    */
+    virtual ~Canvas() override;
 };
 
 
@@ -501,9 +549,9 @@ protected:
 public:
     VScrollCanvas(Canvas &canvas_) : canvas(canvas_) {}
 
-
     virtual void operator () (vec_t param) override {
-        canvas.texture_offset.y = param * (canvas.getTextureSize().y - canvas.size.y);
+        if (canvas.getTextureSize().y > canvas.size.y)
+            canvas.texture_offset.y = param * (canvas.getTextureSize().y - canvas.size.y);
     }
 };
 
@@ -516,9 +564,9 @@ protected:
 public:
     HScrollCanvas(Canvas &canvas_) : canvas(canvas_) {}
 
-
     virtual void operator () (vec_t param) override {
-        canvas.texture_offset.x = param * (canvas.getTextureSize().x - canvas.size.x);
+        if (canvas.getTextureSize().x > canvas.size.x)
+            canvas.texture_offset.x = param * (canvas.getTextureSize().x - canvas.size.x);
     }
 };
 
@@ -533,9 +581,6 @@ private:
 public:
     FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_);
 
-
     virtual int onKeyDown(int key_id) override;
-
-
     virtual int onKeyUp(int key_id) override;
 };

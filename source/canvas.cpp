@@ -801,6 +801,7 @@ void CanvasGroup::setActive(Canvas *new_active) {
 
 
 Canvas *CanvasGroup::getActive() {
+    if (canvases.size() == 0) return nullptr;
     return canvases[active];
 }
 
@@ -836,8 +837,10 @@ FilterAction::FilterAction(FilterPalette::FILTERS filter_id_, FilterPalette &pal
 
 
 void FilterAction::operator () () {
-    palette.getFilter(filter_id)->applyFilter(*group.getActive());
-    palette.setLastFilter(filter_id);
+    if (group.getActive()) {
+        palette.getFilter(filter_id)->applyFilter(*group.getActive());
+        palette.setLastFilter(filter_id);
+    }
 }
 
 
@@ -847,52 +850,69 @@ FilterAction *FilterAction::clone() { return new FilterAction(filter_id, palette
 // ============================================================================
 
 
-void Canvas::clear_canvas() {
+Canvas::Canvas(
+    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+    ToolPalette &palette_, CanvasGroup &group_
+) :
+    Widget(id_, transform_, size_, z_index_, parent_),
+    texture(), texture_offset(Vector2D(0, 0)),
+    palette(&palette_), last_position(), group(&group_), filter_mask(),
+    filename("")
+{
+    group->addCanvas(this);
+}
+
+
+void Canvas::clearCanvas() {
     texture.clear(CANVAS_BACKGROUND);
 }
 
 
-Canvas::Canvas(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
-    const char *image_path, ToolPalette *palette_, CanvasGroup *group_
-) :
-    Widget(id_, transform_, size_, z_index_, parent_),
-    texture(), texture_offset(Vector2D(0, 0)),
-    palette(palette_), last_position(), group(group_), filter_mask()
-{
-    ASSERT(palette, "Canvas must have palette!\n");
-    ASSERT(group, "Canvas must be assigned to group!\n");
-    group->addCanvas(this);
+void Canvas::createImage(size_t width, size_t height) {
+    ASSERT(texture.create(width, height), "Failed to create texture!\n");
+    clearCanvas();
 
-    Vector2D texture_size = size;
-
-    if (image_path) {
-        sf::Texture image;
-        if (image.loadFromFile(image_path)) {
-            if (texture_size.x < image.getSize().x) texture_size.x = image.getSize().x;
-            if (texture_size.y < image.getSize().y) texture_size.y = image.getSize().y;
-
-            texture.create(texture_size.x, texture_size.y);
-            clear_canvas();
-
-            sf::Sprite tool_sprite(image);
-            tool_sprite.setPosition(Vector2D());
-
-            texture.draw(tool_sprite);
-
-            filter_mask.initMask(texture.getSize().x, texture.getSize().y);
-            filter_mask.fill(true);
-
-            return;
-        }
-    }
-
-    texture.create(size.x, size.y);
-
-    filter_mask.initMask(texture.getSize().x, texture.getSize().y);
+    filter_mask.initMask(width, height);
     filter_mask.fill(true);
 
-    clear_canvas();
+    filename = "";
+}
+
+
+void Canvas::openImage(const char *filename_) {
+    sf::Texture image;
+    if (image.loadFromFile(filename_)) {
+        createImage(image.getSize().x, image.getSize().y);
+
+        sf::Sprite tool_sprite(image);
+        tool_sprite.setPosition(Vector2D());
+
+        texture.draw(tool_sprite);
+
+        filename = filename_;
+    }
+}
+
+
+void Canvas::saveImage() const {
+    ASSERT(isImageOpen(), "File was not specified!\n");
+    saveImageAs(filename.data());
+}
+
+
+void Canvas::saveImageAs(const char *filename_) const {
+    sf::Image image = texture.getTexture().copyToImage();
+    image.saveToFile(filename_);
+}
+
+
+const char *Canvas::getFilename() const {
+    return (isImageOpen()) ? filename.data() : nullptr;
+}
+
+
+bool Canvas::isImageOpen() const {
+    return filename.length() > 0;
 }
 
 
@@ -926,7 +946,9 @@ void Canvas::draw(sf::RenderTexture &result, List<Transform> &transforms) {
 
     sf::Sprite tool_sprite(texture.getTexture());
     sf::Vector2i offset_(texture_offset.x, texture_offset.y);
-    sf::Vector2i size_(size.x, size.y);
+    sf::Vector2i size_(texture.getSize().x, texture.getSize().y);
+    if (size_.x > size.x) size_.x = size.x;
+    if (size_.y > size.y) size_.y = size.y;
     tool_sprite.setTextureRect(sf::IntRect(offset_, size_));
     tool_sprite.setPosition(transforms.front().offset);
 
@@ -1069,6 +1091,12 @@ int Canvas::onTimer(float delta_time) {
         palette->getCurrentTool()->getWidget()->onTimer(delta_time);
     
     return UNHANDLED;
+}
+
+
+Canvas::~Canvas() {
+    ASSERT(group, "Canvas is not in group!\n");
+    group->removeCanvas(this);
 }
 
 

@@ -40,11 +40,11 @@ protected:
     Container container;        ///< Window content manager
     Menu *menu;                 ///< Window menu
 
-
+private:
     /**
      * \brief Adds buttons for managing window
     */
-    void addButtons();
+    void addButtons(bool can_resize, bool can_move, bool can_close);
 
     /**
      * \brief Adds close button to window
@@ -73,7 +73,11 @@ public:
     */
     Window(
         size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
-        const sf::String &title_, const WindowStyle &style_
+        const sf::String &title_,
+        const WindowStyle &style_,
+        bool can_resize = true,
+        bool can_move = true,
+        bool can_close = true
     );
 
 

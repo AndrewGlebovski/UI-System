@@ -25,6 +25,8 @@ const Vector2D CLOSE_OFFSET = Vector2D(-45, 12);            ///< Window close bu
 const Vector2D EXPAND_OFFSET = Vector2D(-85, 12);           ///< Window expand button offset from window top-right corner
 const size_t CLOSE_BUTTON_ID = Widget::AUTO_ID + 1;         ///< Window append button ID
 const size_t EXPAND_BUTTON_ID = Widget::AUTO_ID + 2;        ///< Window close button ID
+const size_t BUTTONS_ID = Widget::AUTO_ID + 3;              ///< Window buttons container ID
+const size_t CONTAINER_ID = Widget::AUTO_ID + 4;            ///< Window container ID
 
 
 /// Invisible button for moving windows
@@ -133,26 +135,31 @@ public:
 
 Window::Window(
     size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_, 
-    const sf::String &title_, const WindowStyle &style_
+    const sf::String &title_,
+    const WindowStyle &style_,
+    bool can_resize,
+    bool can_move,
+    bool can_close
 ) :
     Widget(id_, transform_, size_, z_index_, parent_),
     title(title_), style(style_),
-    buttons(1, Transform(), size, 1, this, false), 
-    container(2, Transform(), Vector2D(), 1, this),
+    buttons(BUTTONS_ID, Transform(), size, 1, this, false), 
+    container(CONTAINER_ID, Transform(), Vector2D(), 1, this),
     menu(nullptr)
 {
     container.transform.offset = getAreaPosition() - transform.offset;
     container.size = getAreaSize();
-    addButtons();
+    addButtons(can_resize, can_move, can_close);
 }
 
 
-void Window::addButtons() {
-    addMoveButton();
-    addCloseButton();
-    addExpandButton();
-
-    if (style.outline > MIN_OUTLINE) addResizeButtons();
+void Window::addButtons(bool can_resize, bool can_move, bool can_close) {
+    if (can_move) addMoveButton();
+    if (can_close) addCloseButton();
+    if (can_resize) {
+        addExpandButton();
+        addResizeButtons();
+    }
 }
 
 
@@ -398,12 +405,15 @@ void Window::tryResize(const Vector2D &new_size) {
     container.size = getAreaSize();
     container.onParentResize();
 
-    if (buttons.findWidget(CLOSE_BUTTON_ID))
-        buttons.findWidget(CLOSE_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
-    
-    if (buttons.findWidget(EXPAND_BUTTON_ID))
-        buttons.findWidget(EXPAND_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
+    Widget *close_button = buttons.findWidget(CLOSE_BUTTON_ID);
+    Widget *expand_button = buttons.findWidget(EXPAND_BUTTON_ID);
 
+    if (close_button)
+        close_button->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
+    
+    if (expand_button)
+        expand_button->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
+    
     if (menu) menu->size.x = getAreaSize().x;
 }
 
@@ -464,11 +474,14 @@ void MainWindow::tryResize(const Vector2D &new_size) {
     container.size = getAreaSize();
     container.onParentResize();
 
-    if (buttons.findWidget(CLOSE_BUTTON_ID))
-        buttons.findWidget(CLOSE_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
+    Widget *close_button = buttons.findWidget(CLOSE_BUTTON_ID);
+    Widget *expand_button = buttons.findWidget(EXPAND_BUTTON_ID);
+
+    if (close_button)
+        close_button->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
     
-    if (buttons.findWidget(EXPAND_BUTTON_ID))
-        buttons.findWidget(EXPAND_BUTTON_ID)->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
+    if (expand_button)
+        expand_button->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
     
     if (menu) menu->size.x = getAreaSize().x;
 }
