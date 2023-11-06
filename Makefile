@@ -18,12 +18,12 @@ all: $(BIN_DIR) $(EXE_NAME)
 
 
 # Завершение сборки
-$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o window.o widget.o canvas.o button.o scrollbar.o asset.o container.o menu.o line-edit.o) 
+$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o window.o widget.o canvas.o button.o scrollbar.o asset.o container.o menu.o line-edit.o dialog.o) 
 	$(COMPILER) $^ -o $(EXE_NAME) -lsfml-graphics -lsfml-window -lsfml-system
 
 
 # Предварительная сборка main.cpp
-$(BIN_DIR)/main.o: $(addprefix $(SRC_DIR)/, main.cpp configs.hpp window.hpp vector.hpp list.hpp widget.hpp button.hpp scrollbar.hpp canvas.hpp asset.hpp clock.hpp container.hpp menu.hpp line-edit.hpp)
+$(BIN_DIR)/main.o: $(addprefix $(SRC_DIR)/, main.cpp configs.hpp window.hpp vector.hpp list.hpp widget.hpp button.hpp scrollbar.hpp canvas.hpp asset.hpp clock.hpp container.hpp menu.hpp line-edit.hpp dialog.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
@@ -74,6 +74,11 @@ $(BIN_DIR)/menu.o: $(addprefix $(SRC_DIR)/, menu.cpp menu.hpp button.hpp vector.
 
 # Предварительная сборка line-edit.cpp
 $(BIN_DIR)/line-edit.o: $(addprefix $(SRC_DIR)/, line-edit.cpp line-edit.hpp vector.hpp list.hpp widget.hpp configs.hpp)
+	$(COMPILER) $(FLAGS) -c $< -o $@
+
+
+# Предварительная сборка dialog.cpp
+$(BIN_DIR)/dialog.o: $(addprefix $(SRC_DIR)/, dialog.cpp dialog.hpp vector.hpp list.hpp widget.hpp container.hpp window.hpp button.hpp configs.hpp asset.hpp menu.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
