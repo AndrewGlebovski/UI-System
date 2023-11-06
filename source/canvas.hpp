@@ -478,12 +478,13 @@ public:
      * \brief Saves texture to current image file
      * \warning Assert will be called if image is not open
     */
-    void saveImage() const;
+    void saveImage();
 
     /**
      * \brief Saves texture to path
+     * \note Changes filename field to filename_
     */
-    void saveImageAs(const char *filename_) const;
+    void saveImageAs(const char *filename_);
 
     /**
      * \brief Returns path to current image

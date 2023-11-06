@@ -894,15 +894,16 @@ void Canvas::openImage(const char *filename_) {
 }
 
 
-void Canvas::saveImage() const {
+void Canvas::saveImage() {
     ASSERT(isImageOpen(), "File was not specified!\n");
     saveImageAs(filename.data());
 }
 
 
-void Canvas::saveImageAs(const char *filename_) const {
+void Canvas::saveImageAs(const char *filename_) {
     sf::Image image = texture.getTexture().copyToImage();
     image.saveToFile(filename_);
+    filename = filename_;
 }
 
 

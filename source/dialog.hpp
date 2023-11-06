@@ -31,11 +31,14 @@ protected:
     Dialog *dialog;
 
 public:
+    DialogAction() : dialog(nullptr) {}
+
+    DialogAction(const DialogAction&) = default;
+    DialogAction &operator = (const DialogAction&) = default;
+
     virtual void operator () () override = 0;
 
-
     virtual DialogAction *clone() override = 0;
-
 
     void setDialog(Dialog &dialog_) { dialog = &dialog_; }
 };

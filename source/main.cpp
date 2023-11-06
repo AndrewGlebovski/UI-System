@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <stdio.h>
 #include <time.h>
+#include <sys/stat.h>
 #include "vector.hpp"
 #include "list.hpp"
 #include "configs.hpp"
@@ -14,10 +15,8 @@
 #include "window.hpp"
 #include "canvas.hpp"
 #include "clock.hpp"
-
-
-/// Opens picture on canvas in new subwindow with scrollbars
-Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
+#include "dialog.hpp"
+#include "canvas_dialogs.hpp"
 
 
 /// Creates palette view in new subwindow
@@ -67,6 +66,24 @@ int main() {
         sf::Color(0x000080ff)
     );
 
+    LineEditStyle line_edit_style(
+        font,
+        20,
+        sf::Color::Black,
+        sf::Color::White,
+        sf::Color::Black,
+        sf::Color::Black,
+        1
+    );
+
+    ButtonStyle button_style(
+        font,
+        20,
+        sf::Color::Black,
+        sf::Color::White,
+        sf::Color::White
+    );
+
     ClockStyle clock_style(
         sf::Color::Black,
         20,
@@ -94,9 +111,32 @@ int main() {
     CanvasGroup *canvas_group = new CanvasGroup();
     FilterPalette *filter_palette = new FilterPalette();
     
+    main_menu->addMenuButton("File");
+    main_menu->addButton(0, "Open", new CreateOpenFileDialog(
+        main_window,
+        *palette,
+        *canvas_group,
+        window_style,
+        scrollbar_style,
+        line_edit_style,
+        button_style
+    ));
+
+    main_menu->addButton(0, "Save", new SaveFileAction(
+        *canvas_group
+    ));
+    
+    main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(
+        main_window,
+        *canvas_group,
+        window_style,
+        line_edit_style,
+        button_style
+    ));
+    
     main_menu->addMenuButton("Filter");
-    main_menu->addButton(0, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER, *filter_palette, *canvas_group));
-    main_menu->addButton(0, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER, *filter_palette, *canvas_group));
+    main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER, *filter_palette, *canvas_group));
+    main_menu->addButton(1, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER, *filter_palette, *canvas_group));
 
     main_window.setMenu(main_menu);
 
@@ -161,59 +201,11 @@ int main() {
     }
 
     delete palette;
+    delete canvas_group;
+    delete filter_palette;
     
     printf("UI System!\n");
     return 0;
-}
-
-
-Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
-    Window *subwindow = new Window(
-        Widget::AUTO_ID,
-        Transform(Vector2D(300, 100)),
-        Vector2D(800, 600),
-        1,
-        nullptr,
-        (filename) ? filename : "Canvas",
-        window_style
-    );
-
-    Canvas *canvas = new Canvas(
-        Widget::AUTO_ID,
-        Transform(),
-        subwindow->getAreaSize() - Vector2D(30, 30),
-        0,
-        nullptr,
-        palette,
-        group
-    );
-
-    if (filename) canvas->openImage(filename);
-    else canvas->createImage(1920, 1080);
-
-    subwindow->addChild(canvas);
-
-    subwindow->addChild(new VScrollBar(
-        Widget::AUTO_ID,
-        Transform(Vector2D(subwindow->getAreaSize().x - 20, 0)),
-        Vector2D(20, subwindow->getAreaSize().y - 30),
-        1,
-        nullptr,
-        new VScrollCanvas(*canvas),
-        scrollbar_style
-    ));
-
-    subwindow->addChild(new HScrollBar(
-        Widget::AUTO_ID,
-        Transform(Vector2D(0, subwindow->getAreaSize().y - 20)),
-        Vector2D(subwindow->getAreaSize().x, 20),
-        1,
-        nullptr,
-        new HScrollCanvas(*canvas),
-        scrollbar_style
-    ));
-
-    return subwindow;
 }
 
 

@@ -23,7 +23,7 @@ $(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o window.o widget.o canvas.o
 
 
 # Предварительная сборка main.cpp
-$(BIN_DIR)/main.o: $(addprefix $(SRC_DIR)/, main.cpp configs.hpp window.hpp vector.hpp list.hpp widget.hpp button.hpp scrollbar.hpp canvas.hpp asset.hpp clock.hpp container.hpp menu.hpp line-edit.hpp dialog.hpp)
+$(BIN_DIR)/main.o: $(addprefix $(SRC_DIR)/, main.cpp configs.hpp window.hpp vector.hpp list.hpp widget.hpp button.hpp scrollbar.hpp canvas.hpp asset.hpp clock.hpp container.hpp menu.hpp line-edit.hpp dialog.hpp canvas_dialogs.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 
