@@ -4,6 +4,12 @@
 */
 
 
+using EVENT_STATUS = bool;              ///< Shows if event was handled or not
+
+const EVENT_STATUS UNHANDLED = false;   ///< Event was not handled (father broadcasting is required)
+const EVENT_STATUS HANDLED = true;      ///< Event was handled (father broadcasting is not required)
+
+
 /// Holds transformation of the widget
 struct Transform {
     Vector2D offset;        ///< Offset from parent
@@ -100,13 +106,6 @@ public:
     static const size_t AUTO_ID = 0;
 
 
-    /// Shows if event was handled or not
-    enum EVENT_STATUS {
-        UNHANDLED   = 0,    ///< Event was not handled (father broadcasting is required)
-        HANDLED     = 1     ///< Event was handled (father broadcasting is not required)
-    };
-
-
     /// Shows parent if some actions requiered for this widget
     enum WIDGET_STATUS {
         PASS        = 0,    ///< Nothing to be done for this widget
@@ -189,13 +188,13 @@ public:
     virtual void tryTransform(const Transform &new_transform);
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) { return UNHANDLED; }
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) { return UNHANDLED; }
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) { return UNHANDLED; }
-    virtual int onKeyUp(int key_id) { return UNHANDLED; }
-    virtual int onKeyDown(int key_id) { return UNHANDLED; }
-    virtual int onTimer(float delta_time) { return UNHANDLED; }
-    virtual int onParentResize() { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) { return UNHANDLED; }
+    virtual EVENT_STATUS onKeyUp(int key_id) { return UNHANDLED; }
+    virtual EVENT_STATUS onKeyDown(int key_id) { return UNHANDLED; }
+    virtual EVENT_STATUS onTimer(float delta_time) { return UNHANDLED; }
+    virtual EVENT_STATUS onParentResize() { return UNHANDLED; }
     virtual void checkChildren() {}
 
 

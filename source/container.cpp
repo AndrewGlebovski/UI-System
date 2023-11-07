@@ -118,7 +118,7 @@ do {                                                                            
 } while(0)
 
 
-int Container::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
@@ -129,7 +129,7 @@ int Container::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms
 }
 
 
-int Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
@@ -140,7 +140,7 @@ int Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Tra
 }
 
 
-int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
@@ -151,7 +151,7 @@ int Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<T
 }
 
 
-int Container::onKeyUp(int key_id) {
+EVENT_STATUS Container::onKeyUp(int key_id) {
     if (widgets.size() == 0) return UNHANDLED;
 
     CONTAINER_FOR(onKeyUp(key_id));
@@ -160,7 +160,7 @@ int Container::onKeyUp(int key_id) {
 }
 
 
-int Container::onKeyDown(int key_id) {
+EVENT_STATUS Container::onKeyDown(int key_id) {
     if (widgets.size() == 0) return UNHANDLED;
 
     CONTAINER_FOR(onKeyDown(key_id));
@@ -169,7 +169,7 @@ int Container::onKeyDown(int key_id) {
 }
 
 
-int Container::onTimer(float delta_time) {
+EVENT_STATUS Container::onTimer(float delta_time) {
     for (size_t i = 0; i < widgets.size(); i++)
         widgets[i]->onTimer(delta_time);
     
@@ -177,7 +177,7 @@ int Container::onTimer(float delta_time) {
 }
 
 
-int Container::onParentResize() {
+EVENT_STATUS Container::onParentResize() {
     for (size_t i = 0; i < widgets.size(); i++)
         widgets[i]->onParentResize();
     

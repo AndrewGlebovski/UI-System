@@ -46,10 +46,10 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual int onParentResize() override;
+    virtual EVENT_STATUS onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onParentResize() override;
 };
 
 
@@ -83,10 +83,10 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual int onParentResize() override;
+    virtual EVENT_STATUS onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onParentResize() override;
 };
 
 
@@ -345,7 +345,7 @@ do {                                                                            
 } while(0)
 
 
-int Window::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS Window::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     BROADCAST_MOUSE_EVENT(onMouseMove(mouse_x, mouse_y, transforms));
@@ -354,7 +354,7 @@ int Window::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
 }
 
 
-int Window::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Window::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     BROADCAST_MOUSE_EVENT(onMouseButtonUp(mouse_x, mouse_y, button_id, transforms));
@@ -363,7 +363,7 @@ int Window::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transf
 }
 
 
-int Window::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Window::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     BROADCAST_MOUSE_EVENT(onMouseButtonDown(mouse_x, mouse_y, button_id, transforms));
@@ -375,21 +375,21 @@ int Window::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tran
 #undef BROADCAST_MOUSE_EVENT
 
 
-int Window::onKeyUp(int key_id) {
+EVENT_STATUS Window::onKeyUp(int key_id) {
     if (buttons.onKeyUp(key_id) == HANDLED) return HANDLED;
     if (container.onKeyUp(key_id) == HANDLED) return HANDLED;
     return UNHANDLED;
 }
 
 
-int Window::onKeyDown(int key_id) {
+EVENT_STATUS Window::onKeyDown(int key_id) {
     if (buttons.onKeyDown(key_id) == HANDLED) return HANDLED;
     if (container.onKeyDown(key_id) == HANDLED) return HANDLED;
     return UNHANDLED;
 }
 
 
-int Window::onTimer(float delta_time) {
+EVENT_STATUS Window::onTimer(float delta_time) {
     buttons.onTimer(delta_time);
     container.onTimer(delta_time);
     return UNHANDLED;
@@ -418,7 +418,7 @@ void Window::tryResize(const Vector2D &new_size) {
 }
 
 
-int Window::onParentResize() {
+EVENT_STATUS Window::onParentResize() {
     // WINDOW MOVES TO KEEP ITS SIZE AS LONG AS POSSIBLE
     tryTransform(transform);
 
@@ -541,7 +541,7 @@ void MoveButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-int MoveButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS MoveButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     if (!is_moving) return UNHANDLED;
 
     // WE CHANGED WINDOW POSITION SO CURRENT TRANSFORM WILL BE INCORRECT
@@ -557,7 +557,7 @@ int MoveButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transform
 }
 
 
-int MoveButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS MoveButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y))) {
@@ -570,13 +570,13 @@ int MoveButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 }
 
 
-int MoveButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS MoveButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }
 
 
-int MoveButton::onParentResize() {
+EVENT_STATUS MoveButton::onParentResize() {
     float outline = window.getStyle().outline;
     Vector2D window_size = window.size;
 
@@ -607,7 +607,7 @@ void ResizeButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-int ResizeButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS ResizeButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     if (!is_moving) return UNHANDLED;
 
     Vector2D shift = Vector2D(mouse_x, mouse_y) - prev_mouse;
@@ -655,7 +655,7 @@ int ResizeButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transfo
 }
 
 
-int ResizeButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ResizeButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y))) {
@@ -668,13 +668,13 @@ int ResizeButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, Lis
 }
 
 
-int ResizeButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ResizeButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }
 
 
-int ResizeButton::onParentResize() {
+EVENT_STATUS ResizeButton::onParentResize() {
     float outline = window.getStyle().outline;
     Vector2D window_size = window.size;
 

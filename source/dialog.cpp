@@ -38,31 +38,31 @@ Dialog::Dialog(
 {}
 
 
-int Dialog::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS Dialog::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     Window::onMouseMove(mouse_x, mouse_y, transforms);
     return HANDLED;
 }
 
 
-int Dialog::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Dialog::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     Window::onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
     return HANDLED;
 }
 
 
-int Dialog::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Dialog::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     Window::onMouseButtonDown(mouse_x, mouse_y, button_id,transforms);
     return HANDLED;
 }
 
 
-int Dialog::onKeyUp(int key_id) {
+EVENT_STATUS Dialog::onKeyUp(int key_id) {
     Window::onKeyUp(key_id);
     return HANDLED;
 }
 
 
-int Dialog::onKeyDown(int key_id) {
+EVENT_STATUS Dialog::onKeyDown(int key_id) {
     Window::onKeyDown(key_id);
     return HANDLED;
 }

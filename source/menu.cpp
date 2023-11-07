@@ -86,7 +86,7 @@ void MenuButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-int MenuButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS MenuButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     RectButton::onMouseMove(mouse_x, mouse_y, transforms);
 
     if (!is_opened) return UNHANDLED;
@@ -100,7 +100,7 @@ int MenuButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transform
 }
 
 
-int MenuButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS MenuButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     if (RectButton::onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
         return HANDLED;
 
@@ -116,7 +116,7 @@ int MenuButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<
 }
 
 
-int MenuButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS MenuButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     if (RectButton::onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
         return HANDLED;
 
@@ -229,7 +229,7 @@ void Menu::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-int Menu::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS Menu::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++)
@@ -239,7 +239,7 @@ int Menu::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
 }
 
 
-int Menu::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Menu::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++) {
@@ -258,7 +258,7 @@ int Menu::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transf
 }
 
 
-int Menu::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Menu::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++)
@@ -269,7 +269,7 @@ int Menu::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transfor
 }
 
 
-int Menu::onParentResize() {
+EVENT_STATUS Menu::onParentResize() {
     tryResize(Vector2D(parent->size.x, size.y));
     return UNHANDLED;
 }

@@ -59,7 +59,7 @@ public:
     }
 
 
-    virtual int onTimer(float delta_time) override {
+    virtual EVENT_STATUS onTimer(float delta_time) override {
         time_passed += delta_time;
 
         if (time_passed > 1) {

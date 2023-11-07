@@ -47,7 +47,7 @@ void ScrollBar::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-int ScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS ScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     if (is_moving) {
         Vector2D mouse(mouse_x, mouse_y);
 
@@ -61,7 +61,7 @@ int ScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms
 }
 
 
-int ScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     Vector2D mouse(mouse_x, mouse_y);
@@ -82,7 +82,7 @@ int ScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<T
 }
 
 
-int ScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }
@@ -117,7 +117,7 @@ void VScrollBar::scrollTo(const Vector2D &shift) {
 }
 
 
-int VScrollBar::onParentResize() {
+EVENT_STATUS VScrollBar::onParentResize() {
     float prev = scroller.getPosition().y / (size.y - scroller.getSize().y);
 
     tryTransform(Transform(Vector2D(parent->size.x - 20, transform.offset.y)));
@@ -154,7 +154,7 @@ void HScrollBar::scrollTo(const Vector2D &shift) {
 }
 
 
-int HScrollBar::onParentResize() {
+EVENT_STATUS HScrollBar::onParentResize() {
     float prev = scroller.getPosition().x / (size.x - scroller.getSize().x);
 
     tryTransform(Transform(Vector2D(transform.offset.x, parent->size.y - 20)));

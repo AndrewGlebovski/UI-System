@@ -257,10 +257,10 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual int onKeyDown(int key_id) override;
+    virtual EVENT_STATUS onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onKeyDown(int key_id) override;
 
 
     virtual ~ToolPaletteView();
@@ -542,13 +542,13 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual int onKeyDown(int key_id) override;
-    virtual int onKeyUp(int key_id) override;
-    virtual int onTimer(float delta_time) override;
-    virtual int onParentResize() override;
+    virtual EVENT_STATUS onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onKeyDown(int key_id) override;
+    virtual EVENT_STATUS onKeyUp(int key_id) override;
+    virtual EVENT_STATUS onTimer(float delta_time) override;
+    virtual EVENT_STATUS onParentResize() override;
 
     /**
      * \brief Removes canvas from his group
@@ -597,6 +597,6 @@ private:
 public:
     FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_);
 
-    virtual int onKeyDown(int key_id) override;
-    virtual int onKeyUp(int key_id) override;
+    virtual EVENT_STATUS onKeyDown(int key_id) override;
+    virtual EVENT_STATUS onKeyUp(int key_id) override;
 };

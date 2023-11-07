@@ -145,7 +145,7 @@ void LineEdit::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-int LineEdit::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS LineEdit::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y))) {
@@ -158,7 +158,7 @@ int LineEdit::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tr
 }
 
 
-int LineEdit::onKeyDown(int key_id) {
+EVENT_STATUS LineEdit::onKeyDown(int key_id) {
     switch (key_id) {
         case Escape: 
         case Enter: 
@@ -202,7 +202,7 @@ int LineEdit::onKeyDown(int key_id) {
 }
 
 
-int LineEdit::onKeyUp(int key_id) {
+EVENT_STATUS LineEdit::onKeyUp(int key_id) {
     switch (key_id) {
         case LShift:
         case RShift:
@@ -213,7 +213,7 @@ int LineEdit::onKeyUp(int key_id) {
 }
 
 
-int LineEdit::onTimer(float delta_time) {
+EVENT_STATUS LineEdit::onTimer(float delta_time) {
     blink_time += delta_time;
 
     if (blink_time > CURSOR_BLINK_TIME) {

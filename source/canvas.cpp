@@ -630,28 +630,28 @@ void ToolPaletteView::draw(sf::RenderTarget &result, List<Transform> &transforms
 }
 
 
-int ToolPaletteView::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS ToolPaletteView::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     return buttons.onMouseMove(mouse_x, mouse_y, transforms);
 }
 
 
-int ToolPaletteView::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ToolPaletteView::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     return buttons.onMouseButtonDown(mouse_x, mouse_y, button_id, transforms);
 }
 
 
-int ToolPaletteView::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ToolPaletteView::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     return buttons.onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
 }
 
 
-int ToolPaletteView::onKeyDown(int key_id) {
+EVENT_STATUS ToolPaletteView::onKeyDown(int key_id) {
     switch(key_id) {
         case Num1: palette->setCurrentTool(ToolPalette::PENCIL_TOOL); return HANDLED;
         case Num2: palette->setCurrentTool(ToolPalette::RECT_TOOL); return HANDLED;
@@ -981,7 +981,7 @@ void Canvas::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-int Canvas::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS Canvas::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     last_position = Vector2D(mouse_x, mouse_y);
@@ -1000,7 +1000,7 @@ int Canvas::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
 }
 
 
-int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     if (button_id != MouseLeft) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
@@ -1027,7 +1027,7 @@ int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tran
 }
 
 
-int Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
     if (button_id != MouseLeft) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
@@ -1047,7 +1047,7 @@ int Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transf
 }
 
 
-int Canvas::onParentResize() {
+EVENT_STATUS Canvas::onParentResize() {
     Vector2D new_size = texture.getSize();
     if (new_size.x > parent->size.x - 30) new_size.x = parent->size.x - 30;
     if (new_size.y > parent->size.y - 30) new_size.y = parent->size.y - 30;
@@ -1058,7 +1058,7 @@ int Canvas::onParentResize() {
 }
 
 
-int Canvas::onKeyDown(int key_id) {
+EVENT_STATUS Canvas::onKeyDown(int key_id) {
     switch (key_id) {
         case Escape: 
             palette->getCurrentTool()->onCancel(); break;
@@ -1084,7 +1084,7 @@ int Canvas::onKeyDown(int key_id) {
 }
 
 
-int Canvas::onKeyUp(int key_id) {
+EVENT_STATUS Canvas::onKeyUp(int key_id) {
     switch (key_id) {
         case LShift:
         case RShift:
@@ -1106,7 +1106,7 @@ int Canvas::onKeyUp(int key_id) {
 }
 
 
-int Canvas::onTimer(float delta_time) {
+EVENT_STATUS Canvas::onTimer(float delta_time) {
     if (palette->getCurrentTool()->getWidget())
         palette->getCurrentTool()->getWidget()->onTimer(delta_time);
     
@@ -1129,7 +1129,7 @@ FilterHotkey::FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup
 {}
 
 
-int FilterHotkey::onKeyDown(int key_id) {
+EVENT_STATUS FilterHotkey::onKeyDown(int key_id) {
     switch (key_id) {
         case F: 
             if (ctrl_pressed) {
@@ -1147,7 +1147,7 @@ int FilterHotkey::onKeyDown(int key_id) {
 }
 
 
-int FilterHotkey::onKeyUp(int key_id) {
+EVENT_STATUS FilterHotkey::onKeyUp(int key_id) {
     switch (key_id) {
         case LControl:
         case RControl:

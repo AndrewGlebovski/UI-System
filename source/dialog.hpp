@@ -17,11 +17,11 @@ protected:
     );
 
 public:
-    virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
-    virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual int onKeyUp(int key_id) override;
-    virtual int onKeyDown(int key_id) override;
+    virtual EVENT_STATUS onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onKeyUp(int key_id) override;
+    virtual EVENT_STATUS onKeyDown(int key_id) override;
 };
 
 
