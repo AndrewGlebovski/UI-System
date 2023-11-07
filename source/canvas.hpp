@@ -315,16 +315,24 @@ public:
 };
 
 
+/// Changes image colors intensity
 class IntensityFilter : public CanvasFilter {
 private:
     int intensity;
-
 
     unsigned char clip(int channel) const;
 
 public:
     IntensityFilter(char intensity_);
 
+    virtual void applyFilter(Canvas &canvas) const override;
+};
+
+
+/// Change image colors to black and white style
+class MonochromeFilter : public CanvasFilter {
+public:
+    MonochromeFilter();
 
     virtual void applyFilter(Canvas &canvas) const override;
 };
@@ -341,6 +349,7 @@ public:
     enum FILTERS {
         LIGHTEN_FILTER,     ///< Increase intensity
         DARKEN_FILTER,      ///< Decrease intensity
+        MONOCHROME_FILTER,  ///< Black and white style
         FILTERS_SIZE        ///< Filters size (this field must always be last!)
     };
 
@@ -355,7 +364,7 @@ public:
     CanvasFilter *getLastFilter();
 
     /**
-     * \brief 
+     * \brief Sets last used filter
     */
     void setLastFilter(FILTERS filter_id);
 
