@@ -52,6 +52,8 @@ protected:
     bool is_cursor_hidden;      ///< Cursor is hidden at this moment
     float blink_time;           ///< Time passed since last switch between cursor blink states
     size_t cursor_pos;          ///< Cursor position
+    sf::RenderTexture *visible_rect;     ///< Visible part of the text
+    float visible_rect_x;                ///< Visible rect offset from text begin
 
 
     /**
@@ -68,6 +70,9 @@ public:
         size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
         const LineEditStyle &style_, size_t max_length_
     );
+
+    LineEdit(const LineEdit &line_edit) = delete;
+    LineEdit &operator = (const LineEdit &line_edit) = delete;
 
     /**
      * \brief Checks if key can be added to string
@@ -108,4 +113,9 @@ public:
     virtual int onKeyDown(int key_id) override;
     virtual int onKeyUp(int key_id) override;
     virtual int onTimer(float delta_time) override;
+
+    /**
+     * \brief Delete visible rect
+    */
+    virtual ~LineEdit() override;
 };

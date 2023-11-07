@@ -27,8 +27,12 @@ LineEdit::LineEdit(
 ) :
     Widget(id_, transform_, size_, z_index_, parent_),
     str(""), style(style_), is_typing(false), max_length(max_length_),
-    shift_pressed(false), is_cursor_hidden(false), blink_time(0), cursor_pos(0)
-{}
+    shift_pressed(false), is_cursor_hidden(false), blink_time(0), cursor_pos(0),
+    visible_rect(nullptr), visible_rect_x(0)
+{
+    ASSERT((visible_rect = new sf::RenderTexture()), "Failed to allocate texture");
+    ASSERT(visible_rect->create(size.x - TEXT_OFFSET, size.y - TEXT_OFFSET), "Failed to create texture!\n");
+}
 
 
 void LineEdit::setCursorVisible() {
@@ -89,14 +93,42 @@ void LineEdit::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     result.draw(rect);
 
     sf::Text text(str.data(), style.getFont(), style.font_size);
+    text.setPosition(0, 0);
     text.setFillColor(style.font_color);
-    text.setPosition(transforms.front().offset + Vector2D(TEXT_OFFSET, TEXT_OFFSET));
-    result.draw(text);
+
+    Vector2D char_rel_pos = text.findCharacterPos(cursor_pos);
+
+    float cursor_x = 0;
+
+    // Move visible rect to left
+    if (char_rel_pos.x < visible_rect_x) {
+        visible_rect_x = char_rel_pos.x;
+        cursor_x = TEXT_OFFSET;
+    }
+    // Move visible rect to right
+    else if (char_rel_pos.x > visible_rect_x + size.x - TEXT_OFFSET) {
+        visible_rect_x = char_rel_pos.x - (size.x - TEXT_OFFSET);
+        cursor_x = size.x;
+    }
+    // Don't move visible rect
+    else {
+        cursor_x = char_rel_pos.x - visible_rect_x + TEXT_OFFSET;
+    }
+    
+    text.setPosition(-visible_rect_x, 0);
+
+    visible_rect->clear(sf::Color(0));
+    visible_rect->draw(text);
+    visible_rect->display();
+
+    sf::Sprite tool_sprite(visible_rect->getTexture());
+    tool_sprite.setPosition(transforms.front().offset + Vector2D(TEXT_OFFSET, TEXT_OFFSET));
+    result.draw(tool_sprite);
 
     if (is_typing && !is_cursor_hidden) {
         sf::RectangleShape cursor(Vector2D(CURSOR_WIDTH, size.y + CURSOR_OFFSET * 2));
         cursor.setFillColor(style.cursor_color);
-        cursor.setPosition(Vector2D(text.findCharacterPos(cursor_pos).x, transforms.front().offset.y - CURSOR_OFFSET));
+        cursor.setPosition(transforms.front().offset + Vector2D(cursor_x, -CURSOR_OFFSET));
         result.draw(cursor);
     }
 }
@@ -179,6 +211,11 @@ int LineEdit::onTimer(float delta_time) {
     }
 
     return UNHANDLED;
+}
+
+
+LineEdit::~LineEdit() {
+    delete visible_rect;
 }
 
 
