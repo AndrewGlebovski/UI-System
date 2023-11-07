@@ -1,8 +1,35 @@
-/// Opens picture on canvas in new subwindow with scrollbars
+/**
+ * \brief Opens picture on canvas in new subwindow with scrollbars
+ * \note If image fails to open, then nullptr will be returned
+*/
 Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
 
 
 Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
+    // First we create to check if file is correct image
+    Canvas *canvas = new Canvas(
+        Widget::AUTO_ID,
+        Transform(),
+        Vector2D(),
+        0,
+        nullptr,
+        palette,
+        group
+    );
+
+    if (filename) {
+        if (!canvas->openImage(filename)) {
+            delete canvas;
+            return nullptr;
+        }
+    }
+    else {
+        if (!canvas->createImage(SCREEN_W, SCREEN_H)) {
+            delete canvas;
+            return nullptr;
+        }
+    }
+    // If file is correct we can create other stuff
     Window *subwindow = new Window(
         Widget::AUTO_ID,
         Transform(Vector2D(300, 100)),
@@ -13,18 +40,7 @@ Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &gro
         window_style
     );
 
-    Canvas *canvas = new Canvas(
-        Widget::AUTO_ID,
-        Transform(),
-        subwindow->getAreaSize() - Vector2D(30, 30),
-        0,
-        nullptr,
-        palette,
-        group
-    );
-
-    if (filename) canvas->openImage(filename);
-    else canvas->createImage(1920, 1080);
+    canvas->size = subwindow->getAreaSize() - Vector2D(30, 30);
 
     subwindow->addChild(canvas);
 
@@ -79,9 +95,10 @@ public:
         ASSERT(dialog, "Dialog is nullptr!\n");
         const char *filename = ((SelectFileDialog*)(dialog))->getFilename();
 
-        struct stat file_info = {};
-        if (stat(filename, &file_info) == 0) {
-            window.addChild(openPicture(filename, palette, group, window_style, scrollbar_style));
+        Widget *subwindow = openPicture(filename, palette, group, window_style, scrollbar_style);
+        
+        if (subwindow) {
+            window.addChild(subwindow);
             dialog->setStatus(Widget::DELETE);
         }
     }

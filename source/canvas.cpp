@@ -331,31 +331,31 @@ void BucketTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &
         sf::Color color = canvas.getPalette()->getCurrentColor();
         sf::Color origin = image.getPixel(mouse.x, mouse.y);
 
-        List<Vector2D> dfs;
-        dfs.push_back(mouse);
-        image.setPixel(mouse.x, mouse.y, color);
+        List<sf::Vector2u> dfs;
+        dfs.push_back(sf::Vector2u(mouse.x, mouse.y));
+        image.setPixel(dfs.back().x, dfs.back().y, color);
         
         while (dfs.size()) {
-            Vector2D pixel = dfs[dfs.size() - 1];
+            sf::Vector2u pixel = dfs[dfs.size() - 1];
             dfs.remove(dfs.size() - 1);
 
-            if (pixel.x > 0.5 && image.getPixel(pixel.x - 1, pixel.y) == origin) {
-                dfs.push_back(Vector2D(pixel.x - 1, pixel.y));
+            if (pixel.x > 0 && image.getPixel(pixel.x - 1, pixel.y) == origin) {
+                dfs.push_back(sf::Vector2u(pixel.x - 1, pixel.y));
                 image.setPixel(pixel.x - 1, pixel.y, color);
             }
 
-            if (pixel.x < canvas.getTextureSize().x - 0.5 && image.getPixel(pixel.x + 1, pixel.y) == origin) {
-                dfs.push_back(Vector2D(pixel.x + 1, pixel.y));
+            if (pixel.x < image.getSize().x - 1 && image.getPixel(pixel.x + 1, pixel.y) == origin) {
+                dfs.push_back(sf::Vector2u(pixel.x + 1, pixel.y));
                 image.setPixel(pixel.x + 1, pixel.y, color);
             }
 
-            if (pixel.y > 0.5 && image.getPixel(pixel.x, pixel.y - 1) == origin) {
-                dfs.push_back(Vector2D(pixel.x, pixel.y - 1));
+            if (pixel.y > 0 && image.getPixel(pixel.x, pixel.y - 1) == origin) {
+                dfs.push_back(sf::Vector2u(pixel.x, pixel.y - 1));
                 image.setPixel(pixel.x, pixel.y - 1, color);
             }
 
-            if (pixel.y < canvas.getTextureSize().y - 0.5 && image.getPixel(pixel.x, pixel.y + 1) == origin) {
-                dfs.push_back(Vector2D(pixel.x, pixel.y + 1));
+            if (pixel.y < image.getSize().y - 1 && image.getPixel(pixel.x, pixel.y + 1) == origin) {
+                dfs.push_back(sf::Vector2u(pixel.x, pixel.y + 1));
                 image.setPixel(pixel.x, pixel.y + 1, color);
             }
         }
@@ -454,7 +454,7 @@ TextTool::TextTool() : text_font(), text_preview(nullptr) {
     text_preview = new LineEdit(
         Widget::AUTO_ID,
         Transform(),
-        Vector2D(0, TEXT_SIZE + TEXT_OFFSET * 2),
+        Vector2D(SCREEN_W, TEXT_SIZE + TEXT_OFFSET * 2),
         0,
         nullptr,
         style,
@@ -685,6 +685,7 @@ void FilterMask::initMask(size_t width_, size_t height_) {
 
 
 bool FilterMask::getPixelMask(size_t x, size_t y) const {
+    ASSERT(mask, "Mask is nullptr!\n");
     ASSERT(x < width, "X is out of range!\n");
     ASSERT(y < height, "Y is out of range!\n");
     return mask[y * width + x];
@@ -698,6 +699,7 @@ size_t FilterMask::getHeight() const { return height; }
 
 
 void FilterMask::setPixelMask(size_t x, size_t y, bool flag) {
+    ASSERT(mask, "Mask is nullptr!\n");
     ASSERT(x < width, "X is out of range!\n");
     ASSERT(y < height, "Y is out of range!\n");
     mask[y * width + x] = flag;
@@ -705,6 +707,8 @@ void FilterMask::setPixelMask(size_t x, size_t y, bool flag) {
 
 
 void FilterMask::fill(bool value) {
+    ASSERT(mask, "Mask is nullptr!\n");
+
     size_t mask_size = width * height;
     for (size_t i = 0; i < mask_size; i++)
         mask[i] = value;
@@ -712,6 +716,8 @@ void FilterMask::fill(bool value) {
 
 
 void FilterMask::invert() {
+    ASSERT(mask, "Mask is nullptr!\n");
+
     size_t mask_size = width * height;
     for (size_t i = 0; i < mask_size; i++)
         mask[i] = !mask[i];
@@ -719,8 +725,7 @@ void FilterMask::invert() {
 
 
 FilterMask::~FilterMask() {
-    ASSERT(mask, "Mask is nullptr!\n");
-    delete mask;
+    if (mask) delete[] mask;
 }
 
 
@@ -746,8 +751,10 @@ void IntensityFilter::applyFilter(Canvas &canvas) const {
     
     for (size_t y = 0; y < mask.getHeight(); y++) {
         for (size_t x = 0; x < mask.getWidth(); x++) {
-            sf::Color origin(image.getPixel(x, y));
-            image.setPixel(x, y, sf::Color(clip(origin.r), clip(origin.g), clip(origin.b)));
+            if (mask.getPixelMask(x, y)) {
+                sf::Color origin(image.getPixel(x, y));
+                image.setPixel(x, y, sf::Color(clip(origin.r), clip(origin.g), clip(origin.b)));
+            }
         }
     }
     
@@ -780,6 +787,12 @@ CanvasFilter *FilterPalette::getFilter(FILTERS filter_id) { return filters[filte
 size_t FilterPalette::getFilterCount() const { return FILTERS_SIZE; }
 
 
+FilterPalette::~FilterPalette() {
+    for (size_t i = 0; i < filters.size(); i++)
+        delete filters[i];
+}
+
+
 // ============================================================================
 
 
@@ -809,8 +822,7 @@ Canvas *CanvasGroup::getActive() {
 void CanvasGroup::addCanvas(Canvas *new_canvas) {
     if (!isInGroup(new_canvas)) {
         canvases.push_back(new_canvas);
-
-        if (canvases.size() == 1) setActive(new_canvas);
+        setActive(new_canvas);
     }
 }
 
@@ -868,7 +880,7 @@ void Canvas::clearCanvas() {
 }
 
 
-void Canvas::createImage(size_t width, size_t height) {
+bool Canvas::createImage(size_t width, size_t height) {
     ASSERT(texture.create(width, height), "Failed to create texture!\n");
     clearCanvas();
 
@@ -876,10 +888,11 @@ void Canvas::createImage(size_t width, size_t height) {
     filter_mask.fill(true);
 
     filename = "";
+    return true;
 }
 
 
-void Canvas::openImage(const char *filename_) {
+bool Canvas::openImage(const char *filename_) {
     sf::Texture image;
     if (image.loadFromFile(filename_)) {
         createImage(image.getSize().x, image.getSize().y);
@@ -890,7 +903,10 @@ void Canvas::openImage(const char *filename_) {
         texture.draw(tool_sprite);
 
         filename = filename_;
+        return true;
     }
+
+    return false;
 }
 
 
@@ -956,7 +972,7 @@ void Canvas::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     result.draw(tool_sprite);
 
     if (isActive() && palette->getCurrentTool()->getWidget()) {
-        TransformApplier texture_transform(transforms, texture_offset);
+        TransformApplier texture_transform(transforms, Transform(-texture_offset));
         palette->getCurrentTool()->getWidget()->draw(result, transforms);
     }
 }

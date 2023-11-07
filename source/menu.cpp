@@ -132,6 +132,14 @@ int MenuButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Tr
 }
 
 
+MenuButton::~MenuButton() {
+    for (size_t i = 0; i < buttons.size(); i++) {
+        ASSERT(buttons[i], "Button is nullptr!\n");
+        delete buttons[i];
+    }
+}
+
+
 Menu::Menu(
     size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
     const MenuStyle &style_
@@ -264,6 +272,14 @@ int Menu::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transfor
 int Menu::onParentResize() {
     tryResize(Vector2D(parent->size.x, size.y));
     return UNHANDLED;
+}
+
+
+Menu::~Menu() {
+    for (size_t i = 0; i < buttons.size(); i++) {
+        ASSERT(buttons[i], "MenuButton is nullptr!\n");
+        delete buttons[i];
+    }
 }
 
 

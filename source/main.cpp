@@ -90,7 +90,7 @@ int main() {
         font
     );
 
-    MainWindow main_window(
+    MainWindow *main_window = new MainWindow(
         Widget::AUTO_ID,
         Transform(),
         Vector2D(SCREEN_W, SCREEN_H),
@@ -113,7 +113,7 @@ int main() {
     
     main_menu->addMenuButton("File");
     main_menu->addButton(0, "Open", new CreateOpenFileDialog(
-        main_window,
+        *main_window,
         *palette,
         *canvas_group,
         window_style,
@@ -127,7 +127,7 @@ int main() {
     ));
     
     main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(
-        main_window,
+        *main_window,
         *canvas_group,
         window_style,
         line_edit_style,
@@ -138,9 +138,9 @@ int main() {
     main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER, *filter_palette, *canvas_group));
     main_menu->addButton(1, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER, *filter_palette, *canvas_group));
 
-    main_window.setMenu(main_menu);
+    main_window->setMenu(main_menu);
 
-    main_window.addChild(new Clock(
+    main_window->addChild(new Clock(
         Widget::AUTO_ID,
         Transform(),
         Vector2D(100, 50),
@@ -149,14 +149,14 @@ int main() {
         clock_style
     ));
 
-    main_window.addChild(new FilterHotkey(
-        &main_window,
+    main_window->addChild(new FilterHotkey(
+        main_window,
         *filter_palette,
         *canvas_group
     ));
 
-    main_window.addChild(openPicture(nullptr, *palette, *canvas_group, window_style, scrollbar_style));
-    main_window.addChild(createToolPaletteView(palette, window_style, palette_asset));
+    main_window->addChild(openPicture(nullptr, *palette, *canvas_group, window_style, scrollbar_style));
+    main_window->addChild(createToolPaletteView(palette, window_style, palette_asset));
     
     sf::RenderTexture result;
     result.create(SCREEN_W, SCREEN_H);
@@ -167,12 +167,12 @@ int main() {
     sf::Clock timer;
 
     while (render_window.isOpen()) {
-        if (main_window.getStatus() == Widget::DELETE) {
+        if (main_window->getStatus() == Widget::DELETE) {
             render_window.close();
             break;
         }
 
-        main_window.checkChildren();
+        main_window->checkChildren();
 
         sf::Event event;
 
@@ -182,15 +182,15 @@ int main() {
                 break;
             }
             
-            main_window.parseEvent(event, transforms);
+            main_window->parseEvent(event, transforms);
         }
         
-        main_window.onTimer(timer.getElapsedTime().asSeconds());
+        main_window->onTimer(timer.getElapsedTime().asSeconds());
         timer.restart();
 
         result.clear();
 
-        main_window.draw(result, transforms);
+        main_window->draw(result, transforms);
 
         result.display();
         sf::Sprite tool_sprite(result.getTexture());
@@ -200,6 +200,7 @@ int main() {
         render_window.display();
     }
 
+    delete main_window;
     delete palette;
     delete canvas_group;
     delete filter_palette;

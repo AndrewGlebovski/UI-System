@@ -147,8 +147,7 @@ public:
     virtual int onParentResize() override;
     virtual void checkChildren() override;
 
-
-    virtual ~Window();
+    virtual ~Window() override;
 };
 
 

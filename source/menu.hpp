@@ -64,6 +64,8 @@ public:
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+
+    virtual ~MenuButton() override;
 };
 
 
@@ -106,4 +108,6 @@ public:
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onParentResize() override;
+
+    virtual ~Menu() override;
 };

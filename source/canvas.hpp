@@ -333,8 +333,8 @@ public:
 /// Contains filters and remembers last used one 
 class FilterPalette {
 private:
-    List<CanvasFilter*> filters;
-    size_t last_filter;
+    List<CanvasFilter*> filters;        ///< Filter instances
+    size_t last_filter;                 ///< Last used filter index
 
 public:
     /// Filters avalaible for the palette
@@ -344,20 +344,35 @@ public:
         FILTERS_SIZE        ///< Filters size (this field must always be last!)
     };
 
-
+    /**
+     * \brief Constructs all filters
+    */
     FilterPalette();
 
-
+    /**
+     * \brief Returns last used filter instance
+    */
     CanvasFilter *getLastFilter();
 
-
+    /**
+     * \brief 
+    */
     void setLastFilter(FILTERS filter_id);
 
-
+    /**
+     * \brief Returns filter instance by ID
+    */
     CanvasFilter *getFilter(FILTERS filter_id);
 
-
+    /**
+     * \brief Returns amount of supported filters
+    */
     size_t getFilterCount() const;
+
+    /**
+     * \brief Delete filters
+    */
+    ~FilterPalette();
 };
 
 
@@ -466,13 +481,13 @@ public:
     /**
      * \brief Creates image with the given size filled with background color
     */
-    void createImage(size_t width, size_t height);
+    bool createImage(size_t width, size_t height);
 
     /**
      * \brief Opens image file
      * \note If file fails to open, nothing happens
     */
-    void openImage(const char *filename_);
+    bool openImage(const char *filename_);
 
     /**
      * \brief Saves texture to current image file
