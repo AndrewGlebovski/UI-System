@@ -28,7 +28,7 @@ ScrollBar::ScrollBar(
 }
 
 
-void ScrollBar::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void ScrollBar::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
     
     sf::RectangleShape frame(size);

@@ -58,7 +58,7 @@ public:
     void setOpened(bool is_opened_);
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
@@ -101,7 +101,7 @@ public:
     virtual void addButton(size_t menu_id, const sf::String &text, ButtonAction *action);
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;

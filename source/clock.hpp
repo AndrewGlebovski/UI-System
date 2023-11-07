@@ -37,7 +37,7 @@ public:
     }
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override {
         TransformApplier(transforms, transform);
 
         size_t hours = (daytime / 3600) % 24;

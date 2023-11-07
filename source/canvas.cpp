@@ -37,17 +37,17 @@ const size_t TEXT_MAX_LENGTH = 256;                     ///< Text tool text max 
 
 
 /// Draws line on the texture
-void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf::RenderTexture &result);
+void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf::RenderTarget &result);
 
 
 /// Draws polygon or polyline based on the primitive type
-void drawPolygon(const Vector2D &offset, const List<Vector2D> &points, const sf::Color &color, sf::RenderTexture &result, sf::PrimitiveType type);
+void drawPolygon(const Vector2D &offset, const List<Vector2D> &points, const sf::Color &color, sf::RenderTarget &result, sf::PrimitiveType type);
 
 
 // ============================================================================
 
 
-void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf::RenderTexture &result) {
+void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf::RenderTarget &result) {
     sf::Vertex line[] = {
         sf::Vertex(p1, color),
         sf::Vertex(p2, color)
@@ -57,7 +57,7 @@ void drawLine(const Vector2D &p1, const Vector2D &p2, const sf::Color &color, sf
 }
 
 
-void drawPolygon(const Vector2D &offset, const List<Vector2D> &points, const sf::Color &color, sf::RenderTexture &result, sf::PrimitiveType type) {
+void drawPolygon(const Vector2D &offset, const List<Vector2D> &points, const sf::Color &color, sf::RenderTarget &result, sf::PrimitiveType type) {
     sf::Vertex *polygon = new sf::Vertex[points.size()];
 
     for (size_t i = 0; i < points.size(); i++)
@@ -115,7 +115,7 @@ public:
         Widget(1, Transform(Vector2D()), Vector2D(), 1, nullptr), tool(tool_) {}
     
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override {
         TransformApplier add_transform(transforms, transform);
 
         sf::RectangleShape rect(size);
@@ -212,7 +212,7 @@ public:
     /**
      * \note Transform offset used as line's first point and size as second
     */
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override {
         // REMAINDER: transform.offset = point1, size = point2
         drawLine(transforms.front().offset + transform.offset, transforms.front().offset + size, PREVIEW_COLOR, result);
     }
@@ -382,7 +382,7 @@ public:
         Widget(1, Transform(), Vector2D(), 1, nullptr), tool(tool_) {}
     
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override {
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override {
         drawPolygon(transforms.front().offset, tool.getPoints(), PREVIEW_COLOR, result, sf::PrimitiveType::LineStrip);
     }
 };
@@ -621,7 +621,7 @@ ToolPaletteView::ToolPaletteView(
 #undef ADD_TOOL_BUTTON
 
 
-void ToolPaletteView::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void ToolPaletteView::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     updateToolButtons();
@@ -959,7 +959,7 @@ bool Canvas::isActive() const {
 }
 
 
-void Canvas::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void Canvas::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     texture.display();

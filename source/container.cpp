@@ -24,7 +24,7 @@ Container::Container(
 {}
 
 
-void Container::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void Container::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     size_t count = widgets.size();
     if (count == 0) return;
 

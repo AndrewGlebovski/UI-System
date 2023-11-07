@@ -174,7 +174,7 @@ public:
     /**
      * \brief Draws red rectangle for debug purposes
     */
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms);
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms);
 
 
     /**

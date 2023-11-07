@@ -74,7 +74,7 @@ void MenuButton::setOpened(bool is_opened_) {
 }
 
 
-void MenuButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void MenuButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     RectButton::draw(result, transforms);
 
     TransformApplier add_transform(transforms, transform);
@@ -216,7 +216,7 @@ void Menu::addButton(size_t menu_id, const sf::String &text, ButtonAction *actio
 }
 
 
-void Menu::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void Menu::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     sf::RectangleShape rect(size);

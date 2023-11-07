@@ -43,7 +43,7 @@ public:
     );
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
@@ -80,7 +80,7 @@ public:
     );
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
@@ -259,7 +259,7 @@ do {                                                                            
 } while(0)
 
 
-void Window::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void Window::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     Vector2D tl_size = style.asset[WindowAsset::FRAME_TL].getSize();
@@ -529,7 +529,7 @@ MoveButton::MoveButton(
 {}
 
 
-void MoveButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void MoveButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     /* DEBUG DRAWING
     TransformApplier add_transform(transforms, transform);
 
@@ -595,7 +595,7 @@ ResizeButton::ResizeButton(
 {}
 
 
-void ResizeButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void ResizeButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     /* DEBUG DRAWING
     TransformApplier add_transform(transforms, transform);
 

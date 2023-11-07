@@ -173,7 +173,7 @@ bool RectButton::isInsideButton(const Vector2D &point) {
 }
 
 
-void RectButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void RectButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     sf::Text btn_text(text, style.font, style.font_size);
@@ -224,7 +224,7 @@ bool TextureButton::isInsideButton(const Vector2D &point) {
 }
 
 
-void TextureButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void TextureButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     sf::Sprite btn_sprite;
@@ -253,7 +253,7 @@ TextureIconButton::TextureIconButton(
 {}
 
 
-void TextureIconButton::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void TextureIconButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TextureButton::draw(result, transforms);
 
     sf::Sprite icon_sprite(icon);

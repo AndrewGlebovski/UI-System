@@ -93,7 +93,7 @@ void LineEdit::setKeyboardFocus(bool is_focused) {
 }
 
 
-void LineEdit::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void LineEdit::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     sf::RectangleShape rect(size);

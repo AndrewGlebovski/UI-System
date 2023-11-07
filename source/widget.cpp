@@ -100,7 +100,7 @@ void Widget::setStatus(WIDGET_STATUS new_status) {
 }
 
 
-void Widget::draw(sf::RenderTexture &result, List<Transform> &transforms) {
+void Widget::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
     /* DEBUG DRAWING
     sf::RectangleShape rect(Vector2D(25, 25));

@@ -24,7 +24,7 @@ public:
     /**
      * \brief Draws widgets under his management
     */
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
     virtual Widget *findWidget(size_t widget_id) override;

@@ -157,9 +157,6 @@ int main() {
 
     main_window->addChild(openPicture(nullptr, *palette, *canvas_group, window_style, scrollbar_style));
     main_window->addChild(createToolPaletteView(palette, window_style, palette_asset));
-    
-    sf::RenderTexture result;
-    result.create(SCREEN_W, SCREEN_H);
 
     List<Transform> transforms;
     transforms.push_back(Transform());
@@ -188,14 +185,9 @@ int main() {
         main_window->onTimer(timer.getElapsedTime().asSeconds());
         timer.restart();
 
-        result.clear();
+        render_window.clear();
 
-        main_window->draw(result, transforms);
-
-        result.display();
-        sf::Sprite tool_sprite(result.getTexture());
-
-        render_window.draw(tool_sprite);
+        main_window->draw(render_window, transforms);
 
         render_window.display();
     }

@@ -11,7 +11,7 @@ public:
         Widget(id_, transform_, size_, z_index_, parent_) {}
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override = 0;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override = 0;
 
 
     virtual ~BaseButton() = default;
@@ -102,7 +102,7 @@ public:
     virtual bool isInsideButton(const Vector2D &point) = 0;
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override = 0;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override = 0;
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
@@ -210,7 +210,7 @@ public:
     virtual bool isInsideButton(const Vector2D &point) override;
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 };
 
 
@@ -232,7 +232,7 @@ public:
     virtual bool isInsideButton(const Vector2D &point) override;
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 };
 
 
@@ -253,5 +253,5 @@ public:
     );
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 };

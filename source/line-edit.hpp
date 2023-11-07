@@ -112,7 +112,7 @@ public:
     /**
      * \brief Draws buffer content and cursor
     */
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
     virtual int onKeyDown(int key_id) override;

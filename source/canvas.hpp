@@ -254,7 +254,7 @@ public:
     ToolPaletteView &operator = (const ToolPaletteView &palette_view) = default;
 
 
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
@@ -540,7 +540,7 @@ public:
     /**
      * \brief Draws canvas inner texture
     */
-    virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
     virtual int onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
     virtual int onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
