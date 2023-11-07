@@ -163,7 +163,7 @@ SelectFileDialog::SelectFileDialog(
         BUTTON_PRESSED_COLOR
     ));
 
-    container.addChild(new LineEdit(
+    LineEdit *line_edit = new LineEdit(
         3,
         Transform(),
         Vector2D(getAreaSize().x, 30),
@@ -171,7 +171,11 @@ SelectFileDialog::SelectFileDialog(
         nullptr,
         line_edit_style_,
         256
-    ));
+    );
+
+    line_edit->setKeyboardFocus(true);
+
+    container.addChild(line_edit);
 }
 
 

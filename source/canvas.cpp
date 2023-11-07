@@ -467,6 +467,7 @@ void TextTool::onMainButton(ButtonState state, const Vector2D &mouse, Canvas &ca
     if (state == PRESSED) {
         is_drawing = true;
         text_preview->transform.offset = mouse;
+        text_preview->setKeyboardFocus(true);
     }
 }
 
@@ -480,12 +481,14 @@ void TextTool::onConfirm(const Vector2D &mouse, Canvas &canvas) {
         is_drawing = false;
     }
 
+    text_preview->setKeyboardFocus(false);
     text_preview->setString("");
 }
 
 
 void TextTool::onCancel() {
     is_drawing = false;
+    text_preview->setKeyboardFocus(false);
     text_preview->setString("");
 }
 
@@ -989,7 +992,7 @@ int Canvas::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
     );
 
     if (palette->getCurrentTool()->getWidget()) {
-        TransformApplier texture_transform(transforms, texture_offset);
+        TransformApplier texture_transform(transforms, -texture_offset);
         return palette->getCurrentTool()->getWidget()->onMouseMove(mouse_x, mouse_y, transforms);
     }
 
@@ -1013,7 +1016,7 @@ int Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tran
         );
 
         if (palette->getCurrentTool()->getWidget()) {
-            TransformApplier texture_transform(transforms, texture_offset);
+            TransformApplier texture_transform(transforms, -texture_offset);
             palette->getCurrentTool()->getWidget()->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms);
         }
         
@@ -1036,7 +1039,7 @@ int Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transf
     );
 
     if (palette->getCurrentTool()->getWidget()) {
-        TransformApplier texture_transform(transforms, texture_offset);
+        TransformApplier texture_transform(transforms, -texture_offset);
         return palette->getCurrentTool()->getWidget()->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
     }
 

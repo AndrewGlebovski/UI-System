@@ -105,6 +105,11 @@ public:
     void setStyle(const LineEditStyle &new_style);
 
     /**
+     * \brief If is_focused == true, this widget starts handling keyboard inputs
+    */
+    void setKeyboardFocus(bool is_focused);
+
+    /**
      * \brief Draws buffer content and cursor
     */
     virtual void draw(sf::RenderTexture &result, List<Transform> &transforms) override;

@@ -82,6 +82,17 @@ void LineEdit::setStyle(const LineEditStyle &new_style) {
 }
 
 
+void LineEdit::setKeyboardFocus(bool is_focused) {
+    if (is_focused) {
+        setCursorVisible();
+        is_typing = true;
+    }
+    else {
+        is_typing = false;
+    }
+}
+
+
 void LineEdit::draw(sf::RenderTexture &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
@@ -138,11 +149,11 @@ int LineEdit::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Tr
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y))) {
-        is_typing = true;
+        setKeyboardFocus(true);
         return HANDLED;
     }
 
-    is_typing = false;
+    setKeyboardFocus(false);
     return UNHANDLED;
 }
 
@@ -151,7 +162,7 @@ int LineEdit::onKeyDown(int key_id) {
     switch (key_id) {
         case Escape: 
         case Enter: 
-            is_typing = false; return HANDLED;
+            setKeyboardFocus(false); return HANDLED;
         case Left:
             if (cursor_pos > 0) cursor_pos--;
             setCursorVisible();
