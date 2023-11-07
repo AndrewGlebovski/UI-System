@@ -86,22 +86,22 @@ void MenuButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS MenuButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
-    RectButton::onMouseMove(mouse_x, mouse_y, transforms);
+EVENT_STATUS MenuButton::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+    RectButton::onMouseMove(mouse, transforms);
 
     if (!is_opened) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++)
-        buttons[i]->onMouseMove(mouse_x, mouse_y, transforms);
+        buttons[i]->onMouseMove(mouse, transforms);
 
     return UNHANDLED;
 }
 
 
-EVENT_STATUS MenuButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
-    if (RectButton::onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
+EVENT_STATUS MenuButton::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+    if (RectButton::onMouseButtonDown(mouse, button_id, transforms) == HANDLED)
         return HANDLED;
 
     if (!is_opened) return UNHANDLED;
@@ -109,15 +109,15 @@ EVENT_STATUS MenuButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++)
-        if (buttons[i]->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
+        if (buttons[i]->onMouseButtonDown(mouse, button_id, transforms) == HANDLED)
             return HANDLED;
 
     return UNHANDLED;
 }
 
 
-EVENT_STATUS MenuButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
-    if (RectButton::onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
+EVENT_STATUS MenuButton::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+    if (RectButton::onMouseButtonUp(mouse, button_id, transforms) == HANDLED)
         return HANDLED;
 
     if (!is_opened) return UNHANDLED;
@@ -125,7 +125,7 @@ EVENT_STATUS MenuButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++)
-        if (buttons[i]->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED)
+        if (buttons[i]->onMouseButtonDown(mouse, button_id, transforms) == HANDLED)
             return HANDLED;
 
     return UNHANDLED;
@@ -229,21 +229,21 @@ void Menu::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS Menu::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS Menu::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++)
-        buttons[i]->onMouseMove(mouse_x, mouse_y, transforms);
+        buttons[i]->onMouseMove(mouse, transforms);
 
     return UNHANDLED;
 }
 
 
-EVENT_STATUS Menu::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Menu::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++) {
-        if (buttons[i]->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms) == HANDLED) {
+        if (buttons[i]->onMouseButtonDown(mouse, button_id, transforms) == HANDLED) {
             openMenu(i);
             return HANDLED;
         }
@@ -258,11 +258,11 @@ EVENT_STATUS Menu::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, Li
 }
 
 
-EVENT_STATUS Menu::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Menu::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++)
-        if (buttons[i]->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms) == HANDLED)
+        if (buttons[i]->onMouseButtonUp(mouse, button_id, transforms) == HANDLED)
             return HANDLED;
 
     return UNHANDLED;

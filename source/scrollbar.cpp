@@ -47,10 +47,8 @@ void ScrollBar::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS ScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS ScrollBar::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
     if (is_moving) {
-        Vector2D mouse(mouse_x, mouse_y);
-
         scrollTo(mouse - mouse_prev);
         mouse_prev = mouse;
 
@@ -61,10 +59,8 @@ EVENT_STATUS ScrollBar::onMouseMove(int mouse_x, int mouse_y, List<Transform> &t
 }
 
 
-EVENT_STATUS ScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ScrollBar::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
-
-    Vector2D mouse(mouse_x, mouse_y);
 
     if (isInsideRect(transforms.front().offset, size, mouse)) {
         Vector2D scroller_absolute = transforms.front().offset + scroller.getPosition();
@@ -82,7 +78,7 @@ EVENT_STATUS ScrollBar::onMouseButtonDown(int mouse_x, int mouse_y, int button_i
 }
 
 
-EVENT_STATUS ScrollBar::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ScrollBar::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }

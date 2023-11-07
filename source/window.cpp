@@ -46,9 +46,9 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual EVENT_STATUS onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onParentResize() override;
 };
 
@@ -83,9 +83,9 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual EVENT_STATUS onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onParentResize() override;
 };
 
@@ -340,33 +340,33 @@ do {                                                                            
         return HANDLED;                                                             \
     if (container.CALL_FUNC == HANDLED)                                             \
         return HANDLED;                                                             \
-    if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y)))  \
+    if (isInsideRect(transforms.front().offset, size, mouse))  \
         return HANDLED;                                                             \
 } while(0)
 
 
-EVENT_STATUS Window::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS Window::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    BROADCAST_MOUSE_EVENT(onMouseMove(mouse_x, mouse_y, transforms));
+    BROADCAST_MOUSE_EVENT(onMouseMove(mouse, transforms));
 
     return UNHANDLED;
 }
 
 
-EVENT_STATUS Window::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Window::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    BROADCAST_MOUSE_EVENT(onMouseButtonUp(mouse_x, mouse_y, button_id, transforms));
+    BROADCAST_MOUSE_EVENT(onMouseButtonUp(mouse, button_id, transforms));
 
     return UNHANDLED;
 }
 
 
-EVENT_STATUS Window::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Window::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    BROADCAST_MOUSE_EVENT(onMouseButtonDown(mouse_x, mouse_y, button_id, transforms));
+    BROADCAST_MOUSE_EVENT(onMouseButtonDown(mouse, button_id, transforms));
 
     return UNHANDLED;
 }
@@ -509,11 +509,11 @@ void MainWindow::parseEvent(const sf::Event &event, List<Transform> &transforms)
         case sf::Event::KeyReleased:
             onKeyUp(event.key.code); break;
         case sf::Event::MouseButtonPressed:
-            onMouseButtonDown(event.mouseButton.x, event.mouseButton.y, event.mouseButton.button, transforms); break;
+            onMouseButtonDown(Vector2D(event.mouseButton.x, event.mouseButton.y), event.mouseButton.button, transforms); break;
         case sf::Event::MouseButtonReleased:
-            onMouseButtonUp(event.mouseButton.x, event.mouseButton.y, event.mouseButton.button, transforms); break;
+            onMouseButtonUp(Vector2D(event.mouseButton.x, event.mouseButton.y), event.mouseButton.button, transforms); break;
         case sf::Event::MouseMoved:
-            onMouseMove(event.mouseMove.x, event.mouseMove.y, transforms); break;
+            onMouseMove(Vector2D(event.mouseMove.x, event.mouseMove.y), transforms); break;
         default:
             return;
     }
@@ -541,15 +541,15 @@ void MoveButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS MoveButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS MoveButton::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
     if (!is_moving) return UNHANDLED;
 
     // WE CHANGED WINDOW POSITION SO CURRENT TRANSFORM WILL BE INCORRECT
     // BUT IT DOESN'T MATTER CAUSE EVENT IS HANDLED
     // AND FARTHER BROADCASTING IS NOT NEEDED
 
-    Vector2D new_position = window.transform.offset + (Vector2D(mouse_x, mouse_y) - prev_mouse);
-    prev_mouse = Vector2D(mouse_x, mouse_y);
+    Vector2D new_position = window.transform.offset + (mouse - prev_mouse);
+    prev_mouse = mouse;
 
     window.tryTransform(Transform(new_position));
 
@@ -557,12 +557,12 @@ EVENT_STATUS MoveButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &
 }
 
 
-EVENT_STATUS MoveButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS MoveButton::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y))) {
+    if (isInsideRect(transforms.front().offset, size, mouse)) {
         is_moving = true;
-        prev_mouse = Vector2D(mouse_x, mouse_y);
+        prev_mouse = mouse;
         return HANDLED;
     }
 
@@ -570,7 +570,7 @@ EVENT_STATUS MoveButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_
 }
 
 
-EVENT_STATUS MoveButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS MoveButton::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }
@@ -607,11 +607,11 @@ void ResizeButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS ResizeButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS ResizeButton::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
     if (!is_moving) return UNHANDLED;
 
-    Vector2D shift = Vector2D(mouse_x, mouse_y) - prev_mouse;
-    prev_mouse = Vector2D(mouse_x, mouse_y);
+    Vector2D shift = mouse - prev_mouse;
+    prev_mouse = mouse;
 
     switch (resize_dir) {
         case LEFT: 
@@ -655,12 +655,12 @@ EVENT_STATUS ResizeButton::onMouseMove(int mouse_x, int mouse_y, List<Transform>
 }
 
 
-EVENT_STATUS ResizeButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ResizeButton::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y))) {
+    if (isInsideRect(transforms.front().offset, size, mouse)) {
         is_moving = true;
-        prev_mouse = Vector2D(mouse_x, mouse_y);
+        prev_mouse = mouse;
         return HANDLED;
     }
 
@@ -668,7 +668,7 @@ EVENT_STATUS ResizeButton::onMouseButtonDown(int mouse_x, int mouse_y, int butto
 }
 
 
-EVENT_STATUS ResizeButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ResizeButton::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }

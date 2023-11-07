@@ -145,10 +145,10 @@ void LineEdit::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS LineEdit::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS LineEdit::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (isInsideRect(transforms.front().offset, size, Vector2D(mouse_x, mouse_y))) {
+    if (isInsideRect(transforms.front().offset, size, mouse)) {
         setKeyboardFocus(true);
         return HANDLED;
     }

@@ -38,20 +38,20 @@ Dialog::Dialog(
 {}
 
 
-EVENT_STATUS Dialog::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
-    Window::onMouseMove(mouse_x, mouse_y, transforms);
+EVENT_STATUS Dialog::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+    Window::onMouseMove(mouse, transforms);
     return HANDLED;
 }
 
 
-EVENT_STATUS Dialog::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
-    Window::onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
+EVENT_STATUS Dialog::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+    Window::onMouseButtonUp(mouse, button_id, transforms);
     return HANDLED;
 }
 
 
-EVENT_STATUS Dialog::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
-    Window::onMouseButtonDown(mouse_x, mouse_y, button_id,transforms);
+EVENT_STATUS Dialog::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+    Window::onMouseButtonDown(mouse, button_id,transforms);
     return HANDLED;
 }
 

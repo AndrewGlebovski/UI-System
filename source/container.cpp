@@ -118,34 +118,34 @@ do {                                                                            
 } while(0)
 
 
-EVENT_STATUS Container::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
     if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
 
-    CONTAINER_FOR(onMouseMove(mouse_x, mouse_y, transforms));
+    CONTAINER_FOR(onMouseMove(mouse, transforms));
     
     return UNHANDLED;
 }
 
 
-EVENT_STATUS Container::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
 
-    CONTAINER_FOR(onMouseButtonUp(mouse_x, mouse_y, button_id, transforms));
+    CONTAINER_FOR(onMouseButtonUp(mouse, button_id, transforms));
     
     return UNHANDLED;
 }
 
 
-EVENT_STATUS Container::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
 
-    CONTAINER_FOR(onMouseButtonDown(mouse_x, mouse_y, button_id, transforms), focused = i);
+    CONTAINER_FOR(onMouseButtonDown(mouse, button_id, transforms), focused = i);
     
     return UNHANDLED;
 }

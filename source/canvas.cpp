@@ -630,24 +630,24 @@ void ToolPaletteView::draw(sf::RenderTarget &result, List<Transform> &transforms
 }
 
 
-EVENT_STATUS ToolPaletteView::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS ToolPaletteView::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    return buttons.onMouseMove(mouse_x, mouse_y, transforms);
+    return buttons.onMouseMove(mouse, transforms);
 }
 
 
-EVENT_STATUS ToolPaletteView::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ToolPaletteView::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    return buttons.onMouseButtonDown(mouse_x, mouse_y, button_id, transforms);
+    return buttons.onMouseButtonDown(mouse, button_id, transforms);
 }
 
 
-EVENT_STATUS ToolPaletteView::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ToolPaletteView::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    return buttons.onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
+    return buttons.onMouseButtonUp(mouse, button_id, transforms);
 }
 
 
@@ -981,10 +981,10 @@ void Canvas::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS Canvas::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS Canvas::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    last_position = Vector2D(mouse_x, mouse_y);
+    last_position = mouse;
 
     palette->getCurrentTool()->onMove(
         last_position - transforms.front().offset + texture_offset,
@@ -993,14 +993,14 @@ EVENT_STATUS Canvas::onMouseMove(int mouse_x, int mouse_y, List<Transform> &tran
 
     if (palette->getCurrentTool()->getWidget()) {
         TransformApplier texture_transform(transforms, -texture_offset);
-        return palette->getCurrentTool()->getWidget()->onMouseMove(mouse_x, mouse_y, transforms);
+        return palette->getCurrentTool()->getWidget()->onMouseMove(mouse, transforms);
     }
 
     return UNHANDLED;
 }
 
 
-EVENT_STATUS Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Canvas::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     if (button_id != MouseLeft) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
@@ -1017,7 +1017,7 @@ EVENT_STATUS Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, 
 
         if (palette->getCurrentTool()->getWidget()) {
             TransformApplier texture_transform(transforms, -texture_offset);
-            palette->getCurrentTool()->getWidget()->onMouseButtonDown(mouse_x, mouse_y, button_id, transforms);
+            palette->getCurrentTool()->getWidget()->onMouseButtonDown(mouse, button_id, transforms);
         }
         
         return HANDLED;
@@ -1027,7 +1027,7 @@ EVENT_STATUS Canvas::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, 
 }
 
 
-EVENT_STATUS Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Canvas::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     if (button_id != MouseLeft) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
@@ -1040,7 +1040,7 @@ EVENT_STATUS Canvas::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, Li
 
     if (palette->getCurrentTool()->getWidget()) {
         TransformApplier texture_transform(transforms, -texture_offset);
-        return palette->getCurrentTool()->getWidget()->onMouseButtonUp(mouse_x, mouse_y, button_id, transforms);
+        return palette->getCurrentTool()->getWidget()->onMouseButtonUp(mouse, button_id, transforms);
     }
 
     return UNHANDLED;

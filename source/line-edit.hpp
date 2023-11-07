@@ -114,7 +114,7 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
-    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
     virtual EVENT_STATUS onKeyUp(int key_id) override;
     virtual EVENT_STATUS onTimer(float delta_time) override;

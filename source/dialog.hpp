@@ -17,9 +17,9 @@ protected:
     );
 
 public:
-    virtual EVENT_STATUS onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onKeyUp(int key_id) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
 };

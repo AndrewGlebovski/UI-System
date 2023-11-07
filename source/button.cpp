@@ -60,10 +60,10 @@ bool ActionButton::isPressedInGroup() const { return isInGroup() && group->getPr
 void ActionButton::setButtonStatus(BUTTON_STATUS new_status) { status = new_status; };
 
 
-EVENT_STATUS ActionButton::onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) {
+EVENT_STATUS ActionButton::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (isInsideButton(Vector2D(mouse_x, mouse_y) - transforms.front().offset)) {
+    if (isInsideButton(mouse - transforms.front().offset)) {
         if (status != BUTTON_PRESSED)
             setButtonStatus(BUTTON_HOVER);
 
@@ -76,10 +76,10 @@ EVENT_STATUS ActionButton::onMouseMove(int mouse_x, int mouse_y, List<Transform>
 }
 
 
-EVENT_STATUS ActionButton::onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ActionButton::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (!isInsideButton(Vector2D(mouse_x, mouse_y) - transforms.front().offset)) return UNHANDLED;
+    if (!isInsideButton(mouse - transforms.front().offset)) return UNHANDLED;
 
     setButtonStatus(BUTTON_PRESSED);
     if (isInGroup()) group->setPressed(this);
@@ -89,10 +89,10 @@ EVENT_STATUS ActionButton::onMouseButtonDown(int mouse_x, int mouse_y, int butto
 }
 
 
-EVENT_STATUS ActionButton::onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ActionButton::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    if (isInsideButton(Vector2D(mouse_x, mouse_y) - transforms.front().offset)) {
+    if (isInsideButton(mouse - transforms.front().offset)) {
         if (!isPressedInGroup()) setButtonStatus(BUTTON_HOVER);
 
         return HANDLED;

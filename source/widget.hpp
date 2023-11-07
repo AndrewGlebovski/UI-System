@@ -188,9 +188,9 @@ public:
     virtual void tryTransform(const Transform &new_transform);
 
 
-    virtual EVENT_STATUS onMouseMove(int mouse_x, int mouse_y, List<Transform> &transforms) { return UNHANDLED; }
-    virtual EVENT_STATUS onMouseButtonUp(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) { return UNHANDLED; }
-    virtual EVENT_STATUS onMouseButtonDown(int mouse_x, int mouse_y, int button_id, List<Transform> &transforms) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) { return UNHANDLED; }
     virtual EVENT_STATUS onKeyUp(int key_id) { return UNHANDLED; }
     virtual EVENT_STATUS onKeyDown(int key_id) { return UNHANDLED; }
     virtual EVENT_STATUS onTimer(float delta_time) { return UNHANDLED; }
