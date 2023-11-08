@@ -5,162 +5,158 @@
 
 
 /// Vector component type
-typedef float vec_t;
+typedef double vec_t;
 
 
 /// Math vector with x, y components
-class Vector2D {
+class Vec2d {
 public:
     vec_t x;    ///< Vector X component
     vec_t y;    ///< Vector Y component
 
-
     /**
      * \brief Constructs zero vector
     */
-    Vector2D();
-
+    Vec2d();
 
     /**
      * \brief Constructs vector from initial components
     */
-    Vector2D(vec_t init_x, vec_t init_y);
-
+    Vec2d(vec_t init_x, vec_t init_y);
 
     /**
      * \brief Constructs vector from its SFML analogue
     */
-    Vector2D(const sf::Vector2f &vec);
-
+    Vec2d(const sf::Vector2f &vec);
 
     /**
      * \brief Constructs vector from SFML Vector2u
     */
-    Vector2D(const sf::Vector2u &vec);
-
-
-    /**
-     * \brief Fills all fields with NAN
-    */
-    ~Vector2D();
-
-
-    /**
-     * \brief Scalar product
-    */
-    vec_t dot(const Vector2D &arg) const;
-
+    Vec2d(const sf::Vector2u &vec);
 
     /**
      * \brief Vector length
     */
     vec_t length() const;
 
-
     /**
-     * \brief Returns normalized vector
+     * \brief Returns square of length
     */
-    Vector2D normalize() const;
-
-
-    /**
-     * \brief Returns vector reflected from a surface with given normal
-    */
-    Vector2D reflected(const Vector2D &normal) const;
-
+    vec_t length2() const;
 
     /**
-     * \brief Prints vector components and its length
+     * \brief Prints vector components
     */
     void print() const;
 
-
     /**
-     * \brief Converts Vector2D to its SFML analogue
+     * \brief Converts Vec2d to its SFML analogue
     */
     operator sf::Vector2f() const;
 
-
     /**
-     * \brief Converts Vector2D to SFML Vector2i
+     * \brief Converts Vec2d to SFML Vector2i
     */
     operator sf::Vector2i() const;
+
+    /**
+     * \brief Fills all fields with NAN
+    */
+    ~Vec2d();
 };
+
+
+/**
+ * \brief Returns normalized vector
+*/
+Vec2d normalize(const Vec2d &v);
+
+
+/**
+ * \brief Scalar product
+*/
+vec_t dot(const Vec2d &a, const Vec2d &b);
 
 
 /**
  * \brief Adds B to A
 */
-Vector2D &operator += (Vector2D &a, const Vector2D &b);
+Vec2d &operator += (Vec2d &a, const Vec2d &b);
 
 
 /**
  * \brief Subtract B from A
 */
-Vector2D &operator -= (Vector2D &a, const Vector2D &b);
+Vec2d &operator -= (Vec2d &a, const Vec2d &b);
 
 
 /**
  * \brief Multiply each coordinate of A by B
 */
-Vector2D &operator *= (Vector2D &a, const Vector2D &b);
+Vec2d &operator *= (Vec2d &a, const Vec2d &b);
 
 
 /**
  * \brief Multiplies each component of A by argument
 */
-Vector2D &operator *= (Vector2D &a, vec_t arg);
+Vec2d &operator *= (Vec2d &a, vec_t arg);
 
 
 /**
  * \brief Divides each component of A by argument
 */
-Vector2D &operator /= (Vector2D &a, vec_t arg);
+Vec2d &operator /= (Vec2d &a, vec_t arg);
 
 
 /**
  * \brief Returns sum of A and B
 */
-Vector2D operator + (const Vector2D &a, const Vector2D &b);
+Vec2d operator + (const Vec2d &a, const Vec2d &b);
 
 
 /**
  * \brief Returns A minus B
 */
-Vector2D operator - (const Vector2D &a, const Vector2D &b);
+Vec2d operator - (const Vec2d &a, const Vec2d &b);
 
 
 /**
  * \brief Multiply each coordinate of A by -1
 */
-Vector2D operator - (const Vector2D &a);
+Vec2d operator - (const Vec2d &a);
 
 
 /**
- * \brief Returns Vector2D(a.x * b.x, a.y * b.y)
+ * \brief Returns Vec2d(a.x * b.x, a.y * b.y)
 */
-Vector2D operator * (const Vector2D &a, const Vector2D &b);
+Vec2d operator * (const Vec2d &a, const Vec2d &b);
 
 
 /**
- * \brief Returns Vector2D(a.x * arg, a.y * arg)
+ * \brief Returns Vec2d(a.x * arg, a.y * arg)
 */
-Vector2D operator * (const Vector2D &a, vec_t arg);
+Vec2d operator * (const Vec2d &a, vec_t arg);
 
 
 /**
- * \brief Returns Vector2D(a.x / arg, a.y / arg)
+ * \brief Returns Vec2d(a.x * arg, a.y * arg)
 */
-Vector2D operator / (const Vector2D &a, vec_t arg);
+Vec2d operator * (vec_t arg, const Vec2d &a);
+
+
+/**
+ * \brief Returns Vec2d(a.x / arg, a.y / arg)
+*/
+Vec2d operator / (const Vec2d &a, vec_t arg);
 
 
 /**
  * \brief Checks if A and B are equal
 */
-bool operator == (const Vector2D &a, const Vector2D &b);
+bool operator == (const Vec2d &a, const Vec2d &b);
 
 
 /**
  * \brief Checks if two floats are equal
 */
-bool isEqual(float a, float b);
+bool isEqual(vec_t a, vec_t b);

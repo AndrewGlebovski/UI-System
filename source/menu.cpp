@@ -19,11 +19,11 @@
 
 
 const size_t INVALID_OPENED = std::numeric_limits<size_t>::max();   ///< No opened menu at the moment
-const Vector2D add_size(20, 20);                                    ///< Additional size to text rect
+const Vec2d add_size(20, 20);                                    ///< Additional size to text rect
 
 
 MenuButton::MenuButton(
-    const Transform &transform_, const Vector2D &size_, Widget *parent_,
+    const Transform &transform_, const Vec2d &size_, Widget *parent_,
     const sf::String &text_, const ButtonStyle &style_,
     const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
 ) : 
@@ -36,10 +36,10 @@ void MenuButton::addButton(const sf::String &text_, ButtonAction *action_) {
     Widget *last_button = (buttons.size()) ? buttons.back() : nullptr;
 
     sf::Text btn_text(text_, style.font, style.font_size);
-    Vector2D new_size = Vector2D(btn_text.getLocalBounds().width + add_size.x, size.y);
+    Vec2d new_size = Vec2d(btn_text.getLocalBounds().width + add_size.x, size.y);
 
     Transform new_transform(transform);
-    new_transform.offset = Vector2D();
+    new_transform.offset = Vec2d();
 
     if (last_button) {
         new_transform.offset.y = last_button->transform.offset.y + last_button->size.y;
@@ -86,7 +86,7 @@ void MenuButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS MenuButton::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+EVENT_STATUS MenuButton::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
     RectButton::onMouseMove(mouse, transforms);
 
     if (!is_opened) return UNHANDLED;
@@ -100,7 +100,7 @@ EVENT_STATUS MenuButton::onMouseMove(const Vector2D &mouse, List<Transform> &tra
 }
 
 
-EVENT_STATUS MenuButton::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS MenuButton::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     if (RectButton::onMouseButtonDown(mouse, button_id, transforms) == HANDLED)
         return HANDLED;
 
@@ -116,7 +116,7 @@ EVENT_STATUS MenuButton::onMouseButtonDown(const Vector2D &mouse, int button_id,
 }
 
 
-EVENT_STATUS MenuButton::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS MenuButton::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     if (RectButton::onMouseButtonUp(mouse, button_id, transforms) == HANDLED)
         return HANDLED;
 
@@ -144,7 +144,7 @@ Menu::Menu(
     size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
     const MenuStyle &style_
 ) :
-    Widget(id_, transform_, Vector2D(), z_index_, parent_),
+    Widget(id_, transform_, Vec2d(), z_index_, parent_),
     buttons(), style(style_), opened(INVALID_OPENED)
 {
     sf::Text btn_text("Test", style.font, style.font_size);
@@ -188,7 +188,7 @@ void Menu::addMenuButton(const sf::String &text) {
     MenuButton *last_menu_button = buttons.size() ? buttons.back() : nullptr;
 
     sf::Text btn_text(text, style.font, style.font_size);
-    Vector2D new_size(btn_text.getLocalBounds().width + add_size.x, size.y);
+    Vec2d new_size(btn_text.getLocalBounds().width + add_size.x, size.y);
 
     Transform new_transform;
 
@@ -229,7 +229,7 @@ void Menu::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS Menu::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+EVENT_STATUS Menu::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++)
@@ -239,7 +239,7 @@ EVENT_STATUS Menu::onMouseMove(const Vector2D &mouse, List<Transform> &transform
 }
 
 
-EVENT_STATUS Menu::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Menu::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++) {
@@ -258,7 +258,7 @@ EVENT_STATUS Menu::onMouseButtonDown(const Vector2D &mouse, int button_id, List<
 }
 
 
-EVENT_STATUS Menu::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Menu::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     for (size_t i = 0; i < buttons.size(); i++)
@@ -270,7 +270,7 @@ EVENT_STATUS Menu::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Tr
 
 
 EVENT_STATUS Menu::onParentResize() {
-    tryResize(Vector2D(parent->size.x, size.y));
+    tryResize(Vec2d(parent->size.x, size.y));
     return UNHANDLED;
 }
 

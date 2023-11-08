@@ -46,7 +46,7 @@ protected:
 
 public:
     MenuButton(
-        const Transform &transform_, const Vector2D &size_, Widget *parent_,
+        const Transform &transform_, const Vec2d &size_, Widget *parent_,
         const sf::String &text_, const ButtonStyle &style_,
         const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
     );
@@ -61,9 +61,9 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
 
     virtual ~MenuButton() override;
 };
@@ -104,9 +104,9 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onParentResize() override;
 
     virtual ~Menu() override;

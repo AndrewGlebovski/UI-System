@@ -4,131 +4,137 @@
 #include "vector.hpp"
 
 
-const vec_t EPS = 0.0001f;          ///< Requiered for float comparsion
+const vec_t EPS = 0.0001;           ///< Requiered for comparsion
 
 
-Vector2D::Vector2D() : x(0), y(0) {}
+Vec2d::Vec2d() : x(0), y(0) {}
 
 
-Vector2D::Vector2D(vec_t init_x, vec_t init_y) : x(init_x), y(init_y) {}
+Vec2d::Vec2d(vec_t init_x, vec_t init_y) : x(init_x), y(init_y) {}
 
 
-Vector2D::Vector2D(const sf::Vector2f &vec) : x(vec.x), y(vec.y) {}
+Vec2d::Vec2d(const sf::Vector2f &vec) : x(vec_t(vec.x)), y(vec_t(vec.y)) {}
 
 
-Vector2D::Vector2D(const sf::Vector2u &vec) : x(float(vec.x)), y(float(vec.y)) {}
+Vec2d::Vec2d(const sf::Vector2u &vec) : x(vec_t(vec.x)), y(vec_t(vec.y)) {}
 
 
-Vector2D::~Vector2D() { x = NAN, y = NAN; }
+Vec2d::~Vec2d() { x = NAN, y = NAN; }
 
 
-vec_t Vector2D::dot(const Vector2D &arg) const {
-    return x * arg.x + y * arg.y;
+vec_t dot(const Vec2d &a, const Vec2d &b) {
+    return a.x * b.x + a.y * b.y;
 }
 
 
-vec_t Vector2D::length() const {
-    return sqrt(this->dot(*this));
+vec_t Vec2d::length() const {
+    return sqrt(length2());
 }
 
 
-Vector2D Vector2D::normalize() const {
-    vec_t len = length();
-    return Vector2D(x / len, y / len);
+vec_t Vec2d::length2() const {
+    return dot(*this, *this);
 }
 
 
-Vector2D Vector2D::reflected(const Vector2D &normal) const {
-    return (*this) - normal * (2 * (*this).dot(normal));
+Vec2d normalize(const Vec2d &v) {
+    vec_t len = v.length();
+    return Vec2d(v.x / len, v.y / len);
 }
 
 
-void Vector2D::print() const { 
-    printf("x: %15.3f, y: %15.3f, len: %15.3f\n", x, y, length());
+void Vec2d::print() const { 
+    printf("x: %15.3lf, y: %15.3lf", x, y);
 }
 
 
-Vector2D::operator sf::Vector2f() const { return sf::Vector2f(x, y); }
+Vec2d::operator sf::Vector2f() const { return sf::Vector2f(float(x), float(y)); }
 
 
-Vector2D::operator sf::Vector2i() const { return sf::Vector2i(int(x), int(y)); }
+Vec2d::operator sf::Vector2i() const { return sf::Vector2i(int(x), int(y)); }
 
 
-Vector2D &operator += (Vector2D &a, const Vector2D &b) {
+Vec2d &operator += (Vec2d &a, const Vec2d &b) {
     a.x += b.x;
     a.y += b.y;
     return a;
 }
 
 
-Vector2D &operator -= (Vector2D &a, const Vector2D &b) {
+Vec2d &operator -= (Vec2d &a, const Vec2d &b) {
     a.x -= b.x;
     a.y -= b.y;
     return a;
 }
 
 
-Vector2D &operator *= (Vector2D &a, const Vector2D &b) {
+Vec2d &operator *= (Vec2d &a, const Vec2d &b) {
     a.x *= b.x;
     a.y *= b.y;
     return a;
 }
 
 
-Vector2D &operator *= (Vector2D &a, vec_t arg) {
+Vec2d &operator *= (Vec2d &a, vec_t arg) {
     a.x *= arg;
     a.y *= arg;
     return a;
 }
 
 
-Vector2D &operator /= (Vector2D &a, vec_t arg) {
+Vec2d &operator /= (Vec2d &a, vec_t arg) {
     a.x /= arg;
     a.y /= arg;
     return a;
 }
 
 
-Vector2D operator + (const Vector2D &a, const Vector2D &b) {
-    Vector2D res = a;
+Vec2d operator + (const Vec2d &a, const Vec2d &b) {
+    Vec2d res = a;
     return (res += b);
 }
 
 
-Vector2D operator - (const Vector2D &a, const Vector2D &b) {
-    Vector2D res = a;
+Vec2d operator - (const Vec2d &a, const Vec2d &b) {
+    Vec2d res = a;
     return (res -= b);
 }
 
 
-Vector2D operator - (const Vector2D &a) {
-    return Vector2D(-a.x, -a.y);
+Vec2d operator - (const Vec2d &a) {
+    return Vec2d(-a.x, -a.y);
 }
 
 
-Vector2D operator * (const Vector2D &a, const Vector2D &b) {
-    Vector2D res = a;
+Vec2d operator * (const Vec2d &a, const Vec2d &b) {
+    Vec2d res = a;
     return (res *= b);
 }
 
 
-Vector2D operator * (const Vector2D &a, vec_t arg) {
-    Vector2D res = a;
+Vec2d operator * (const Vec2d &a, vec_t arg) {
+    Vec2d res = a;
     return (res *= arg);
 }
 
 
-Vector2D operator / (const Vector2D &a, vec_t arg) {
-    Vector2D res = a;
+Vec2d operator * (vec_t arg, const Vec2d &a) {
+    Vec2d res = a;
+    return (res *= arg);
+}
+
+
+Vec2d operator / (const Vec2d &a, vec_t arg) {
+    Vec2d res = a;
     return (res /= arg);
 }
 
 
-bool operator == (const Vector2D &a, const Vector2D &b) {
+bool operator == (const Vec2d &a, const Vec2d &b) {
     return isEqual(a.x, b.x) && isEqual(a.x, b.x);
 }
 
 
-bool isEqual(float a, float b) {
-    return (fabs(a - b) < EPS);
+bool isEqual(vec_t a, vec_t b) {
+    return (abs(a - b) < EPS);
 }

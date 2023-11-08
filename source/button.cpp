@@ -17,7 +17,7 @@
 
 
 ActionButton::ActionButton(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
     ButtonAction *action_, ButtonGroup *group_
 ) :
     BaseButton(id_, transform_, size_, z_index_, parent_),
@@ -60,7 +60,7 @@ bool ActionButton::isPressedInGroup() const { return isInGroup() && group->getPr
 void ActionButton::setButtonStatus(BUTTON_STATUS new_status) { status = new_status; };
 
 
-EVENT_STATUS ActionButton::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+EVENT_STATUS ActionButton::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideButton(mouse - transforms.front().offset)) {
@@ -76,7 +76,7 @@ EVENT_STATUS ActionButton::onMouseMove(const Vector2D &mouse, List<Transform> &t
 }
 
 
-EVENT_STATUS ActionButton::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ActionButton::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     if (!isInsideButton(mouse - transforms.front().offset)) return UNHANDLED;
@@ -89,7 +89,7 @@ EVENT_STATUS ActionButton::onMouseButtonDown(const Vector2D &mouse, int button_i
 }
 
 
-EVENT_STATUS ActionButton::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ActionButton::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideButton(mouse - transforms.front().offset)) {
@@ -157,7 +157,7 @@ bool ButtonGroup::isInGroup(ActionButton *button) const {
 
 
 RectButton::RectButton(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
     ButtonAction *action_, ButtonGroup *group_,
     const sf::String &text_, const ButtonStyle &style_,
     const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
@@ -168,8 +168,8 @@ RectButton::RectButton(
 {}
 
 
-bool RectButton::isInsideButton(const Vector2D &point) {
-    return isInsideRect(Vector2D(), size, point);
+bool RectButton::isInsideButton(const Vec2d &point) {
+    return isInsideRect(Vec2d(), size, point);
 }
 
 
@@ -178,7 +178,7 @@ void RectButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 
     sf::Text btn_text(text, style.font, style.font_size);
     sf::FloatRect text_rect = btn_text.getLocalBounds();
-    Vector2D text_offset((size.x - text_rect.width) / 2, (size.y - text_rect.height) / 2);
+    Vec2d text_offset((size.x - text_rect.width) / 2, (size.y - text_rect.height) / 2);
 
     btn_text.setPosition(transforms.front().offset + text_offset);
 
@@ -212,15 +212,15 @@ TextureButton::TextureButton(
     ButtonAction *action_, ButtonGroup *group_,
     const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_
 ) :
-    ActionButton(id_, transform_, Vector2D(), z_index_, parent_, action_, group_),
+    ActionButton(id_, transform_, Vec2d(), z_index_, parent_, action_, group_),
     normal(normal_), hover(hover_), pressed(pressed_)
 {
-    size = Vector2D(normal.getSize().x, normal.getSize().y);
+    size = Vec2d(normal.getSize().x, normal.getSize().y);
 }
 
 
-bool TextureButton::isInsideButton(const Vector2D &point) {
-    return isInsideRect(Vector2D(), size, point);
+bool TextureButton::isInsideButton(const Vec2d &point) {
+    return isInsideRect(Vec2d(), size, point);
 }
 
 

@@ -21,8 +21,8 @@
 
 
 const float MIN_OUTLINE = 0.0001f;                          ///< If outline is smaller then window can not be resized
-const Vector2D CLOSE_OFFSET = Vector2D(-45, 12);            ///< Window close button offset from window top-right corner
-const Vector2D EXPAND_OFFSET = Vector2D(-85, 12);           ///< Window expand button offset from window top-right corner
+const Vec2d CLOSE_OFFSET = Vec2d(-45, 12);            ///< Window close button offset from window top-right corner
+const Vec2d EXPAND_OFFSET = Vec2d(-85, 12);           ///< Window expand button offset from window top-right corner
 const size_t CLOSE_BUTTON_ID = Widget::AUTO_ID + 1;         ///< Window append button ID
 const size_t EXPAND_BUTTON_ID = Widget::AUTO_ID + 2;        ///< Window close button ID
 const size_t BUTTONS_ID = Widget::AUTO_ID + 3;              ///< Window buttons container ID
@@ -33,12 +33,12 @@ const size_t CONTAINER_ID = Widget::AUTO_ID + 4;            ///< Window containe
 class MoveButton : public BaseButton {
 protected:
     Window &window;         ///< Window to move
-    Vector2D prev_mouse;    ///< Previous mouse click position
+    Vec2d prev_mouse;    ///< Previous mouse click position
     bool is_moving;         ///< If moving is active
 
 public:
     MoveButton(
-        size_t id_, const Transform &transform_, const Vector2D &size_, Widget *parent_, 
+        size_t id_, const Transform &transform_, const Vec2d &size_, Widget *parent_, 
         Window &window_
     );
 
@@ -46,9 +46,9 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onParentResize() override;
 };
 
@@ -57,7 +57,7 @@ public:
 class ResizeButton : public BaseButton {
 protected:
     Window &window;         ///< Window to move
-    Vector2D prev_mouse;    ///< Previous mouse click position
+    Vec2d prev_mouse;    ///< Previous mouse click position
     bool is_moving;         ///< If moving is active
     const int resize_dir;   ///< Resize direction
 
@@ -75,7 +75,7 @@ public:
 
 
     ResizeButton(
-        size_t id_, const Transform &transform_, const Vector2D &size_, Widget *parent_, 
+        size_t id_, const Transform &transform_, const Vec2d &size_, Widget *parent_, 
         Window &window_, RESIZE_DIRECTION resize_dir_
     );
 
@@ -83,9 +83,9 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onParentResize() override;
 };
 
@@ -121,9 +121,9 @@ public:
 
     virtual void operator () () override {
         Transform new_transform = widget.transform;
-        new_transform.offset = Vector2D();
+        new_transform.offset = Vec2d();
         widget.tryTransform(new_transform);
-        widget.tryResize(Vector2D(SCREEN_W, SCREEN_H));
+        widget.tryResize(Vec2d(SCREEN_W, SCREEN_H));
     }
 
 
@@ -134,7 +134,7 @@ public:
 
 
 Window::Window(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_, 
+    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_, 
     const sf::String &title_,
     const WindowStyle &style_,
     bool can_resize,
@@ -144,7 +144,7 @@ Window::Window(
     Widget(id_, transform_, size_, z_index_, parent_),
     title(title_), style(style_),
     buttons(BUTTONS_ID, Transform(), size, 1, this, false), 
-    container(CONTAINER_ID, Transform(), Vector2D(), 1, this),
+    container(CONTAINER_ID, Transform(), Vec2d(), 1, this),
     menu(nullptr)
 {
     container.transform.offset = getAreaPosition() - transform.offset;
@@ -166,7 +166,7 @@ void Window::addButtons(bool can_resize, bool can_move, bool can_close) {
 void Window::addCloseButton() {
     buttons.addChild(new TextureIconButton(
         CLOSE_BUTTON_ID,
-        Transform(Vector2D(size.x, 0) + CLOSE_OFFSET),
+        Transform(Vec2d(size.x, 0) + CLOSE_OFFSET),
         2,
         nullptr,
         new CloseAction(*this),
@@ -182,7 +182,7 @@ void Window::addCloseButton() {
 void Window::addExpandButton() {
     buttons.addChild(new TextureIconButton(
         EXPAND_BUTTON_ID,
-        Transform(Vector2D(size.x, 0) + EXPAND_OFFSET),
+        Transform(Vec2d(size.x, 0) + EXPAND_OFFSET),
         2,
         nullptr,
         new ExpandAction(*this),
@@ -200,8 +200,8 @@ void Window::addMoveButton() {
 
     buttons.addChild(new MoveButton(
         Widget::AUTO_ID,
-        Transform(Vector2D(1, 1) * offset),
-        Vector2D(size.x - 2 * offset, style.tl_offset.y - offset),
+        Transform(Vec2d(1, 1) * offset),
+        Vec2d(size.x - 2 * offset, style.tl_offset.y - offset),
         nullptr,
         *this
     ));
@@ -222,29 +222,29 @@ buttons.addChild(new ResizeButton(              \
 void Window::addResizeButtons() {
     float offset = style.outline;
 
-    ADD_RESIZE_BUTTON(Vector2D(0, offset),                          Vector2D(offset, size.y - 2 * offset),  ResizeButton::LEFT);
-    ADD_RESIZE_BUTTON(Vector2D(offset, 0),                          Vector2D(size.x - 2 * offset, offset),  ResizeButton::TOP);
-    ADD_RESIZE_BUTTON(Vector2D(offset, size.y - offset),            Vector2D(size.x - 2 * offset, offset),  ResizeButton::BOTTOM);
-    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, offset),            Vector2D(offset, size.y - 2 * offset),  ResizeButton::RIGHT);
-    ADD_RESIZE_BUTTON(Vector2D(),                                   Vector2D(offset, offset),               ResizeButton::TOP_LEFT);
-    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, 0),                 Vector2D(offset, offset),               ResizeButton::TOP_RIGHT);
-    ADD_RESIZE_BUTTON(Vector2D(0, size.y - offset),                 Vector2D(offset, offset),               ResizeButton::BOTTOM_LEFT);
-    ADD_RESIZE_BUTTON(Vector2D(size.x - offset, size.y - offset),   Vector2D(offset, offset),               ResizeButton::BOTTOM_RIGHT);
+    ADD_RESIZE_BUTTON(Vec2d(0, offset),                          Vec2d(offset, size.y - 2 * offset),  ResizeButton::LEFT);
+    ADD_RESIZE_BUTTON(Vec2d(offset, 0),                          Vec2d(size.x - 2 * offset, offset),  ResizeButton::TOP);
+    ADD_RESIZE_BUTTON(Vec2d(offset, size.y - offset),            Vec2d(size.x - 2 * offset, offset),  ResizeButton::BOTTOM);
+    ADD_RESIZE_BUTTON(Vec2d(size.x - offset, offset),            Vec2d(offset, size.y - 2 * offset),  ResizeButton::RIGHT);
+    ADD_RESIZE_BUTTON(Vec2d(),                                   Vec2d(offset, offset),               ResizeButton::TOP_LEFT);
+    ADD_RESIZE_BUTTON(Vec2d(size.x - offset, 0),                 Vec2d(offset, offset),               ResizeButton::TOP_RIGHT);
+    ADD_RESIZE_BUTTON(Vec2d(0, size.y - offset),                 Vec2d(offset, offset),               ResizeButton::BOTTOM_LEFT);
+    ADD_RESIZE_BUTTON(Vec2d(size.x - offset, size.y - offset),   Vec2d(offset, offset),               ResizeButton::BOTTOM_RIGHT);
 }
 
 
 #undef ADD_RESIZE_BUTTON
 
 
-Vector2D Window::getAreaPosition() const {
-    Vector2D area_position = transform.offset + style.tl_offset;
+Vec2d Window::getAreaPosition() const {
+    Vec2d area_position = transform.offset + style.tl_offset;
     if (menu) area_position.y += menu->size.y;
     return area_position;
 }
 
 
-Vector2D Window::getAreaSize() const {
-    Vector2D area_size = size - style.tl_offset - style.br_offset;
+Vec2d Window::getAreaSize() const {
+    Vec2d area_size = size - style.tl_offset - style.br_offset;
     if (menu) area_size.y -= menu->size.y;
     return area_size;
 }
@@ -253,7 +253,7 @@ Vector2D Window::getAreaSize() const {
 #define DRAW_TEXTURE(TEXTURE_ID, POSITION, TEXTURE_RECT_SIZE)                   \
 do {                                                                            \
     tool_sprite.setTexture(style.asset[TEXTURE_ID]);                            \
-    tool_sprite.setTextureRect(sf::IntRect(Vector2D(), TEXTURE_RECT_SIZE));     \
+    tool_sprite.setTextureRect(sf::IntRect(Vec2d(), TEXTURE_RECT_SIZE));     \
     tool_sprite.setPosition(POSITION + transforms.front().offset);                   \
     result.draw(tool_sprite);                                                   \
 } while(0)
@@ -262,23 +262,23 @@ do {                                                                            
 void Window::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
-    Vector2D tl_size = style.asset[WindowAsset::FRAME_TL].getSize();
-    Vector2D br_size = style.asset[WindowAsset::FRAME_BR].getSize();
+    Vec2d tl_size = style.asset[WindowAsset::FRAME_TL].getSize();
+    Vec2d br_size = style.asset[WindowAsset::FRAME_BR].getSize();
 
     vec_t center_h = size.y - tl_size.y - br_size.y;
     vec_t center_w = size.x - tl_size.x - br_size.x;
 
     sf::Sprite tool_sprite;
 
-    DRAW_TEXTURE(WindowAsset::FRAME_TL,     Vector2D(),                                             tl_size);
-    DRAW_TEXTURE(WindowAsset::FRAME_L,      Vector2D(0, tl_size.y),                                 Vector2D(tl_size.x, center_h));
-    DRAW_TEXTURE(WindowAsset::FRAME_BL,     Vector2D(0, tl_size.y + center_h),                      Vector2D(tl_size.x, br_size.y));
-    DRAW_TEXTURE(WindowAsset::FRAME_B,      Vector2D(tl_size.x, tl_size.y + center_h),              Vector2D(center_w, br_size.y));
-    DRAW_TEXTURE(WindowAsset::FRAME_BR,     Vector2D(tl_size.x + center_w, tl_size.y + center_h),   br_size);
-    DRAW_TEXTURE(WindowAsset::FRAME_R,      Vector2D(tl_size.x + center_w, tl_size.y),              Vector2D(br_size.x, center_h));
-    DRAW_TEXTURE(WindowAsset::FRAME_TR,     Vector2D(tl_size.x + center_w, 0),                      Vector2D(br_size.x, tl_size.y));
-    DRAW_TEXTURE(WindowAsset::TITLE,        Vector2D(tl_size.x, 0),                                 Vector2D(center_w, tl_size.y));
-    DRAW_TEXTURE(WindowAsset::FRAME_CENTER, tl_size,                                                Vector2D(center_w, center_h));
+    DRAW_TEXTURE(WindowAsset::FRAME_TL,     Vec2d(),                                             tl_size);
+    DRAW_TEXTURE(WindowAsset::FRAME_L,      Vec2d(0, tl_size.y),                                 Vec2d(tl_size.x, center_h));
+    DRAW_TEXTURE(WindowAsset::FRAME_BL,     Vec2d(0, tl_size.y + center_h),                      Vec2d(tl_size.x, br_size.y));
+    DRAW_TEXTURE(WindowAsset::FRAME_B,      Vec2d(tl_size.x, tl_size.y + center_h),              Vec2d(center_w, br_size.y));
+    DRAW_TEXTURE(WindowAsset::FRAME_BR,     Vec2d(tl_size.x + center_w, tl_size.y + center_h),   br_size);
+    DRAW_TEXTURE(WindowAsset::FRAME_R,      Vec2d(tl_size.x + center_w, tl_size.y),              Vec2d(br_size.x, center_h));
+    DRAW_TEXTURE(WindowAsset::FRAME_TR,     Vec2d(tl_size.x + center_w, 0),                      Vec2d(br_size.x, tl_size.y));
+    DRAW_TEXTURE(WindowAsset::TITLE,        Vec2d(tl_size.x, 0),                                 Vec2d(center_w, tl_size.y));
+    DRAW_TEXTURE(WindowAsset::FRAME_CENTER, tl_size,                                                Vec2d(center_w, center_h));
 
     sf::Text text(title, style.font, style.font_size);
     text.setPosition(transforms.front().offset + style.title_offset);
@@ -345,7 +345,7 @@ do {                                                                            
 } while(0)
 
 
-EVENT_STATUS Window::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+EVENT_STATUS Window::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     BROADCAST_MOUSE_EVENT(onMouseMove(mouse, transforms));
@@ -354,7 +354,7 @@ EVENT_STATUS Window::onMouseMove(const Vector2D &mouse, List<Transform> &transfo
 }
 
 
-EVENT_STATUS Window::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Window::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     BROADCAST_MOUSE_EVENT(onMouseButtonUp(mouse, button_id, transforms));
@@ -363,7 +363,7 @@ EVENT_STATUS Window::onMouseButtonUp(const Vector2D &mouse, int button_id, List<
 }
 
 
-EVENT_STATUS Window::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Window::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     BROADCAST_MOUSE_EVENT(onMouseButtonDown(mouse, button_id, transforms));
@@ -396,7 +396,7 @@ EVENT_STATUS Window::onTimer(float delta_time) {
 }
 
 
-void Window::tryResize(const Vector2D &new_size) {
+void Window::tryResize(const Vec2d &new_size) {
     Widget::tryResize(new_size);
 
     buttons.size = size;
@@ -409,10 +409,10 @@ void Window::tryResize(const Vector2D &new_size) {
     Widget *expand_button = buttons.findWidget(EXPAND_BUTTON_ID);
 
     if (close_button)
-        close_button->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
+        close_button->transform.offset = Vec2d(size.x, 0) + CLOSE_OFFSET;
     
     if (expand_button)
-        expand_button->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
+        expand_button->transform.offset = Vec2d(size.x, 0) + EXPAND_OFFSET;
     
     if (menu) menu->size.x = getAreaSize().x;
 }
@@ -423,7 +423,7 @@ EVENT_STATUS Window::onParentResize() {
     tryTransform(transform);
 
     // CHECKS IF RESIZE IS NECESSARY
-    Vector2D new_size = size;
+    Vec2d new_size = size;
 
     if (transform.offset.x < 0) {
         transform.offset.x = 0;
@@ -452,14 +452,14 @@ Window::~Window() {
 
 
 MainWindow::MainWindow(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_,
+    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_,
     const sf::String &title_, const WindowStyle &style_
 ) :
     Window(id_, transform_, size_, z_index_, nullptr, title_, style_)
 {}
 
 
-void MainWindow::tryResize(const Vector2D &new_size) {
+void MainWindow::tryResize(const Vec2d &new_size) {
     size = new_size;
 
     if (transform.offset.x + new_size.x > SCREEN_W) size.x = SCREEN_W - transform.offset.x;
@@ -478,10 +478,10 @@ void MainWindow::tryResize(const Vector2D &new_size) {
     Widget *expand_button = buttons.findWidget(EXPAND_BUTTON_ID);
 
     if (close_button)
-        close_button->transform.offset = Vector2D(size.x, 0) + CLOSE_OFFSET;
+        close_button->transform.offset = Vec2d(size.x, 0) + CLOSE_OFFSET;
     
     if (expand_button)
-        expand_button->transform.offset = Vector2D(size.x, 0) + EXPAND_OFFSET;
+        expand_button->transform.offset = Vec2d(size.x, 0) + EXPAND_OFFSET;
     
     if (menu) menu->size.x = getAreaSize().x;
 }
@@ -509,11 +509,11 @@ void MainWindow::parseEvent(const sf::Event &event, List<Transform> &transforms)
         case sf::Event::KeyReleased:
             onKeyUp(event.key.code); break;
         case sf::Event::MouseButtonPressed:
-            onMouseButtonDown(Vector2D(event.mouseButton.x, event.mouseButton.y), event.mouseButton.button, transforms); break;
+            onMouseButtonDown(Vec2d(event.mouseButton.x, event.mouseButton.y), event.mouseButton.button, transforms); break;
         case sf::Event::MouseButtonReleased:
-            onMouseButtonUp(Vector2D(event.mouseButton.x, event.mouseButton.y), event.mouseButton.button, transforms); break;
+            onMouseButtonUp(Vec2d(event.mouseButton.x, event.mouseButton.y), event.mouseButton.button, transforms); break;
         case sf::Event::MouseMoved:
-            onMouseMove(Vector2D(event.mouseMove.x, event.mouseMove.y), transforms); break;
+            onMouseMove(Vec2d(event.mouseMove.x, event.mouseMove.y), transforms); break;
         default:
             return;
     }
@@ -521,11 +521,11 @@ void MainWindow::parseEvent(const sf::Event &event, List<Transform> &transforms)
 
 
 MoveButton::MoveButton(
-    size_t id_, const Transform &transform_, const Vector2D &size_, Widget *parent_, 
+    size_t id_, const Transform &transform_, const Vec2d &size_, Widget *parent_, 
     Window &window_
 ) :
     BaseButton(id_, transform_, size_, 0, parent_),
-    window(window_), prev_mouse(Vector2D()), is_moving(false)
+    window(window_), prev_mouse(Vec2d()), is_moving(false)
 {}
 
 
@@ -541,14 +541,14 @@ void MoveButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS MoveButton::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+EVENT_STATUS MoveButton::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
     if (!is_moving) return UNHANDLED;
 
     // WE CHANGED WINDOW POSITION SO CURRENT TRANSFORM WILL BE INCORRECT
     // BUT IT DOESN'T MATTER CAUSE EVENT IS HANDLED
     // AND FARTHER BROADCASTING IS NOT NEEDED
 
-    Vector2D new_position = window.transform.offset + (mouse - prev_mouse);
+    Vec2d new_position = window.transform.offset + (mouse - prev_mouse);
     prev_mouse = mouse;
 
     window.tryTransform(Transform(new_position));
@@ -557,7 +557,7 @@ EVENT_STATUS MoveButton::onMouseMove(const Vector2D &mouse, List<Transform> &tra
 }
 
 
-EVENT_STATUS MoveButton::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS MoveButton::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideRect(transforms.front().offset, size, mouse)) {
@@ -570,7 +570,7 @@ EVENT_STATUS MoveButton::onMouseButtonDown(const Vector2D &mouse, int button_id,
 }
 
 
-EVENT_STATUS MoveButton::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS MoveButton::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }
@@ -578,20 +578,20 @@ EVENT_STATUS MoveButton::onMouseButtonUp(const Vector2D &mouse, int button_id, L
 
 EVENT_STATUS MoveButton::onParentResize() {
     float outline = window.getStyle().outline;
-    Vector2D window_size = window.size;
+    Vec2d window_size = window.size;
 
-    size = Vector2D(window_size.x - 2 * outline, window.getStyle().tl_offset.y - outline);
+    size = Vec2d(window_size.x - 2 * outline, window.getStyle().tl_offset.y - outline);
     
     return UNHANDLED;
 }
 
 
 ResizeButton::ResizeButton(
-    size_t id_, const Transform &transform_, const Vector2D &size_, Widget *parent_, 
+    size_t id_, const Transform &transform_, const Vec2d &size_, Widget *parent_, 
     Window &window_, RESIZE_DIRECTION resize_dir_
 ) :
     BaseButton(id_, transform_, size_, 0, parent_),
-    window(window_), prev_mouse(Vector2D()), is_moving(false), resize_dir(resize_dir_)
+    window(window_), prev_mouse(Vec2d()), is_moving(false), resize_dir(resize_dir_)
 {}
 
 
@@ -607,10 +607,10 @@ void ResizeButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS ResizeButton::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+EVENT_STATUS ResizeButton::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
     if (!is_moving) return UNHANDLED;
 
-    Vector2D shift = mouse - prev_mouse;
+    Vec2d shift = mouse - prev_mouse;
     prev_mouse = mouse;
 
     switch (resize_dir) {
@@ -637,12 +637,12 @@ EVENT_STATUS ResizeButton::onMouseMove(const Vector2D &mouse, List<Transform> &t
             window.tryResize(window.size - shift);
             break;
         case TOP_RIGHT: 
-            window.tryTransform(Transform(window.transform.offset + Vector2D(0, shift.y)));
-            window.tryResize(window.size + Vector2D(shift.x, -shift.y));
+            window.tryTransform(Transform(window.transform.offset + Vec2d(0, shift.y)));
+            window.tryResize(window.size + Vec2d(shift.x, -shift.y));
             break;
         case BOTTOM_LEFT: 
-            window.tryTransform(Transform(window.transform.offset + Vector2D(shift.x, 0)));
-            window.tryResize(window.size + Vector2D(-shift.x, shift.y));
+            window.tryTransform(Transform(window.transform.offset + Vec2d(shift.x, 0)));
+            window.tryResize(window.size + Vec2d(-shift.x, shift.y));
             break;
         case BOTTOM_RIGHT: 
             window.tryResize(window.size + shift);
@@ -655,7 +655,7 @@ EVENT_STATUS ResizeButton::onMouseMove(const Vector2D &mouse, List<Transform> &t
 }
 
 
-EVENT_STATUS ResizeButton::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ResizeButton::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideRect(transforms.front().offset, size, mouse)) {
@@ -668,7 +668,7 @@ EVENT_STATUS ResizeButton::onMouseButtonDown(const Vector2D &mouse, int button_i
 }
 
 
-EVENT_STATUS ResizeButton::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ResizeButton::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }
@@ -676,37 +676,37 @@ EVENT_STATUS ResizeButton::onMouseButtonUp(const Vector2D &mouse, int button_id,
 
 EVENT_STATUS ResizeButton::onParentResize() {
     float outline = window.getStyle().outline;
-    Vector2D window_size = window.size;
+    Vec2d window_size = window.size;
 
     switch (resize_dir) {
         case LEFT: 
-            size = Vector2D(outline, window_size.y - 2 * outline);
+            size = Vec2d(outline, window_size.y - 2 * outline);
             break;
         case TOP: 
-            size = Vector2D(window_size.x - 2 * outline, outline);
+            size = Vec2d(window_size.x - 2 * outline, outline);
             break;
         case BOTTOM: 
-            transform.offset = Vector2D(outline, window_size.y - outline);
-            size = Vector2D(window_size.x - 2 * outline, outline);
+            transform.offset = Vec2d(outline, window_size.y - outline);
+            size = Vec2d(window_size.x - 2 * outline, outline);
             break;
         case RIGHT: 
-            transform.offset = Vector2D(window_size.x - outline, outline);
-            size = Vector2D(outline, window_size.y - 2 * outline);
+            transform.offset = Vec2d(window_size.x - outline, outline);
+            size = Vec2d(outline, window_size.y - 2 * outline);
             break;
         case TOP_LEFT: 
-            size = Vector2D(outline, outline);
+            size = Vec2d(outline, outline);
             break;
         case TOP_RIGHT: 
-            transform.offset = Vector2D(window_size.x - outline, 0);
-            size = Vector2D(outline, outline);
+            transform.offset = Vec2d(window_size.x - outline, 0);
+            size = Vec2d(outline, outline);
             break;
         case BOTTOM_LEFT: 
-            transform.offset = Vector2D(0, window_size.y - outline);
-            size = Vector2D(outline, outline);
+            transform.offset = Vec2d(0, window_size.y - outline);
+            size = Vec2d(outline, outline);
             break;
         case BOTTOM_RIGHT: 
-            transform.offset = Vector2D(window_size.x - outline, window_size.y - outline);
-            size = Vector2D(outline, outline);
+            transform.offset = Vec2d(window_size.x - outline, window_size.y - outline);
+            size = Vec2d(outline, outline);
             break;
         default:
             printf("Unknown resize direction!\n"); abort();

@@ -8,20 +8,20 @@
 class WindowStyle {
 public:
     sf::Color title_color;      ///< Title color
-    Vector2D title_offset;      ///< Title offset from top-left corner
+    Vec2d title_offset;      ///< Title offset from top-left corner
     unsigned font_size;         ///< Title font size
     const sf::Font &font;       ///< Title font
     const WindowAsset &asset;   ///< Textures used in window
     float outline;              ///< Describes size of window resizing buttons
-    Vector2D tl_offset;         ///< Window inner area offset from top-left corner
-    Vector2D br_offset;         ///< Window inner area offset from bottom-right corner
+    Vec2d tl_offset;         ///< Window inner area offset from top-left corner
+    Vec2d br_offset;         ///< Window inner area offset from bottom-right corner
 
 
     WindowStyle(
-        const sf::Color &title_color_, const Vector2D &title_offset_,
+        const sf::Color &title_color_, const Vec2d &title_offset_,
         unsigned font_size_, const sf::Font &font_,
         const WindowAsset &asset_, float outline_, 
-        const Vector2D &tl_offset_, const Vector2D &br_offset_
+        const Vec2d &tl_offset_, const Vec2d &br_offset_
     ) :
         title_color(title_color_), title_offset(title_offset_),
         font_size(font_size_), font(font_),
@@ -72,7 +72,7 @@ public:
      * \note Position and size consider title bar and frame
     */
     Window(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         const sf::String &title_,
         const WindowStyle &style_,
         bool can_resize = true,
@@ -88,13 +88,13 @@ public:
     /**
      * \brief Returns position of the window inside area
     */
-    Vector2D getAreaPosition() const;
+    Vec2d getAreaPosition() const;
 
 
     /**
      * \brief Returns position of the window inside area
     */
-    Vector2D getAreaSize() const;
+    Vec2d getAreaSize() const;
 
 
     /**
@@ -126,7 +126,7 @@ public:
     virtual void removeChild(size_t child_id) override;
 
 
-    virtual void tryResize(const Vector2D &new_size) override;
+    virtual void tryResize(const Vec2d &new_size) override;
 
 
     const WindowStyle &getStyle() const { return style; }
@@ -138,9 +138,9 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onKeyUp(int key_id) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
     virtual EVENT_STATUS onTimer(float delta_time) override;
@@ -155,12 +155,12 @@ public:
 class MainWindow : public Window {
 public:
     MainWindow(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_,
         const sf::String &title_, const WindowStyle &style_
     );
 
 
-    virtual void tryResize(const Vector2D &new_size) override;
+    virtual void tryResize(const Vec2d &new_size) override;
 
 
     virtual void tryTransform(const Transform &new_transform) override;

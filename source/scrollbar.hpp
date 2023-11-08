@@ -25,13 +25,13 @@ public:
 class ScrollBarStyle {
 public:
     sf::Color frame_color;          ///< Frame color
-    vec_t frame_outline;            ///< Frame outline thickness
+    float frame_outline;            ///< Frame outline thickness
     sf::Color background_color;     ///< Background color
     sf::Color scroller_color;       ///< Scroller
     vec_t scroller_factor;          ///< Scroller height = factor * scrollbar.size
 
     ScrollBarStyle(
-        const sf::Color &frame_color_, vec_t frame_outline_,
+        const sf::Color &frame_color_, float frame_outline_,
         const sf::Color &background_color_,
         const sf::Color &scroller_color_, vec_t scroller_factor_
     ) :
@@ -49,14 +49,14 @@ protected:
     ScrollBarStyle style;               ///< Style
     sf::RectangleShape scroller;        ///< Rectangle that represents scroller
     bool is_moving;                     ///< Scroller is moving right now
-    Vector2D mouse_prev;                ///< Previous mouse click position
+    Vec2d mouse_prev;                ///< Previous mouse click position
 
 
-    virtual void scrollTo(const Vector2D &mouse) = 0;
+    virtual void scrollTo(const Vec2d &mouse) = 0;
 
 public:
     ScrollBar(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
 
@@ -68,9 +68,9 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
 
 
     virtual ~ScrollBar();
@@ -80,11 +80,11 @@ public:
 /// Can be scrolled up and down
 class VScrollBar : public ScrollBar {
 protected:
-    virtual void scrollTo(const Vector2D &mouse) override;
+    virtual void scrollTo(const Vec2d &mouse) override;
 
 public:
     VScrollBar(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
 
@@ -96,11 +96,11 @@ public:
 /// Can be scrolled left and right
 class HScrollBar : public ScrollBar {
 protected:
-    virtual void scrollTo(const Vector2D &mouse) override;
+    virtual void scrollTo(const Vec2d &mouse) override;
 
 public:
     HScrollBar(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
 

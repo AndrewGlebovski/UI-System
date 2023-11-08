@@ -67,7 +67,7 @@ public:
      * \note Max length must be greater than zero
     */
     LineEdit(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         const LineEditStyle &style_, size_t max_length_
     );
 
@@ -114,7 +114,7 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
     virtual EVENT_STATUS onKeyUp(int key_id) override;
     virtual EVENT_STATUS onTimer(float delta_time) override;

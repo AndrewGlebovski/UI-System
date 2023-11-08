@@ -7,7 +7,7 @@
 /// Base class for all buttons
 class BaseButton : public Widget {
 public:
-    BaseButton(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_) :
+    BaseButton(size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_) :
         Widget(id_, transform_, size_, z_index_, parent_) {}
 
 
@@ -76,7 +76,7 @@ public:
      * \note If group_ != nullptr then button will join the group_
     */
     ActionButton(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         ButtonAction *action_, ButtonGroup *group_
     );
 
@@ -99,15 +99,15 @@ public:
     /**
      * \note Point position is relative to button position
     */
-    virtual bool isInsideButton(const Vector2D &point) = 0;
+    virtual bool isInsideButton(const Vec2d &point) = 0;
 
 
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override = 0;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
 
 
     virtual ~ActionButton() override;
@@ -200,14 +200,14 @@ protected:
 
 public:
     RectButton(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         ButtonAction *action_, ButtonGroup *group_,
         const sf::String &text_, const ButtonStyle &style_,
         const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
     );
 
 
-    virtual bool isInsideButton(const Vector2D &point) override;
+    virtual bool isInsideButton(const Vec2d &point) override;
 
 
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
@@ -229,7 +229,7 @@ public:
     );
 
 
-    virtual bool isInsideButton(const Vector2D &point) override;
+    virtual bool isInsideButton(const Vec2d &point) override;
 
 
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;

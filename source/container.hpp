@@ -16,7 +16,7 @@ private:
 
 public:
     Container(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         bool focus_enabled_ = true
     );
 
@@ -40,9 +40,9 @@ public:
     virtual void removeChild(size_t child_id) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onKeyUp(int key_id) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
     virtual EVENT_STATUS onTimer(float delta_time) override;

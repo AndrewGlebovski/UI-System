@@ -17,12 +17,12 @@
 
 
 ScrollBar::ScrollBar(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
     ScrollAction *action_, const ScrollBarStyle &style_
 ) :
     Widget(id_, transform_, size_, z_index_, parent_),
-    action(action_), style(style_), scroller(Vector2D()), 
-    is_moving(false), mouse_prev(Vector2D()) 
+    action(action_), style(style_), scroller(Vec2d()), 
+    is_moving(false), mouse_prev(Vec2d()) 
 {
     ASSERT(action, "Action is nullptr!\n");
 }
@@ -38,7 +38,7 @@ void ScrollBar::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     frame.setPosition(transforms.front().offset);
     result.draw(frame);
     
-    Vector2D scroller_offset = scroller.getPosition();
+    Vec2d scroller_offset = scroller.getPosition();
 
     scroller.setPosition(transforms.front().offset + scroller_offset);
     result.draw(scroller);
@@ -47,7 +47,7 @@ void ScrollBar::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-EVENT_STATUS ScrollBar::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+EVENT_STATUS ScrollBar::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
     if (is_moving) {
         scrollTo(mouse - mouse_prev);
         mouse_prev = mouse;
@@ -59,11 +59,11 @@ EVENT_STATUS ScrollBar::onMouseMove(const Vector2D &mouse, List<Transform> &tran
 }
 
 
-EVENT_STATUS ScrollBar::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ScrollBar::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideRect(transforms.front().offset, size, mouse)) {
-        Vector2D scroller_absolute = transforms.front().offset + scroller.getPosition();
+        Vec2d scroller_absolute = transforms.front().offset + scroller.getPosition();
 
         if (!isInsideRect(scroller_absolute, scroller.getSize(), mouse))
             scrollTo(mouse - (scroller_absolute + scroller.getSize() / 2));
@@ -78,7 +78,7 @@ EVENT_STATUS ScrollBar::onMouseButtonDown(const Vector2D &mouse, int button_id, 
 }
 
 
-EVENT_STATUS ScrollBar::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS ScrollBar::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     is_moving = false;
     return UNHANDLED;
 }
@@ -90,19 +90,19 @@ ScrollBar::~ScrollBar() {
 
 
 VScrollBar::VScrollBar(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
     ScrollAction *action_, const ScrollBarStyle &style_
 ) :
     ScrollBar(id_, transform_, size_, z_index_, parent_, action_, style_)
 {
     scroller.setPosition(0, 0);
     scroller.setFillColor(style.scroller_color);
-    scroller.setSize(Vector2D(size.x, style.scroller_factor * size.y));
+    scroller.setSize(Vec2d(size.x, style.scroller_factor * size.y));
 }
 
 
-void VScrollBar::scrollTo(const Vector2D &shift) {
-    Vector2D new_position = scroller.getPosition() + Vector2D(0, shift.y);
+void VScrollBar::scrollTo(const Vec2d &shift) {
+    Vec2d new_position = scroller.getPosition() + Vec2d(0, shift.y);
 
     if (new_position.y < 0) new_position.y = 0;
     if (new_position.y + scroller.getSize().y > size.y) new_position.y = size.y - scroller.getSize().y;
@@ -114,32 +114,32 @@ void VScrollBar::scrollTo(const Vector2D &shift) {
 
 
 EVENT_STATUS VScrollBar::onParentResize() {
-    float prev = scroller.getPosition().y / (size.y - scroller.getSize().y);
+    double prev = scroller.getPosition().y / (size.y - scroller.getSize().y);
 
-    tryTransform(Transform(Vector2D(parent->size.x - 20, transform.offset.y)));
-    tryResize(Vector2D(size.x, parent->size.y - 30));
+    tryTransform(Transform(Vec2d(parent->size.x - 20, transform.offset.y)));
+    tryResize(Vec2d(size.x, parent->size.y - 30));
 
-    scroller.setSize(Vector2D(size.x, style.scroller_factor * size.y));
-    scroller.setPosition(Vector2D(scroller.getPosition().x, prev * (size.y - scroller.getSize().y)));
+    scroller.setSize(Vec2d(size.x, style.scroller_factor * size.y));
+    scroller.setPosition(Vec2d(scroller.getPosition().x, prev * (size.y - scroller.getSize().y)));
 
     return UNHANDLED;
 }
 
 
 HScrollBar::HScrollBar(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
     ScrollAction *action_, const ScrollBarStyle &style_
 ) :
     ScrollBar(id_, transform_, size_, z_index_, parent_, action_, style_)
 {
     scroller.setPosition(0, 0);
     scroller.setFillColor(style.scroller_color);
-    scroller.setSize(Vector2D(style.scroller_factor * size.x, size.y));
+    scroller.setSize(Vec2d(style.scroller_factor * size.x, size.y));
 }
 
 
-void HScrollBar::scrollTo(const Vector2D &shift) {
-    Vector2D new_position = scroller.getPosition() + Vector2D(shift.x, 0);
+void HScrollBar::scrollTo(const Vec2d &shift) {
+    Vec2d new_position = scroller.getPosition() + Vec2d(shift.x, 0);
 
     if (new_position.x < 0) new_position.x = 0;
     if (new_position.x + scroller.getSize().x > size.x) new_position.x = size.x - scroller.getSize().x;
@@ -151,13 +151,13 @@ void HScrollBar::scrollTo(const Vector2D &shift) {
 
 
 EVENT_STATUS HScrollBar::onParentResize() {
-    float prev = scroller.getPosition().x / (size.x - scroller.getSize().x);
+    double prev = scroller.getPosition().x / (size.x - scroller.getSize().x);
 
-    tryTransform(Transform(Vector2D(transform.offset.x, parent->size.y - 20)));
-    tryResize(Vector2D(parent->size.x, size.y));
+    tryTransform(Transform(Vec2d(transform.offset.x, parent->size.y - 20)));
+    tryResize(Vec2d(parent->size.x, size.y));
 
-    scroller.setSize(Vector2D(style.scroller_factor * size.x, size.y));
-    scroller.setPosition(Vector2D(prev * (size.x - scroller.getSize().x), scroller.getPosition().y));
+    scroller.setSize(Vec2d(style.scroller_factor * size.x, size.y));
+    scroller.setPosition(Vec2d(prev * (size.x - scroller.getSize().x), scroller.getPosition().y));
 
     return UNHANDLED;
 }

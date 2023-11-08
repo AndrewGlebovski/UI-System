@@ -9,11 +9,11 @@ const int SCREEN_H = 1080;                      ///< Screen height in pixels
 // PREDEFINED VALUES FOR WINDOW STYLE
 
 const size_t WINDOW_TITLE_COLOR = 0xffffffff;
-const Vector2D WINDOW_TITLE_OFFSET(20, 20);
+const Vec2d WINDOW_TITLE_OFFSET(20, 20);
 const int WINDOW_FONT_SIZE = 20;
 const float WINDOW_OUTLINE = 10;
-const Vector2D WINDOW_TL_OFFSET(15, 60);
-const Vector2D WINDOW_BR_OFFSET(15, 15);
+const Vec2d WINDOW_TL_OFFSET(15, 60);
+const Vec2d WINDOW_BR_OFFSET(15, 15);
 
 // PREDEFINED VALUES FOR SCROLLBAR STYLE
 

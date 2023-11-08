@@ -31,26 +31,26 @@ const sf::Color BUTTON_PRESSED_COLOR(0x000080ff);
 
 
 Dialog::Dialog(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
     const sf::String &title_, const WindowStyle &style_
 ) :
     Window(id_, transform_, size_, z_index_, parent_, title_, style_, false, true, false)
 {}
 
 
-EVENT_STATUS Dialog::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+EVENT_STATUS Dialog::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
     Window::onMouseMove(mouse, transforms);
     return HANDLED;
 }
 
 
-EVENT_STATUS Dialog::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Dialog::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     Window::onMouseButtonUp(mouse, button_id, transforms);
     return HANDLED;
 }
 
 
-EVENT_STATUS Dialog::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Dialog::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     Window::onMouseButtonDown(mouse, button_id,transforms);
     return HANDLED;
 }
@@ -79,7 +79,7 @@ ConfirmDialog::ConfirmDialog(
     const WindowStyle &window_style_,
     const ButtonStyle &button_style_
 ) :
-    Dialog(id_, transform_, Vector2D(200, 200), z_index_, parent_, title_, window_style_)
+    Dialog(id_, transform_, Vec2d(200, 200), z_index_, parent_, title_, window_style_)
 {
     ok_action_->setDialog(*this);
     cancel_action_->setDialog(*this);
@@ -87,7 +87,7 @@ ConfirmDialog::ConfirmDialog(
     container.addChild(new RectButton(
         1,
         Transform(),
-        Vector2D(100, 50),
+        Vec2d(100, 50),
         0,
         nullptr,
         ok_action_,
@@ -101,8 +101,8 @@ ConfirmDialog::ConfirmDialog(
 
     container.addChild(new RectButton(
         2,
-        Transform(Vector2D(120, 0)),
-        Vector2D(100, 50),
+        Transform(Vec2d(120, 0)),
+        Vec2d(100, 50),
         0,
         nullptr,
         cancel_action_,
@@ -128,15 +128,15 @@ SelectFileDialog::SelectFileDialog(
     const ButtonStyle &button_style_,
     const LineEditStyle &line_edit_style_
 ) :
-    Dialog(id_, transform_, Vector2D(400, 200), z_index_, parent_, title_, window_style_)
+    Dialog(id_, transform_, Vec2d(400, 200), z_index_, parent_, title_, window_style_)
 {
     select_action_->setDialog(*this);
     cancel_action_->setDialog(*this);
 
     container.addChild(new RectButton(
         1,
-        Transform(Vector2D(0, 50)),
-        Vector2D(100, 50),
+        Transform(Vec2d(0, 50)),
+        Vec2d(100, 50),
         0,
         nullptr,
         select_action_,
@@ -150,8 +150,8 @@ SelectFileDialog::SelectFileDialog(
 
     container.addChild(new RectButton(
         2,
-        Transform(Vector2D(120, 50)),
-        Vector2D(100, 50),
+        Transform(Vec2d(120, 50)),
+        Vec2d(100, 50),
         0,
         nullptr,
         cancel_action_,
@@ -166,7 +166,7 @@ SelectFileDialog::SelectFileDialog(
     LineEdit *line_edit = new LineEdit(
         3,
         Transform(),
-        Vector2D(getAreaSize().x, 30),
+        Vec2d(getAreaSize().x, 30),
         0,
         nullptr,
         line_edit_style_,

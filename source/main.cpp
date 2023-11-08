@@ -93,7 +93,7 @@ int main() {
     MainWindow *main_window = new MainWindow(
         Widget::AUTO_ID,
         Transform(),
-        Vector2D(SCREEN_W, SCREEN_H),
+        Vec2d(SCREEN_W, SCREEN_H),
         1,
         "Paint",
         window_style
@@ -145,7 +145,7 @@ int main() {
     main_window->addChild(new Clock(
         Widget::AUTO_ID,
         Transform(),
-        Vector2D(100, 50),
+        Vec2d(100, 50),
         3,
         nullptr,
         clock_style
@@ -210,8 +210,8 @@ Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, P
 
     Window *subwindow = new Window(
         Widget::AUTO_ID,
-        Transform(Vector2D(0, 100)),
-        Vector2D(218, 451),
+        Transform(Vec2d(0, 100)),
+        Vec2d(218, 451),
         2,
         nullptr,
         "Tools",
@@ -224,7 +224,7 @@ Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, P
     subwindow->addChild(new ToolPaletteView(
         Widget::AUTO_ID,
         Transform(),
-        Vector2D(188, 376),
+        Vec2d(188, 376),
         1,
         nullptr,
         palette,

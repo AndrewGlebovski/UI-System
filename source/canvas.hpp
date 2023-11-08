@@ -22,13 +22,13 @@ public:
     CanvasTool() : is_drawing(false) {}
 
 
-    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) = 0;
-    virtual void onSecondaryButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
-    virtual void onModifier1(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
-    virtual void onModifier2(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
-    virtual void onModifier3(ButtonState state, const Vector2D &mouse, Canvas &canvas) {}
-    virtual void onMove(const Vector2D &mouse, Canvas &canvas) {}
-    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) { is_drawing = false; }
+    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) = 0;
+    virtual void onSecondaryButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) {}
+    virtual void onModifier1(ButtonState state, const Vec2d &mouse, Canvas &canvas) {}
+    virtual void onModifier2(ButtonState state, const Vec2d &mouse, Canvas &canvas) {}
+    virtual void onModifier3(ButtonState state, const Vec2d &mouse, Canvas &canvas) {}
+    virtual void onMove(const Vec2d &mouse, Canvas &canvas) {}
+    virtual void onConfirm(const Vec2d &mouse, Canvas &canvas) { is_drawing = false; }
     virtual void onCancel() { is_drawing = false; }
     virtual Widget *getWidget() { return nullptr; };
 
@@ -40,28 +40,28 @@ public:
 /// Standart pencil tool
 class PencilTool : public CanvasTool {
 protected:
-    Vector2D prev_position;        ///< Previous mouse click position
+    Vec2d prev_position;        ///< Previous mouse click position
 
 public:
     PencilTool();
 
 
-    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
+    virtual void onMove(const Vec2d &mouse, Canvas &canvas) override;
 };
 
 
 /// Tool for drawing rectangle
 class RectTool : public CanvasTool {
 protected:
-    Vector2D draw_start;            ///< Previous mouse click position
+    Vec2d draw_start;            ///< Previous mouse click position
     Widget *rect_preview;           ///< Widget that draws preview of the rectangle
 
 
     /**
      * \brief Creates SFML rectangle based on two points 
     */
-    sf::RectangleShape createRect(const Vector2D &p1, const Vector2D &p2) const;
+    sf::RectangleShape createRect(const Vec2d &p1, const Vec2d &p2) const;
 
 public:
     RectTool();
@@ -71,9 +71,9 @@ public:
     RectTool &operator = (const RectTool &rect_tool) = delete;
 
 
-    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
+    virtual void onMove(const Vec2d &mouse, Canvas &canvas) override;
+    virtual void onConfirm(const Vec2d &mouse, Canvas &canvas) override;
     virtual Widget *getWidget() override;
 
 
@@ -84,7 +84,7 @@ public:
 /// Tool for drawing line
 class LineTool : public CanvasTool {
 protected:
-    Vector2D draw_start;            ///< Previous mouse click position
+    Vec2d draw_start;            ///< Previous mouse click position
     Widget *line_preview;           ///< Widget that draws preview of the line
 
 public:
@@ -95,9 +95,9 @@ public:
     LineTool &operator = (const LineTool &line_tool) = delete;
 
 
-    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
+    virtual void onMove(const Vec2d &mouse, Canvas &canvas) override;
+    virtual void onConfirm(const Vec2d &mouse, Canvas &canvas) override;
     virtual Widget *getWidget() override;
 
 
@@ -108,35 +108,35 @@ public:
 /// Eraser tool
 class EraserTool : public CanvasTool {
 protected:
-    Vector2D prev_position;        ///< Previous mouse click position
+    Vec2d prev_position;        ///< Previous mouse click position
 
 public:
     EraserTool();
 
 
-    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onMove(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
+    virtual void onMove(const Vec2d &mouse, Canvas &canvas) override;
 };
 
 
 /// Changes palette color to color of pixel under mouse
 class ColorPicker : public CanvasTool {
 public:
-    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
 };
 
 
 /// Fill all pixels with the same color to palette color
 class BucketTool : public CanvasTool {
 public:
-    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
 };
 
 
 /// Tool for drawing polygon
 class PolygonTool : public CanvasTool {
 protected:
-    List<Vector2D> points;          ///< Points that form polygon
+    List<Vec2d> points;          ///< Points that form polygon
     Widget *polygon_preview;        ///< Widget that draws preview of the polygon
 
 public:
@@ -147,11 +147,11 @@ public:
     PolygonTool &operator = (const PolygonTool &polygon_tool) = delete;
 
 
-    List<Vector2D> &getPoints();
+    List<Vec2d> &getPoints();
 
 
-    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
+    virtual void onConfirm(const Vec2d &mouse, Canvas &canvas) override;
     virtual void onCancel() override;
     virtual Widget *getWidget() override;
 
@@ -174,8 +174,8 @@ public:
     TextTool &operator = (const TextTool &text_tool) = delete;
 
 
-    virtual void onMainButton(ButtonState state, const Vector2D &mouse, Canvas &canvas) override;
-    virtual void onConfirm(const Vector2D &mouse, Canvas &canvas) override;
+    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
+    virtual void onConfirm(const Vec2d &mouse, Canvas &canvas) override;
     virtual void onCancel() override;
     virtual Widget *getWidget() override;
 
@@ -245,7 +245,7 @@ protected:
 
 public:
     ToolPaletteView(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         ToolPalette *palette_, const PaletteViewAsset &asset_
     );
 
@@ -257,9 +257,9 @@ public:
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
 
 
@@ -469,9 +469,9 @@ class HScrollCanvas;
 class Canvas : public Widget {
 protected:
     sf::RenderTexture texture;
-    Vector2D texture_offset;
+    Vec2d texture_offset;
     ToolPalette *palette;
-    Vector2D last_position;
+    Vec2d last_position;
     CanvasGroup *group;
     FilterMask filter_mask;
     std::string filename;
@@ -485,7 +485,7 @@ public:
      * \brief Creates empty canvas
     */
     Canvas(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         ToolPalette &palette_, CanvasGroup &group_
     );
 
@@ -534,7 +534,7 @@ public:
     /**
      * \brief Returns size of the texture
     */
-    Vector2D getTextureSize() const;
+    Vec2d getTextureSize() const;
 
     /**
      * \brief Returns reference to texture
@@ -561,9 +561,9 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
     virtual EVENT_STATUS onKeyUp(int key_id) override;
     virtual EVENT_STATUS onTimer(float delta_time) override;

@@ -25,7 +25,7 @@ private:
 
 public:
     Clock(
-        size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
         const ClockStyle &style_
     ) :
         Widget(id_, transform_, size_, z_index_, parent_),
@@ -51,7 +51,7 @@ public:
         text.setFillColor(style.text_color);
 
         sf::FloatRect text_rect = text.getLocalBounds();
-        Vector2D text_offset((size.x - text_rect.width) / 2, (size.y - text_rect.height) / 2);
+        Vec2d text_offset((size.x - text_rect.width) / 2, (size.y - text_rect.height) / 2);
 
         text.setPosition(transforms.front().offset + text_offset);
 

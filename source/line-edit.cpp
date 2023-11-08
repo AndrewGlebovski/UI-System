@@ -22,7 +22,7 @@
 
 
 LineEdit::LineEdit(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
     const LineEditStyle &style_, size_t max_length_
 ) :
     Widget(id_, transform_, size_, z_index_, parent_),
@@ -107,7 +107,7 @@ void LineEdit::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     text.setPosition(0, 0);
     text.setFillColor(style.font_color);
 
-    Vector2D char_rel_pos = text.findCharacterPos(cursor_pos);
+    Vec2d char_rel_pos = text.findCharacterPos(cursor_pos);
 
     float cursor_x = 0;
 
@@ -133,19 +133,19 @@ void LineEdit::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     visible_rect->display();
 
     sf::Sprite tool_sprite(visible_rect->getTexture());
-    tool_sprite.setPosition(transforms.front().offset + Vector2D(TEXT_OFFSET, TEXT_OFFSET));
+    tool_sprite.setPosition(transforms.front().offset + Vec2d(TEXT_OFFSET, TEXT_OFFSET));
     result.draw(tool_sprite);
 
     if (is_typing && !is_cursor_hidden) {
-        sf::RectangleShape cursor(Vector2D(CURSOR_WIDTH, size.y + CURSOR_OFFSET * 2));
+        sf::RectangleShape cursor(Vec2d(CURSOR_WIDTH, size.y + CURSOR_OFFSET * 2));
         cursor.setFillColor(style.cursor_color);
-        cursor.setPosition(transforms.front().offset + Vector2D(cursor_x, -CURSOR_OFFSET));
+        cursor.setPosition(transforms.front().offset + Vec2d(cursor_x, -CURSOR_OFFSET));
         result.draw(cursor);
     }
 }
 
 
-EVENT_STATUS LineEdit::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS LineEdit::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
 
     if (isInsideRect(transforms.front().offset, size, mouse)) {

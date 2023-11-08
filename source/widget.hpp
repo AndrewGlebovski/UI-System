@@ -12,7 +12,7 @@ const EVENT_STATUS HANDLED = true;      ///< Event was handled (father broadcast
 
 /// Holds transformation of the widget
 struct Transform {
-    Vector2D offset;        ///< Offset from parent
+    Vec2d offset;        ///< Offset from parent
 
 
     /**
@@ -24,7 +24,7 @@ struct Transform {
     /**
      * \brief Creates transform
     */
-    Transform(const Vector2D &offset_);
+    Transform(const Vec2d &offset_);
 
 
     /**
@@ -87,7 +87,7 @@ protected:
     /**
      * \brief Returns max possible new_size for child
     */
-    virtual Vector2D onChildResize(Widget *child, const Vector2D &new_size);
+    virtual Vec2d onChildResize(Widget *child, const Vec2d &new_size);
 
 
     /**
@@ -97,7 +97,7 @@ protected:
 
 public:
     Transform transform;    ///< Widget local transform
-    Vector2D size;          ///< Widget size
+    Vec2d size;          ///< Widget size
     int z_index;            ///< Shows order in which widgets are drawn
     Widget *parent;         ///< Parent that holds this widget
 
@@ -117,7 +117,7 @@ public:
      * \brief Widget constructor
      * \note If id_ != AUTO_ID sets id to id_, otherwise generates "unique" id
     */
-    Widget(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_);
+    Widget(size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_);
 
 
     /**
@@ -179,7 +179,7 @@ public:
     /**
      * \brief Sets max possible new_size according to parent
     */
-    virtual void tryResize(const Vector2D &new_size);
+    virtual void tryResize(const Vec2d &new_size);
 
 
     /**
@@ -188,9 +188,9 @@ public:
     virtual void tryTransform(const Transform &new_transform);
 
 
-    virtual EVENT_STATUS onMouseMove(const Vector2D &mouse, List<Transform> &transforms) { return UNHANDLED; }
-    virtual EVENT_STATUS onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) { return UNHANDLED; }
-    virtual EVENT_STATUS onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) { return UNHANDLED; }
     virtual EVENT_STATUS onKeyUp(int key_id) { return UNHANDLED; }
     virtual EVENT_STATUS onKeyDown(int key_id) { return UNHANDLED; }
     virtual EVENT_STATUS onTimer(float delta_time) { return UNHANDLED; }
@@ -205,4 +205,4 @@ public:
 /**
  * \brief Checks if point is inside rectangle
 */
-bool isInsideRect(Vector2D position, Vector2D size, Vector2D point);
+bool isInsideRect(Vec2d position, Vec2d size, Vec2d point);

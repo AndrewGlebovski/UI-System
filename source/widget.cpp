@@ -10,10 +10,10 @@
 #include "widget.hpp"
 
 
-Transform::Transform() : offset(Vector2D()) {}
+Transform::Transform() : offset(Vec2d()) {}
 
 
-Transform::Transform(const Vector2D &offset_) : offset(offset_) {}
+Transform::Transform(const Vec2d &offset_) : offset(offset_) {}
 
 
 void Transform::apply(const Transform &transform) {
@@ -57,7 +57,7 @@ TransformApplier::~TransformApplier() {
 }
 
 
-Widget::Widget(size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_) :
+Widget::Widget(size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_) :
     id(generateId(id_)), status(PASS), transform(transform_), size(size_), z_index(z_index_), parent(parent_) {}
 
 
@@ -103,7 +103,7 @@ void Widget::setStatus(WIDGET_STATUS new_status) {
 void Widget::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     TransformApplier add_transform(transforms, transform);
     /* DEBUG DRAWING
-    sf::RectangleShape rect(Vector2D(25, 25));
+    sf::RectangleShape rect(Vec2d(25, 25));
     rect.setFillColor(sf::Color::Red);
     rect.setPosition(transforms.front().offset);
     result.draw(rect);
@@ -111,8 +111,8 @@ void Widget::draw(sf::RenderTarget &result, List<Transform> &transforms) {
 }
 
 
-Vector2D Widget::onChildResize(Widget *child, const Vector2D &new_size) {
-    Vector2D allowed_size = new_size;
+Vec2d Widget::onChildResize(Widget *child, const Vec2d &new_size) {
+    Vec2d allowed_size = new_size;
 
     if (new_size.x < 0)
         allowed_size.x = 0;
@@ -145,7 +145,7 @@ Transform Widget::onChildTransform(Widget *child, const Transform &new_transform
 }
 
 
-void Widget::tryResize(const Vector2D &new_size) {
+void Widget::tryResize(const Vec2d &new_size) {
     size = parent->onChildResize(this, new_size);
 }
 
@@ -155,7 +155,7 @@ void Widget::tryTransform(const Transform &new_transform) {
 }
 
 
-bool isInsideRect(Vector2D position, Vector2D size, Vector2D point) {
+bool isInsideRect(Vec2d position, Vec2d size, Vec2d point) {
     if (point.x < position.x) return false;
     if (point.x > position.x + size.x) return false;
     if (point.y < position.y) return false;

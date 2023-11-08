@@ -10,7 +10,7 @@ Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &gro
     Canvas *canvas = new Canvas(
         Widget::AUTO_ID,
         Transform(),
-        Vector2D(),
+        Vec2d(),
         0,
         nullptr,
         palette,
@@ -32,22 +32,22 @@ Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &gro
     // If file is correct we can create other stuff
     Window *subwindow = new Window(
         Widget::AUTO_ID,
-        Transform(Vector2D(300, 100)),
-        Vector2D(800, 600),
+        Transform(Vec2d(300, 100)),
+        Vec2d(800, 600),
         1,
         nullptr,
         (filename) ? filename : "Canvas",
         window_style
     );
 
-    canvas->size = subwindow->getAreaSize() - Vector2D(30, 30);
+    canvas->size = subwindow->getAreaSize() - Vec2d(30, 30);
 
     subwindow->addChild(canvas);
 
     subwindow->addChild(new VScrollBar(
         Widget::AUTO_ID,
-        Transform(Vector2D(subwindow->getAreaSize().x - 20, 0)),
-        Vector2D(20, subwindow->getAreaSize().y - 30),
+        Transform(Vec2d(subwindow->getAreaSize().x - 20, 0)),
+        Vec2d(20, subwindow->getAreaSize().y - 30),
         1,
         nullptr,
         new VScrollCanvas(*canvas),
@@ -56,8 +56,8 @@ Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &gro
 
     subwindow->addChild(new HScrollBar(
         Widget::AUTO_ID,
-        Transform(Vector2D(0, subwindow->getAreaSize().y - 20)),
-        Vector2D(subwindow->getAreaSize().x, 20),
+        Transform(Vec2d(0, subwindow->getAreaSize().y - 20)),
+        Vec2d(subwindow->getAreaSize().x, 20),
         1,
         nullptr,
         new HScrollCanvas(*canvas),

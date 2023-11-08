@@ -16,7 +16,7 @@
 
 
 Container::Container(
-    size_t id_, const Transform &transform_, const Vector2D &size_, int z_index_, Widget *parent_,
+    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
     bool focus_enabled_
 ) :
     Widget(id_, transform_, size_, z_index_, parent_),
@@ -118,7 +118,7 @@ do {                                                                            
 } while(0)
 
 
-EVENT_STATUS Container::onMouseMove(const Vector2D &mouse, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
     if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
@@ -129,7 +129,7 @@ EVENT_STATUS Container::onMouseMove(const Vector2D &mouse, List<Transform> &tran
 }
 
 
-EVENT_STATUS Container::onMouseButtonUp(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
@@ -140,7 +140,7 @@ EVENT_STATUS Container::onMouseButtonUp(const Vector2D &mouse, int button_id, Li
 }
 
 
-EVENT_STATUS Container::onMouseButtonDown(const Vector2D &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
     if (widgets.size() == 0) return UNHANDLED;
 
     TransformApplier add_transform(transforms, transform);
