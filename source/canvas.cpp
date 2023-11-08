@@ -803,10 +803,41 @@ void MonochromeFilter::applyFilter(Canvas &canvas) const {
 // ============================================================================
 
 
+NegativeFilter::NegativeFilter() {}
+
+
+void NegativeFilter::applyFilter(Canvas &canvas) const {
+    FilterMask &mask = canvas.getFilterMask();
+    sf::Image image = canvas.getTexture().getTexture().copyToImage();
+
+    ASSERT(image.getSize().x == mask.getWidth(), "Invalid mask size!\n");
+    ASSERT(image.getSize().y == mask.getHeight(), "Invalid mask size!\n");
+    
+    for (size_t y = 0; y < mask.getHeight(); y++) {
+        for (size_t x = 0; x < mask.getWidth(); x++) {
+            if (mask.getPixelMask(x, y)) {
+                sf::Color origin(image.getPixel(x, y));
+                image.setPixel(x, y, sf::Color(255 - origin.r, 255 - origin.g, 255 - origin.b));
+            }
+        }
+    }
+    
+    sf::Texture tool_texture;
+    tool_texture.loadFromImage(image);
+
+    sf::Sprite tool_sprite(tool_texture);
+    canvas.getTexture().draw(tool_sprite);
+}
+
+
+// ============================================================================
+
+
 FilterPalette::FilterPalette() : filters(FILTERS_SIZE, nullptr), last_filter(0) {
     filters[LIGHTEN_FILTER] = new IntensityFilter(20);
     filters[DARKEN_FILTER] = new IntensityFilter(-20);
     filters[MONOCHROME_FILTER] = new MonochromeFilter();
+    filters[NEGATIVE_FILTER] = new NegativeFilter();
 }
 
 

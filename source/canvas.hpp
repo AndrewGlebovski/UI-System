@@ -338,6 +338,15 @@ public:
 };
 
 
+/// Change image colors negative
+class NegativeFilter : public CanvasFilter {
+public:
+    NegativeFilter();
+
+    virtual void applyFilter(Canvas &canvas) const override;
+};
+
+
 /// Contains filters and remembers last used one 
 class FilterPalette {
 private:
@@ -350,6 +359,7 @@ public:
         LIGHTEN_FILTER,     ///< Increase intensity
         DARKEN_FILTER,      ///< Decrease intensity
         MONOCHROME_FILTER,  ///< Black and white style
+        NEGATIVE_FILTER,    ///< Negative colors
         FILTERS_SIZE        ///< Filters size (this field must always be last!)
     };
 
