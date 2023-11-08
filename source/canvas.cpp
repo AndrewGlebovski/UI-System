@@ -653,14 +653,14 @@ EVENT_STATUS ToolPaletteView::onMouseButtonUp(const Vector2D &mouse, int button_
 
 EVENT_STATUS ToolPaletteView::onKeyDown(int key_id) {
     switch(key_id) {
-        case Num1: palette->setCurrentTool(ToolPalette::PENCIL_TOOL); return HANDLED;
-        case Num2: palette->setCurrentTool(ToolPalette::RECT_TOOL); return HANDLED;
-        case Num3: palette->setCurrentTool(ToolPalette::LINE_TOOL); return HANDLED;
-        case Num4: palette->setCurrentTool(ToolPalette::ERASER_TOOL); return HANDLED;
-        case Num5: palette->setCurrentTool(ToolPalette::COLOR_PICKER); return HANDLED;
-        case Num6: palette->setCurrentTool(ToolPalette::BUCKET_TOOL); return HANDLED;
-        case Num7: palette->setCurrentTool(ToolPalette::POLYGON_TOOL); return HANDLED;
-        case Num8: palette->setCurrentTool(ToolPalette::TEXT_TOOL); return HANDLED;
+        case P: palette->setCurrentTool(ToolPalette::PENCIL_TOOL); return HANDLED;
+        case R: palette->setCurrentTool(ToolPalette::RECT_TOOL); return HANDLED;
+        case L: palette->setCurrentTool(ToolPalette::LINE_TOOL); return HANDLED;
+        case E: palette->setCurrentTool(ToolPalette::ERASER_TOOL); return HANDLED;
+        case C: palette->setCurrentTool(ToolPalette::COLOR_PICKER); return HANDLED;
+        case F: palette->setCurrentTool(ToolPalette::BUCKET_TOOL); return HANDLED;
+        case O: palette->setCurrentTool(ToolPalette::POLYGON_TOOL); return HANDLED;
+        case T: palette->setCurrentTool(ToolPalette::TEXT_TOOL); return HANDLED;
         default: return UNHANDLED;
     }
 }
