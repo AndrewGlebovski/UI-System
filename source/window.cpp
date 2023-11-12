@@ -187,17 +187,31 @@ public:
 /// Maximizes widget size
 class ExpandAction : public ButtonAction {
 private:
-    Window &window;
+    Window &window;         ///< Window to expand
+    Vec2d prev_pos;         ///< Window position before expansion
+    Vec2d prev_size;        ///< Window size before expansion
 
 public:
-    ExpandAction(Window &window_) : window(window_) {}
-
+    ExpandAction(Window &window_) :
+        window(window_),
+        prev_pos(window.getLayoutBox().getPosition()),
+        prev_size(window.getLayoutBox().getSize())
+    {}
 
     void operator () () override {
-        window.setPosition(Vec2d());
-        window.setSize(Vec2d(SCREEN_W, SCREEN_H));
-    }
+        Vec2d prev_pos_ = window.getLayoutBox().getPosition();
+        Vec2d prev_size_ = window.getLayoutBox().getSize();
 
+        window.setPosition(Vec2d());
+        if (window.setSize(Vec2d(SCREEN_W, SCREEN_H))) {
+            prev_pos = prev_pos_;
+            prev_size = prev_size_;
+        }
+        else {
+            window.setSize(prev_size);
+            window.setPosition(prev_pos);
+        }
+    }
 
     ButtonAction *clone() override {
         return new ExpandAction(window);
