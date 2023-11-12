@@ -16,19 +16,22 @@
 #include "button.hpp"
 
 
+// ============================================================================
+
+
 ActionButton::ActionButton(
-    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
-    ButtonAction *action_, ButtonGroup *group_
+    size_t id_, const LayoutBox &layout_,
+    ButtonAction *action_
 ) :
-    BaseButton(id_, transform_, size_, z_index_, parent_),
-    action(action_), group(group_), status(BUTTON_NORMAL)
+    BaseButton(id_, layout_),
+    action(action_), group(nullptr), status(BUTTON_NORMAL)
 {
     if (group) group->addButton(this);
 }
 
 
 ActionButton::ActionButton(const ActionButton &button) :
-    BaseButton(AUTO_ID, button.transform, button.size, button.z_index, button.parent),
+    BaseButton(AUTO_ID, button.getLayoutBox()),
     action(button.action->clone()), group(button.group), status(BUTTON_NORMAL)
 {
     if (group) group->addButton(this);
@@ -39,12 +42,13 @@ ActionButton &ActionButton::operator = (const ActionButton &button)  {
     if (this != &button) {
         if (action) delete action;
 
-        transform = button.transform;
-        size = button.size;
-        z_index = button.z_index;
-        parent = button.parent;
+        layout = button.getLayoutBox().clone();
         action = button.action->clone();
+
+        if (isInGroup()) group->removeButton(this);
+
         group = button.group;
+        group->addButton(this);
     }
 
     return *this;
@@ -60,10 +64,25 @@ bool ActionButton::isPressedInGroup() const { return isInGroup() && group->getPr
 void ActionButton::setButtonStatus(BUTTON_STATUS new_status) { status = new_status; };
 
 
-EVENT_STATUS ActionButton::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+void ActionButton::setButtonGroup(ButtonGroup *group_) {
+    if (group_ == group) return;
 
-    if (isInsideButton(mouse - transforms.front().offset)) {
+    if (isInGroup()) group->removeButton(this);
+
+    group = group_;
+
+    if (group) group->addButton(this);
+}
+
+
+ButtonGroup *ActionButton::getButtonGroup() { return group; }
+
+
+EVENT_STATUS ActionButton::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
+
+    if (isInsideButton(mouse - global_position, global_size)) {
         if (status != BUTTON_PRESSED)
             setButtonStatus(BUTTON_HOVER);
 
@@ -76,10 +95,11 @@ EVENT_STATUS ActionButton::onMouseMove(const Vec2d &mouse, List<Transform> &tran
 }
 
 
-EVENT_STATUS ActionButton::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+EVENT_STATUS ActionButton::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
 
-    if (!isInsideButton(mouse - transforms.front().offset)) return UNHANDLED;
+    if (!isInsideButton(mouse - global_position, global_size)) return UNHANDLED;
 
     setButtonStatus(BUTTON_PRESSED);
     if (isInGroup()) group->setPressed(this);
@@ -89,10 +109,11 @@ EVENT_STATUS ActionButton::onMouseButtonDown(const Vec2d &mouse, int button_id, 
 }
 
 
-EVENT_STATUS ActionButton::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+EVENT_STATUS ActionButton::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
 
-    if (isInsideButton(mouse - transforms.front().offset)) {
+    if (isInsideButton(mouse - global_position, global_size)) {
         if (!isPressedInGroup()) setButtonStatus(BUTTON_HOVER);
 
         return HANDLED;
@@ -107,6 +128,9 @@ EVENT_STATUS ActionButton::onMouseButtonUp(const Vec2d &mouse, int button_id, Li
 ActionButton::~ActionButton() {
     if (action) delete action;
 }
+
+
+// ============================================================================
 
 
 size_t ButtonGroup::getIndex(ActionButton *button) const {
@@ -156,33 +180,37 @@ bool ButtonGroup::isInGroup(ActionButton *button) const {
 }
 
 
+// ============================================================================
+
+
 RectButton::RectButton(
-    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
-    ButtonAction *action_, ButtonGroup *group_,
-    const sf::String &text_, const ButtonStyle &style_,
-    const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
+    size_t id_, const LayoutBox &layout_,
+    ButtonAction *action_,
+    const std::string &text_, const ButtonStyle &style_,
+    sf::Color normal_, sf::Color hover_, sf::Color pressed_
 ) :
-    ActionButton(id_, transform_, size_, z_index_, parent_, action_, group_),
+    ActionButton(id_, layout_, action_),
     text(text_), style(style_),
     normal_color(normal_), hover_color(hover_), pressed_color(pressed_)
 {}
 
 
-bool RectButton::isInsideButton(const Vec2d &point) {
-    return isInsideRect(Vec2d(), size, point);
+bool RectButton::isInsideButton(const Vec2d &point, const Vec2d &global_size) const {
+    return isInsideRect(Vec2d(), global_size, point);
 }
 
 
-void RectButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
-
+void RectButton::draw(sf::RenderTarget &result, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
+    
     sf::Text btn_text(text, style.font, style.font_size);
     sf::FloatRect text_rect = btn_text.getLocalBounds();
-    Vec2d text_offset((size.x - text_rect.width) / 2, (size.y - text_rect.height) / 2);
+    Vec2d text_offset((global_size.x - text_rect.width) / 2, (global_size.y - text_rect.height) / 2);
 
-    btn_text.setPosition(transforms.front().offset + text_offset);
+    btn_text.setPosition(global_position + text_offset);
 
-    sf::RectangleShape btn_rect(size);
+    sf::RectangleShape btn_rect(global_size);
 
     switch(status) {
         case BUTTON_NORMAL:
@@ -200,32 +228,35 @@ void RectButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
         default: ASSERT(0, "Invalid button status!\n");
     }
 
-    btn_rect.setPosition(transforms.front().offset);
+    btn_rect.setPosition(global_position);
 
     result.draw(btn_rect);
     result.draw(btn_text);
 }
 
 
+// ============================================================================
+
+
 TextureButton::TextureButton(
-    size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
-    ButtonAction *action_, ButtonGroup *group_,
+    size_t id_, const LayoutBox &layout_,
+    ButtonAction *action_,
     const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_
 ) :
-    ActionButton(id_, transform_, Vec2d(), z_index_, parent_, action_, group_),
+    ActionButton(id_, layout_, action_),
     normal(normal_), hover(hover_), pressed(pressed_)
 {
-    size = Vec2d(normal.getSize().x, normal.getSize().y);
+    layout->setSize(Vec2d(normal.getSize().x, normal.getSize().y));
 }
 
 
-bool TextureButton::isInsideButton(const Vec2d &point) {
-    return isInsideRect(Vec2d(), size, point);
+bool TextureButton::isInsideButton(const Vec2d &point, const Vec2d &global_size) const {
+    return isInsideRect(Vec2d(), global_size, point);
 }
 
 
-void TextureButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+void TextureButton::draw(sf::RenderTarget &result, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
 
     sf::Sprite btn_sprite;
 
@@ -236,30 +267,35 @@ void TextureButton::draw(sf::RenderTarget &result, List<Transform> &transforms) 
         default: ASSERT(0, "Invalid button status!\n");
     }
     
-    btn_sprite.setPosition(transforms.front().offset);
+    btn_sprite.setPosition(global_position);
 
     result.draw(btn_sprite);
 }
 
 
 TextureIconButton::TextureIconButton(
-    size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
-    ButtonAction *action_, ButtonGroup *group_,
+    size_t id_, const LayoutBox &layout_,
+    ButtonAction *action_,
     const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_,
     const sf::Texture &icon_
 ) : 
-    TextureButton(id_, transform_, z_index_, parent_, action_, group_, normal_, hover_, pressed_),
+    TextureButton(id_, layout_, action_, normal_, hover_, pressed_),
     icon(icon_)
 {}
 
 
-void TextureIconButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
-    TextureButton::draw(result, transforms);
+void TextureIconButton::draw(sf::RenderTarget &result, TransformStack &stack) {
+    TextureButton::draw(result, stack);
+
+    Vec2d global_position = stack.apply(layout->getPosition());
 
     sf::Sprite icon_sprite(icon);
-    icon_sprite.setPosition(transforms.front().offset + transform.offset);
+    icon_sprite.setPosition(global_position);
     result.draw(icon_sprite);
 }
+
+
+// ============================================================================
 
 
 #pragma GCC diagnostic pop

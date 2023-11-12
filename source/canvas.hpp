@@ -245,7 +245,7 @@ protected:
 
 public:
     ToolPaletteView(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+        size_t id_, const LayoutBox &layout_,
         ToolPalette *palette_, const PaletteViewAsset &asset_
     );
 
@@ -254,12 +254,12 @@ public:
     ToolPaletteView &operator = (const ToolPaletteView &palette_view) = default;
 
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
 
 
@@ -485,7 +485,7 @@ public:
      * \brief Creates empty canvas
     */
     Canvas(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+        size_t id_, const LayoutBox &layout_,
         ToolPalette &palette_, CanvasGroup &group_
     );
 
@@ -559,15 +559,14 @@ public:
     /**
      * \brief Draws canvas inner texture
     */
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
     virtual EVENT_STATUS onKeyUp(int key_id) override;
     virtual EVENT_STATUS onTimer(float delta_time) override;
-    virtual EVENT_STATUS onParentResize() override;
 
     /**
      * \brief Removes canvas from his group
@@ -585,8 +584,10 @@ public:
     VScrollCanvas(Canvas &canvas_) : canvas(canvas_) {}
 
     virtual void operator () (vec_t param) override {
-        if (canvas.getTextureSize().y > canvas.size.y)
-            canvas.texture_offset.y = param * (canvas.getTextureSize().y - canvas.size.y);
+        vec_t canvas_y = canvas.getLayoutBox().getSize().y;
+
+        if (canvas.getTextureSize().y > canvas_y)
+            canvas.texture_offset.y = param * (canvas.getTextureSize().y - canvas_y);
     }
 };
 
@@ -600,8 +601,10 @@ public:
     HScrollCanvas(Canvas &canvas_) : canvas(canvas_) {}
 
     virtual void operator () (vec_t param) override {
-        if (canvas.getTextureSize().x > canvas.size.x)
-            canvas.texture_offset.x = param * (canvas.getTextureSize().x - canvas.size.x);
+        vec_t canvas_x = canvas.getLayoutBox().getSize().x;
+
+        if (canvas.getTextureSize().x > canvas_x)
+            canvas.texture_offset.x = param * (canvas.getTextureSize().x - canvas_x);
     }
 };
 

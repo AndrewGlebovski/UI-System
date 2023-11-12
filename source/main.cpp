@@ -49,7 +49,7 @@ int main() {
 
     ScrollBarStyle scrollbar_style(
         sf::Color(SCROLLBAR_FRAME_COLOR),
-        SCROLLBAR_FRAME_OUTLINE,
+        -3,
         sf::Color(SCROLLBAR_BACKGROUND_COLOR),
         sf::Color(SCROLLBAR_SCROLLER_COLOR),
         SCROLLBAR_SCROLLER_FACTOR
@@ -92,18 +92,14 @@ int main() {
 
     MainWindow *main_window = new MainWindow(
         Widget::AUTO_ID,
-        Transform(),
-        Vec2d(SCREEN_W, SCREEN_H),
-        1,
+        BasicLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H)),
         "Paint",
         window_style
     );
 
     Menu *main_menu = new Menu(
         Widget::AUTO_ID,
-        Transform(),
-        1,
-        nullptr,
+        BasicLayoutBox(),
         menu_style
     );
 
@@ -141,13 +137,10 @@ int main() {
     main_menu->addButton(1, "Negative", new FilterAction(FilterPalette::NEGATIVE_FILTER, *filter_palette, *canvas_group));
 
     main_window->setMenu(main_menu);
-
+    
     main_window->addChild(new Clock(
         Widget::AUTO_ID,
-        Transform(),
-        Vec2d(100, 50),
-        3,
-        nullptr,
+        BasicLayoutBox(Vec2d(), Vec2d(100, 50)),
         clock_style
     ));
 
@@ -156,12 +149,11 @@ int main() {
         *filter_palette,
         *canvas_group
     ));
-
+    
     main_window->addChild(openPicture(nullptr, *palette, *canvas_group, window_style, scrollbar_style));
     main_window->addChild(createToolPaletteView(palette, window_style, palette_asset));
 
-    List<Transform> transforms;
-    transforms.push_back(Transform());
+    TransformStack stack;
 
     sf::Clock timer;
 
@@ -181,15 +173,15 @@ int main() {
                 break;
             }
             
-            main_window->parseEvent(event, transforms);
+            main_window->parseEvent(event, stack);
         }
-        
+
         main_window->onTimer(timer.getElapsedTime().asSeconds());
         timer.restart();
 
         render_window.clear();
 
-        main_window->draw(render_window, transforms);
+        main_window->draw(render_window, stack);
 
         render_window.display();
     }
@@ -210,10 +202,7 @@ Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, P
 
     Window *subwindow = new Window(
         Widget::AUTO_ID,
-        Transform(Vec2d(0, 100)),
-        Vec2d(218, 451),
-        2,
-        nullptr,
+        BasicLayoutBox(Vec2d(0, 100), Vec2d(218, 451)),
         "Tools",
         subwindow_style,
         false,
@@ -223,10 +212,7 @@ Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, P
 
     subwindow->addChild(new ToolPaletteView(
         Widget::AUTO_ID,
-        Transform(),
-        Vec2d(188, 376),
-        1,
-        nullptr,
+        BasicLayoutBox(Vec2d(), Vec2d(188, 376)),
         palette,
         palette_asset
     ));

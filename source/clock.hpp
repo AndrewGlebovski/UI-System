@@ -25,10 +25,10 @@ private:
 
 public:
     Clock(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+        size_t id_, const LayoutBox &layout_,
         const ClockStyle &style_
     ) :
-        Widget(id_, transform_, size_, z_index_, parent_),
+        Widget(id_, layout_),
         daytime(0), style(style_), time_passed(0)
     {
         time_t raw_time = time(NULL);
@@ -37,8 +37,9 @@ public:
     }
 
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override {
-        TransformApplier(transforms, transform);
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override {
+        Vec2d global_position = stack.apply(layout->getPosition());
+        Vec2d global_size = stack.apply_size(layout->getSize());
 
         size_t hours = (daytime / 3600) % 24;
         size_t minutes = (daytime / 60) % 60;
@@ -51,9 +52,9 @@ public:
         text.setFillColor(style.text_color);
 
         sf::FloatRect text_rect = text.getLocalBounds();
-        Vec2d text_offset((size.x - text_rect.width) / 2, (size.y - text_rect.height) / 2);
+        Vec2d text_offset((global_size.x - text_rect.width) / 2, (global_size.y - text_rect.height) / 2);
 
-        text.setPosition(transforms.front().offset + text_offset);
+        text.setPosition(global_position + text_offset);
 
         result.draw(text);
     }

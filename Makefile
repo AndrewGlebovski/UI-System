@@ -14,7 +14,21 @@ SRC_DIR=source
 EXE_NAME=run.exe
 
 
-all: $(BIN_DIR) $(EXE_NAME)
+all: run
+
+
+# Скомпилировать и запустить
+run: compile
+	./$(EXE_NAME)
+
+
+# Скомпилировать и запустить под valgrind (предварительно лучше скомпилировать с -O0 или -O1)
+memcheck: compile
+	valgrind --leak-check=yes --log-file="log.txt" ./$(EXE_NAME)
+
+
+# Скомпилировать
+compile: $(BIN_DIR) $(EXE_NAME)
 
 
 # Завершение сборки
@@ -38,7 +52,7 @@ $(BIN_DIR)/window.o: $(addprefix $(SRC_DIR)/, window.cpp window.hpp vector.hpp l
 
 
 # Предварительная сборка widget.cpp
-$(BIN_DIR)/widget.o: $(addprefix $(SRC_DIR)/, widget.cpp widget.hpp vector.hpp list.hpp)
+$(BIN_DIR)/widget.o: $(addprefix $(SRC_DIR)/, widget.cpp widget.hpp vector.hpp list.hpp configs.hpp)
 	$(COMPILER) $(FLAGS) -c $< -o $@
 
 

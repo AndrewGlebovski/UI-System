@@ -22,15 +22,17 @@
 
 
 LineEdit::LineEdit(
-    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+    size_t id_, const LayoutBox &layout_,
     const LineEditStyle &style_, size_t max_length_
 ) :
-    Widget(id_, transform_, size_, z_index_, parent_),
+    Widget(id_, layout_),
     str(""), style(style_), is_typing(false), max_length(max_length_),
     shift_pressed(false), is_cursor_hidden(false), blink_time(0), cursor_pos(0),
     visible_rect(nullptr), visible_rect_x(0)
 {
     ASSERT((visible_rect = new sf::RenderTexture()), "Failed to allocate texture");
+
+    Vec2d size = layout->getSize();
     ASSERT(visible_rect->create(size.x - TEXT_OFFSET, size.y - TEXT_OFFSET), "Failed to create texture!\n");
 }
 
@@ -93,12 +95,13 @@ void LineEdit::setKeyboardFocus(bool is_focused) {
 }
 
 
-void LineEdit::draw(sf::RenderTarget &result, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+void LineEdit::draw(sf::RenderTarget &result, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
 
-    sf::RectangleShape rect(size);
+    sf::RectangleShape rect(global_size);
     rect.setFillColor(style.background_color);
-    rect.setPosition(transforms.front().offset);
+    rect.setPosition(global_position);
     rect.setOutlineThickness(style.border_thickness);
     rect.setOutlineColor(style.border_color);
     result.draw(rect);
@@ -117,9 +120,9 @@ void LineEdit::draw(sf::RenderTarget &result, List<Transform> &transforms) {
         cursor_x = TEXT_OFFSET;
     }
     // Move visible rect to right
-    else if (char_rel_pos.x > visible_rect_x + size.x - TEXT_OFFSET) {
-        visible_rect_x = char_rel_pos.x - (size.x - TEXT_OFFSET);
-        cursor_x = size.x;
+    else if (char_rel_pos.x > visible_rect_x + global_size.x - TEXT_OFFSET) {
+        visible_rect_x = char_rel_pos.x - (global_size.x - TEXT_OFFSET);
+        cursor_x = global_size.x;
     }
     // Don't move visible rect
     else {
@@ -133,22 +136,23 @@ void LineEdit::draw(sf::RenderTarget &result, List<Transform> &transforms) {
     visible_rect->display();
 
     sf::Sprite tool_sprite(visible_rect->getTexture());
-    tool_sprite.setPosition(transforms.front().offset + Vec2d(TEXT_OFFSET, TEXT_OFFSET));
+    tool_sprite.setPosition(global_position + Vec2d(TEXT_OFFSET, TEXT_OFFSET));
     result.draw(tool_sprite);
 
     if (is_typing && !is_cursor_hidden) {
-        sf::RectangleShape cursor(Vec2d(CURSOR_WIDTH, size.y + CURSOR_OFFSET * 2));
+        sf::RectangleShape cursor(Vec2d(CURSOR_WIDTH, global_size.y + CURSOR_OFFSET * 2));
         cursor.setFillColor(style.cursor_color);
-        cursor.setPosition(transforms.front().offset + Vec2d(cursor_x, -CURSOR_OFFSET));
+        cursor.setPosition(global_position + Vec2d(cursor_x, -CURSOR_OFFSET));
         result.draw(cursor);
     }
 }
 
 
-EVENT_STATUS LineEdit::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+EVENT_STATUS LineEdit::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
 
-    if (isInsideRect(transforms.front().offset, size, mouse)) {
+    if (isInsideRect(global_position, global_size, mouse)) {
         setKeyboardFocus(true);
         return HANDLED;
     }

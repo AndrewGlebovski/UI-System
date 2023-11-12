@@ -7,11 +7,11 @@
 /// Base class for all buttons
 class BaseButton : public Widget {
 public:
-    BaseButton(size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_) :
-        Widget(id_, transform_, size_, z_index_, parent_) {}
+    BaseButton(size_t id_, const LayoutBox &layout_) :
+        Widget(id_, layout_) {}
 
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override = 0;
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override = 0;
 
 
     virtual ~BaseButton() = default;
@@ -76,40 +76,53 @@ public:
      * \note If group_ != nullptr then button will join the group_
     */
     ActionButton(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
-        ButtonAction *action_, ButtonGroup *group_
+        size_t id_, const LayoutBox &layout_,
+        ButtonAction *action_
     );
-
 
     /**
      * \note AUTO_ID used for generating id
     */
     ActionButton(const ActionButton &button);
 
-
+    /**
+     * \brief Copies layout, action and joins the same group
+    */
     ActionButton &operator = (const ActionButton &button);
-
 
     /**
      * \brief Sets button status
     */
     void setButtonStatus(BUTTON_STATUS new_status);
 
+    /**
+     * \brief Adds button to group
+    */
+    void setButtonGroup(ButtonGroup *group_);
+
+    /**
+     * \brief Returns button group or nullptr
+    */
+    ButtonGroup *getButtonGroup();
 
     /**
      * \note Point position is relative to button position
     */
-    virtual bool isInsideButton(const Vec2d &point) = 0;
+    virtual bool isInsideButton(const Vec2d &point, const Vec2d &global_size) const = 0;
+
+    /**
+     * \brief Draws button
+    */
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override = 0;
 
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override = 0;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
 
-
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-
-
+    /**
+     * \brief Delete action if button has one
+    */
     virtual ~ActionButton() override;
 };
 
@@ -192,7 +205,7 @@ public:
 /// Rectangle button with some text
 class RectButton : public ActionButton {
 protected:
-    sf::String text;
+    std::string text;
     ButtonStyle style;
     sf::Color normal_color;
     sf::Color hover_color;
@@ -200,17 +213,17 @@ protected:
 
 public:
     RectButton(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
-        ButtonAction *action_, ButtonGroup *group_,
-        const sf::String &text_, const ButtonStyle &style_,
-        const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
+        size_t id_, const LayoutBox &layout_,
+        ButtonAction *action_,
+        const std::string &text_, const ButtonStyle &style_,
+        sf::Color normal_, sf::Color hover_, sf::Color pressed_
     );
 
 
-    virtual bool isInsideButton(const Vec2d &point) override;
+    virtual bool isInsideButton(const Vec2d &point, const Vec2d &global_size) const override;
 
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 };
 
 
@@ -223,16 +236,16 @@ protected:
 
 public:
     TextureButton(
-        size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
-        ButtonAction *action_, ButtonGroup *group_,
+        size_t id_, const LayoutBox &layout_,
+        ButtonAction *action_,
         const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_
     );
 
 
-    virtual bool isInsideButton(const Vec2d &point) override;
+    virtual bool isInsideButton(const Vec2d &point, const Vec2d &global_size) const override;
 
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 };
 
 
@@ -246,12 +259,12 @@ public:
      * \note Icon must be the same size as the button texture
     */
     TextureIconButton(
-        size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
-        ButtonAction *action_, ButtonGroup *group_,
+        size_t id_, const LayoutBox &layout_,
+        ButtonAction *action_,
         const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_,
         const sf::Texture &icon_
     );
 
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 };

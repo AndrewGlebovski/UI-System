@@ -237,14 +237,14 @@ public:
      * \brief Returns const reference to the first element
      * \warning If list is empty, an abort() will be called
     */
-    const T &front() const { return front(); }
+    const T &front() const { return (*this)[0]; }
 
 
     /**
      * \brief Returns const reference to the last element
      * \warning If list is empty, an abort() will be called
     */
-    const T &back() const { return back(); }
+    const T &back() const { return (*this)[size_ - 1]; }
 
 
     /**

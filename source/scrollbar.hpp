@@ -49,14 +49,14 @@ protected:
     ScrollBarStyle style;               ///< Style
     sf::RectangleShape scroller;        ///< Rectangle that represents scroller
     bool is_moving;                     ///< Scroller is moving right now
-    Vec2d mouse_prev;                ///< Previous mouse click position
+    Vec2d mouse_prev;                   ///< Previous mouse click position
 
 
-    virtual void scrollTo(const Vec2d &mouse) = 0;
+    virtual void scrollTo(const Vec2d &shift) = 0;
 
 public:
     ScrollBar(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+        size_t id_, const LayoutBox &layout_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
 
@@ -65,12 +65,12 @@ public:
     ScrollBar &operator = (const ScrollBar& scrollbar) = delete;
 
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
 
 
     virtual ~ScrollBar();
@@ -80,30 +80,28 @@ public:
 /// Can be scrolled up and down
 class VScrollBar : public ScrollBar {
 protected:
-    virtual void scrollTo(const Vec2d &mouse) override;
+    virtual void scrollTo(const Vec2d &shift) override;
 
 public:
     VScrollBar(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+        size_t id_, const LayoutBox &layout_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
 
-
-    virtual EVENT_STATUS onParentResize() override;
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
 };
 
 
 /// Can be scrolled left and right
 class HScrollBar : public ScrollBar {
 protected:
-    virtual void scrollTo(const Vec2d &mouse) override;
+    virtual void scrollTo(const Vec2d &shift) override;
 
 public:
     HScrollBar(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+        size_t id_, const LayoutBox &layout_,
         ScrollAction *action_, const ScrollBarStyle &style_
     );
 
-
-    virtual EVENT_STATUS onParentResize() override;
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
 };

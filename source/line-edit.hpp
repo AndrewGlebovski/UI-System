@@ -67,7 +67,7 @@ public:
      * \note Max length must be greater than zero
     */
     LineEdit(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+        size_t id_, const LayoutBox &layout_,
         const LineEditStyle &style_, size_t max_length_
     );
 
@@ -112,9 +112,9 @@ public:
     /**
      * \brief Draws buffer content and cursor
     */
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
     virtual EVENT_STATUS onKeyUp(int key_id) override;
     virtual EVENT_STATUS onTimer(float delta_time) override;

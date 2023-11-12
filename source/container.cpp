@@ -16,27 +16,39 @@
 
 
 Container::Container(
-    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+    size_t id_, const LayoutBox &layout_,
     bool focus_enabled_
 ) :
-    Widget(id_, transform_, size_, z_index_, parent_),
+    Widget(id_, layout_),
     widgets(), focused(0), focus_enabled(focus_enabled_)
 {}
 
 
-void Container::draw(sf::RenderTarget &result, List<Transform> &transforms) {
+void Container::draw(sf::RenderTarget &result, TransformStack &stack) {
+# ifdef DEBUG_DRAW
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
+
+    sf::RectangleShape rect(global_size);
+    rect.setPosition(global_position);
+    rect.setFillColor(sf::Color(0));
+    rect.setOutlineColor(sf::Color::Magenta);
+    rect.setOutlineThickness(1);
+    result.draw(rect);
+#endif
+
     size_t count = widgets.size();
     if (count == 0) return;
 
-    TransformApplier add_transform(transforms, transform);
+    TransformApplier add_transform(stack, getTransform());
 
     for (size_t i = count - 1; i > focused; i--)
-        widgets[i]->draw(result, transforms);
+        widgets[i]->draw(result, stack);
     
     for (size_t i = focused - 1; i < count; i--)
-        widgets[i]->draw(result, transforms);
+        widgets[i]->draw(result, stack);
     
-    widgets[focused]->draw(result, transforms);
+    widgets[focused]->draw(result, stack);
 }
 
 
@@ -54,33 +66,38 @@ size_t Container::addChild(Widget *child) {
     ASSERT(child, "Child is nullptr!\n");
 
     // Set this container as child's parent
-    child->parent = this;
+    child->setParent(this);
     // Container is empty
     if (widgets.size() == 0) {
         widgets.push_back(child);
         focused = 0;
-        return child -> getId();
+        return child->getId();
     }
-    // Find place for widget according to z_index
+    // Find place for widget according to z-index
     for (size_t i = 0; i < widgets.size(); i++) {
-        if (child->z_index > widgets[i]->z_index) {
+        if (child->getZIndex() > widgets[i]->getZIndex()) {
             widgets.insert(i, child);
             focused = i;
-            return child -> getId();
+            return child->getId();
         }
     }
-    // Widget has the biggest z_index
+    // Widget has the biggest z-index
     widgets.push_back(child);
     focused = widgets.size() - 1;
-    return child -> getId();
+    return child->getId();
 }
 
 
 void Container::removeWidget(size_t index) {
     ASSERT(index < widgets.size(), "Index is out of range!\n");
 
-    if (index < focused) focused--;
-    else if (index == focused) focused = widgets.size() - 2;
+    if (widgets.size()) {
+        if (index < focused)
+            focused--;
+        else if (index == focused)
+            focused = 0;
+    }
+    else focused = 0;
 
     delete widgets[index];
     widgets.remove(index);
@@ -118,34 +135,34 @@ do {                                                                            
 } while(0)
 
 
-EVENT_STATUS Container::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
     if (widgets.size() == 0) return UNHANDLED;
 
-    TransformApplier add_transform(transforms, transform);
+    TransformApplier add_transform(stack, getTransform());
 
-    CONTAINER_FOR(onMouseMove(mouse, transforms));
+    CONTAINER_FOR(onMouseMove(mouse, stack));
     
     return UNHANDLED;
 }
 
 
-EVENT_STATUS Container::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
     if (widgets.size() == 0) return UNHANDLED;
 
-    TransformApplier add_transform(transforms, transform);
+    TransformApplier add_transform(stack, getTransform());
 
-    CONTAINER_FOR(onMouseButtonUp(mouse, button_id, transforms));
+    CONTAINER_FOR(onMouseButtonUp(mouse, button_id, stack));
     
     return UNHANDLED;
 }
 
 
-EVENT_STATUS Container::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Container::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
     if (widgets.size() == 0) return UNHANDLED;
 
-    TransformApplier add_transform(transforms, transform);
+    TransformApplier add_transform(stack, getTransform());
 
-    CONTAINER_FOR(onMouseButtonDown(mouse, button_id, transforms), focused = i);
+    CONTAINER_FOR(onMouseButtonDown(mouse, button_id, stack), focused = i);
     
     return UNHANDLED;
 }
@@ -169,6 +186,9 @@ EVENT_STATUS Container::onKeyDown(int key_id) {
 }
 
 
+#undef CONTAINER_FOR
+
+
 EVENT_STATUS Container::onTimer(float delta_time) {
     for (size_t i = 0; i < widgets.size(); i++)
         widgets[i]->onTimer(delta_time);
@@ -177,15 +197,12 @@ EVENT_STATUS Container::onTimer(float delta_time) {
 }
 
 
-EVENT_STATUS Container::onParentResize() {
+void Container::onParentUpdate(const LayoutBox &parent_layout) {
+    Widget::onParentUpdate(parent_layout);
+
     for (size_t i = 0; i < widgets.size(); i++)
-        widgets[i]->onParentResize();
-    
-    return UNHANDLED;
+        widgets[i]->onParentUpdate(*layout);
 }
-
-
-#undef CONTAINER_FOR
 
 
 void Container::checkChildren() {

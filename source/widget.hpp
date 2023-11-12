@@ -10,59 +10,108 @@ const EVENT_STATUS UNHANDLED = false;   ///< Event was not handled (father broad
 const EVENT_STATUS HANDLED = true;      ///< Event was handled (father broadcasting is not required)
 
 
-/// Holds transformation of the widget
-struct Transform {
+/// Holds transformation
+class Transform {
+private:
     Vec2d offset;        ///< Offset from parent
+    Vec2d scale;         ///< Scale
 
-
+public:
     /**
      * \brief Creates transform that does nothing
     */
     Transform();
 
-
     /**
      * \brief Creates transform
     */
-    Transform(const Vec2d &offset_);
-
-
-    /**
-     * \brief Applies transform to this one
-    */
-    void apply(const Transform &transform);
-
+    Transform(const Vec2d &offset_, const Vec2d &scale_ = Vec2d(1, 1));
 
     /**
-     * \brief Cancels transform
+     * \brief Returns offset
     */
-    void cancel(const Transform &transform);
-
+    Vec2d getOffset() const;
 
     /**
-     * \brief Checks if two transforms are equal 
+     * \brief Sets offset
     */
-    bool operator == (const Transform &transform);
+    void setOffset(const Vec2d &offset_);
+
+    /**
+     * \brief Returns scale
+    */
+    Vec2d getScale() const;
+
+    /**
+     * \brief Sets scale
+    */
+    void setScale(const Vec2d &scale_);
+
+    /**
+     * \brief Applies transform to position
+    */
+    Vec2d apply(const Vec2d &vec) const;
+
+    /**
+     * \brief Restores position using transform
+    */
+    Vec2d restore(const Vec2d &vec) const;
+};
+
+
+/// Contains stack of transforms and final transform at the top of it
+class TransformStack {
+private:
+    List<Transform> transforms;     ///< Stack of transforms
+
+public:
+    /**
+     * \brief Init transform stack with transform that does nothing
+    */
+    TransformStack();
+
+    /**
+     * \brief Pushes last transform to stack and applies it to the stack top
+    */
+    void enter(const Transform &transform);
+
+    /**
+     * \brief Pops last transform from stack
+    */
+    void leave();
+
+    /**
+     * \brief Returns value of the stack first element
+    */
+    Transform top() const;
+
+    /**
+     * \brief Applies final transform to position
+    */
+    Vec2d apply(const Vec2d &vec) const;
+
+    /**
+     * \brief Restore position using final transform
+    */
+    Vec2d restore(const Vec2d &vec) const;
+
+    /**
+     * \brief Applies final transform to size
+    */
+    Vec2d apply_size(const Vec2d &vec) const;
 };
 
 
 /// Tool class for temporarily applying local transform
 class TransformApplier {
 private:
-    List<Transform> &transforms;     ///< Transform stack
+    TransformStack &stack;     ///< Transform stack
 
 public:
     /**
      * \brief Applies local transform and pushes it to the transform stack
     */
-    TransformApplier(List<Transform> &transforms_, const Transform &local_transform);
-
-
-    /**
-     * \brief Checks if transform stack is not corrupted
-    */
-    bool verify() const;
-
+    TransformApplier(TransformStack &stack_, const Transform &transform);
 
     /**
      * \brief Cancels local transform and pops it from the transform stack
@@ -71,37 +120,130 @@ public:
 };
 
 
+/// Contains widget position and size
+class LayoutBox {
+public:
+    /**
+     * \brief Returns widget position
+    */
+    virtual Vec2d getPosition() const = 0;
+
+    /**
+     * \brief Sets widget position
+     * \return True if position changed, false otherwise
+    */
+    virtual bool setPosition(const Vec2d& position_) = 0;
+
+    /**
+     * \brief Returns widget size
+    */
+    virtual Vec2d getSize() const = 0;
+
+    /**
+     * \brief Sets widget size
+     * \return True if size changed, false otherwise
+    */
+    virtual bool setSize(const Vec2d& size_) = 0;
+
+    /**
+     * \brief Changes its position and size according to parent
+    */
+    virtual void onParentUpdate(const LayoutBox &parent_layout) = 0;
+
+    /**
+     * \brief Returns copy of this layout box
+     * \warning Do not forget to delete it
+    */
+    virtual LayoutBox *clone() const = 0;
+
+    /**
+     * \brief Default destructor
+    */
+    virtual ~LayoutBox() = default;
+};
+
+
+class BasicLayoutBox : public LayoutBox {
+protected:
+    Vec2d position;         ///< Widget position
+    Vec2d size;             ///< Widget size
+    Vec2d bounds;           ///< Parent size
+
+public:
+    BasicLayoutBox();
+
+    BasicLayoutBox(const Vec2d &position_, const Vec2d &size_);
+    
+    virtual Vec2d getPosition() const override;
+
+    virtual bool setPosition(const Vec2d& position_) override;
+
+    virtual Vec2d getSize() const override;
+
+    virtual bool setSize(const Vec2d& size_) override;
+
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+
+    /**
+     * \brief Clones position and size but not bounds
+    */
+    virtual LayoutBox *clone() const override;
+};
+
+
+class OffsetLayoutBox : public BasicLayoutBox {
+protected:
+    Vec2d offset;
+    Vec2d origin;
+
+public:
+    OffsetLayoutBox(const Vec2d &offset_, const Vec2d &origin_, const Vec2d &size_);
+
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+
+    virtual LayoutBox *clone() const override;
+};
+
+
+class LazyLayoutBox : public BasicLayoutBox {
+public:
+    using BasicLayoutBox::BasicLayoutBox;
+
+    virtual bool setPosition(const Vec2d& position_) override {
+        position = position_;
+        return true;
+    }
+
+    virtual bool setSize(const Vec2d& size_) override {
+        size = size_;
+        return true;
+    }
+
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override {
+        bounds = parent_layout.getSize();
+    }
+
+    virtual LayoutBox *clone() const override {
+        return new LazyLayoutBox(position, size);
+    }
+};
+
+
 /// Base class for all widgets
 class Widget {
-private:
+protected:
+    const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
+    LayoutBox *layout;      ///< Widget position and size encapsulated
+    int z_index;            ///< Shows order in which widgets are drawn
+    Widget *parent;         ///< Parent that holds this widget
+    int status;             ///< Shows parent if some actions requiered
+
     /**
      * \brief If requested_id != AUTO_ID returns requested_id, otherwise returns unique id
     */
     size_t generateId(size_t requested_id);
 
-protected:
-    const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
-    int status;             ///< Shows parent if some actions requiered
-
-
-    /**
-     * \brief Returns max possible new_size for child
-    */
-    virtual Vec2d onChildResize(Widget *child, const Vec2d &new_size);
-
-
-    /**
-     * \brief Returns max possible new_transform for child
-    */
-    virtual Transform onChildTransform(Widget *child, const Transform &new_transform);
-
 public:
-    Transform transform;    ///< Widget local transform
-    Vec2d size;          ///< Widget size
-    int z_index;            ///< Shows order in which widgets are drawn
-    Widget *parent;         ///< Parent that holds this widget
-
-
     /// Pass into constructor to generate new ID
     static const size_t AUTO_ID = 0;
 
@@ -112,37 +254,78 @@ public:
         DELETE      = 1     ///< This widget should be deleted
     };
 
-
     /**
      * \brief Widget constructor
      * \note If id_ != AUTO_ID sets id to id_, otherwise generates "unique" id
     */
-    Widget(size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_);
-
+    Widget(size_t id_, const LayoutBox &layout_);
 
     /**
      * \brief Default copy constructor
+     * \note id is AUTO, z-index is set to 0, parent is set nullptr
     */
-    Widget(const Widget&) = default;
-
+    Widget(const Widget &widget);
 
     /**
      * \brief Default assignment
+     * \note z-index is set to 0, parent is set to nullptr
     */
-    Widget &operator = (const Widget&) = default;
-
+    Widget &operator = (const Widget &widget);
 
     /**
      * \brief Returns widget id
     */
     size_t getId() const;
 
+    /**
+     * \brief Returns current layout box
+    */
+    LayoutBox &getLayoutBox();
+
+    /**
+     * \brief Returns current layout box
+    */
+    const LayoutBox &getLayoutBox() const;
+
+    /**
+     * \brief Sets layout box
+    */
+    void setLayoutBox(const LayoutBox &layout_);
+
+    /**
+     * \brief Generates transform using widget position
+    */
+    Transform getTransform() const;
+
+    /**
+     * \brief Returns z-index
+    */
+    int getZIndex() const;
+
+    /**
+     * \brief Sets z-index
+    */
+    void setZIndex(int z_index_);
+
+    /**
+     * \brief Returns parent
+    */
+    Widget *getParent();
+
+    /**
+     * \brief Returns parent
+    */
+    const Widget *getParent() const;
+
+    /**
+     * \brief Sets parent
+    */
+    void setParent(Widget *parent_);
 
     /**
      * \brief Searches widget in hierarchy using id
     */
     virtual Widget *findWidget(size_t widget_id);
-
 
     /**
      * \brief Adds child widget for this
@@ -150,55 +333,50 @@ public:
     */
     virtual size_t addChild(Widget *child);
 
-
     /**
      * \brief Removes child by its id
      * \warning If widget is not supposed to have children, abort() will be called
     */
     virtual void removeChild(size_t child_id);
 
-
     /**
      * \brief Returns widget status
     */
     int getStatus() const;
-
 
     /**
      * \brief Sets widget status
     */
     void setStatus(WIDGET_STATUS new_status);
 
-
     /**
-     * \brief Draws red rectangle for debug purposes
+     * \brief Draws widget on render target
+     * \note By default draws red rectangle for debug purposes
     */
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms);
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack);
 
-
-    /**
-     * \brief Sets max possible new_size according to parent
-    */
-    virtual void tryResize(const Vec2d &new_size);
-
-
-    /**
-     * \brief Sets max possible new_transform according to parent
-    */
-    virtual void tryTransform(const Transform &new_transform);
-
-
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) { return UNHANDLED; }
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) { return UNHANDLED; }
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) { return UNHANDLED; }
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) { return UNHANDLED; }
     virtual EVENT_STATUS onKeyUp(int key_id) { return UNHANDLED; }
     virtual EVENT_STATUS onKeyDown(int key_id) { return UNHANDLED; }
     virtual EVENT_STATUS onTimer(float delta_time) { return UNHANDLED; }
-    virtual EVENT_STATUS onParentResize() { return UNHANDLED; }
+
+    /**
+     * \brief Allows widget to change its position and size according to parent
+    */
+    virtual void onParentUpdate(const LayoutBox &parent_layout) { layout->onParentUpdate(parent_layout); }
+
+    /**
+     * \brief Checks children statuses
+     * \note By default does nothing
+    */
     virtual void checkChildren() {}
 
-
-    virtual ~Widget() {};
+    /**
+     * \brief Delete layout box
+    */
+    virtual ~Widget() { delete layout; };
 };
 
 

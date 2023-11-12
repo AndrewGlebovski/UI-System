@@ -27,6 +27,11 @@ vec_t dot(const Vec2d &a, const Vec2d &b) {
 }
 
 
+vec_t cross(const Vec2d &a, const Vec2d &b) {
+    return a.x * b.y - a.y * b.x;
+}
+
+
 vec_t Vec2d::length() const {
     return sqrt(length2());
 }
@@ -44,7 +49,7 @@ Vec2d normalize(const Vec2d &v) {
 
 
 void Vec2d::print() const { 
-    printf("x: %15.3lf, y: %15.3lf", x, y);
+    printf("x: %15.3lf, y: %15.3lf\n", x, y);
 }
 
 
@@ -71,6 +76,13 @@ Vec2d &operator -= (Vec2d &a, const Vec2d &b) {
 Vec2d &operator *= (Vec2d &a, const Vec2d &b) {
     a.x *= b.x;
     a.y *= b.y;
+    return a;
+}
+
+
+Vec2d &operator /= (Vec2d &a, const Vec2d &b) {
+    a.x /= b.x;
+    a.y /= b.y;
     return a;
 }
 
@@ -112,6 +124,12 @@ Vec2d operator * (const Vec2d &a, const Vec2d &b) {
 }
 
 
+Vec2d operator / (const Vec2d &a, const Vec2d &b) {
+    Vec2d res = a;
+    return (res /= b);
+}
+
+
 Vec2d operator * (const Vec2d &a, vec_t arg) {
     Vec2d res = a;
     return (res *= arg);
@@ -131,7 +149,7 @@ Vec2d operator / (const Vec2d &a, vec_t arg) {
 
 
 bool operator == (const Vec2d &a, const Vec2d &b) {
-    return isEqual(a.x, b.x) && isEqual(a.x, b.x);
+    return isEqual(a.x, b.x) && isEqual(a.y, b.y);
 }
 
 

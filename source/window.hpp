@@ -34,7 +34,7 @@ public:
 /// Frame with widgets inside
 class Window : public Widget {
 protected:
-    sf::String title;           ///< Window title
+    std::string title;           ///< Window title
     WindowStyle style;          ///< Window style
     Container buttons;          ///< Window title bar and resize buttons
     Container container;        ///< Window content manager
@@ -72,30 +72,26 @@ public:
      * \note Position and size consider title bar and frame
     */
     Window(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
-        const sf::String &title_,
+        size_t id_, const LayoutBox &layout_,
+        const std::string &title_,
         const WindowStyle &style_,
         bool can_resize = true,
         bool can_move = true,
         bool can_close = true
     );
 
-
     Window(const Window &window) = delete;
     Window &operator = (const Window &window) = delete;
 
-
     /**
-     * \brief Returns position of the window inside area
+     * \brief Returns position of the window inner area relative to window top-left corner
     */
     Vec2d getAreaPosition() const;
 
-
     /**
-     * \brief Returns position of the window inside area
+     * \brief Returns size of the window inner area
     */
     Vec2d getAreaSize() const;
-
 
     /**
      * \brief Adds menu to window or replaces existing one
@@ -103,18 +99,25 @@ public:
     */
     void setMenu(Menu *menu_);
 
-
     /**
      * \brief Returns pointer to menu
     */
     Menu *getMenu();
 
+    /**
+     * \brief Sets window position
+    */
+    bool setPosition(const Vec2d &position_);
+
+    /**
+     * \brief Sets window size
+    */
+    bool setSize(const Vec2d &size_);
 
     /**
      * \brief Finds pointer to widget inside window container
     */
     virtual Widget *findWidget(size_t widget_id) override;
-
 
     /**
      * \brief Adds new widget to window container
@@ -122,31 +125,42 @@ public:
     */
     virtual size_t addChild(Widget *child) override;
 
-
+    /**
+     * \brief Removes child from window container
+    */
     virtual void removeChild(size_t child_id) override;
 
-
-    virtual void tryResize(const Vec2d &new_size) override;
-
-
+    /**
+     * \brief Returns window style
+    */
     const WindowStyle &getStyle() const { return style; }
-
 
     /**
      * \brief Draws window frame, title bar and its content
     */
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
     virtual EVENT_STATUS onKeyUp(int key_id) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
     virtual EVENT_STATUS onTimer(float delta_time) override;
-    virtual EVENT_STATUS onParentResize() override;
+    
+    /**
+     * \brief Allows widget to change its position and size according to parent
+    */
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+
+    /**
+     * \brief Checks children statuses
+    */
     virtual void checkChildren() override;
 
+    /**
+     * \brief Delete menu if window has one
+    */
     virtual ~Window() override;
 };
 
@@ -155,19 +169,18 @@ public:
 class MainWindow : public Window {
 public:
     MainWindow(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_,
-        const sf::String &title_, const WindowStyle &style_
+        size_t id_, const LayoutBox &layout_,
+        const std::string &title_,
+        const WindowStyle &style_
     );
-
-
-    virtual void tryResize(const Vec2d &new_size) override;
-
-
-    virtual void tryTransform(const Transform &new_transform) override;
-
 
     /**
      * \brief Parses SFML event into my own event system
     */
-    void parseEvent(const sf::Event &event, List<Transform> &transforms);
+    void parseEvent(const sf::Event &event, TransformStack &stack);
+
+    /**
+     * \brief Allows widget to change its position and size according to parent
+    */
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
 };

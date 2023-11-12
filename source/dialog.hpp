@@ -12,14 +12,14 @@ protected:
      * \note Position and size consider title bar and frame
     */
     Dialog(
-        size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
-        const sf::String &title_, const WindowStyle &style_
+        size_t id_, const LayoutBox &layout_,
+        const std::string &title_, const WindowStyle &style_
     );
 
 public:
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
     virtual EVENT_STATUS onKeyUp(int key_id) override;
     virtual EVENT_STATUS onKeyDown(int key_id) override;
 };
@@ -52,7 +52,7 @@ public:
      * \note Actions must set window status as DELETE on exit
     */
     ConfirmDialog(
-        size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
+        size_t id_, const LayoutBox &layout_,
         const std::string &title_,
         DialogAction *ok_action_,
         DialogAction *cancel_action_,
@@ -70,7 +70,7 @@ public:
      * \note Actions must set window status as DELETE on exit
     */
     SelectFileDialog(
-        size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
+        size_t id_, const LayoutBox &layout_,
         const std::string &title_,
         DialogAction *select_action_,
         DialogAction *cancel_action_,

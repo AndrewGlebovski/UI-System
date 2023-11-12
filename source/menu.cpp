@@ -19,53 +19,54 @@
 
 
 const size_t INVALID_OPENED = std::numeric_limits<size_t>::max();   ///< No opened menu at the moment
-const Vec2d add_size(20, 20);                                    ///< Additional size to text rect
+const Vec2d ADD_SIZE(20, 20);                                       ///< Additional size to text rect
+
+
+// ============================================================================
 
 
 MenuButton::MenuButton(
-    const Transform &transform_, const Vec2d &size_, Widget *parent_,
-    const sf::String &text_, const ButtonStyle &style_,
+    size_t id_, const LayoutBox &layout_,
+    const std::string &text_, const ButtonStyle &style_,
     const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
 ) : 
-    RectButton(AUTO_ID, transform_, size_, 1, parent_, nullptr, nullptr, text_, style_, normal_, hover_, pressed_), 
+    RectButton(AUTO_ID, layout_, nullptr, text_, style_, normal_, hover_, pressed_), 
     buttons(), is_opened(false)
 {}
 
 
-void MenuButton::addButton(const sf::String &text_, ButtonAction *action_) {
-    Widget *last_button = (buttons.size()) ? buttons.back() : nullptr;
+void MenuButton::addButton(const std::string &text_, ButtonAction *action_) {
+    Widget *prev_btn = (buttons.size()) ? buttons.back() : nullptr;
 
     sf::Text btn_text(text_, style.font, style.font_size);
-    Vec2d new_size = Vec2d(btn_text.getLocalBounds().width + add_size.x, size.y);
+    Vec2d btn_size = Vec2d(btn_text.getLocalBounds().width + ADD_SIZE.x, getLayoutBox().getSize().y);
+    Vec2d btn_pos = Vec2d();
 
-    Transform new_transform(transform);
-    new_transform.offset = Vec2d();
+    if (prev_btn) {
+        btn_pos.y = prev_btn->getLayoutBox().getPosition().y + prev_btn->getLayoutBox().getSize().y;
 
-    if (last_button) {
-        new_transform.offset.y = last_button->transform.offset.y + last_button->size.y;
-
-        if (new_size.x > last_button->size.x) {
+        if (btn_size.x > prev_btn->getLayoutBox().getSize().x) {
             for (size_t i = 0; i < buttons.size(); i++)
-                buttons[i]->size.x = new_size.x;
+                buttons[i]->getLayoutBox().setSize(btn_size);
         }
-        else new_size.x = last_button->size.x;
+        else btn_size.x = prev_btn->getLayoutBox().getSize().x;
     }
-    else new_transform.offset.y = size.y;
+    else btn_pos.y = getLayoutBox().getSize().y;
 
-    buttons.push_back(new RectButton(
+    RectButton *btn = new RectButton(
         AUTO_ID,
-        new_transform,
-        new_size,
-        0,
-        this,
+        LazyLayoutBox(btn_pos, btn_size),
         action_,
-        nullptr,
         text_,
         style,
         normal_color,
         hover_color,
         pressed_color
-    ));
+    );
+
+    btn->setParent(this);
+
+    buttons.push_back(btn);
 }
 
 
@@ -74,58 +75,58 @@ void MenuButton::setOpened(bool is_opened_) {
 }
 
 
-void MenuButton::draw(sf::RenderTarget &result, List<Transform> &transforms) {
-    RectButton::draw(result, transforms);
+void MenuButton::draw(sf::RenderTarget &result, TransformStack &stack) {
+    RectButton::draw(result, stack);
 
-    TransformApplier add_transform(transforms, transform);
+    TransformApplier add_transform(stack, getTransform());
 
     if (is_opened) {
         for (size_t i = 0; i < buttons.size(); i++)
-            buttons[i]->draw(result, transforms);
+            buttons[i]->draw(result, stack);
     }
 }
 
 
-EVENT_STATUS MenuButton::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
-    RectButton::onMouseMove(mouse, transforms);
+EVENT_STATUS MenuButton::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
+    RectButton::onMouseMove(mouse, stack);
 
     if (!is_opened) return UNHANDLED;
 
-    TransformApplier add_transform(transforms, transform);
+    TransformApplier add_transform(stack, getTransform());
 
     for (size_t i = 0; i < buttons.size(); i++)
-        buttons[i]->onMouseMove(mouse, transforms);
+        buttons[i]->onMouseMove(mouse, stack);
 
     return UNHANDLED;
 }
 
 
-EVENT_STATUS MenuButton::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    if (RectButton::onMouseButtonDown(mouse, button_id, transforms) == HANDLED)
+EVENT_STATUS MenuButton::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    if (RectButton::onMouseButtonDown(mouse, button_id, stack) == HANDLED)
         return HANDLED;
 
     if (!is_opened) return UNHANDLED;
 
-    TransformApplier add_transform(transforms, transform);
+    TransformApplier add_transform(stack, getTransform());
 
     for (size_t i = 0; i < buttons.size(); i++)
-        if (buttons[i]->onMouseButtonDown(mouse, button_id, transforms) == HANDLED)
+        if (buttons[i]->onMouseButtonDown(mouse, button_id, stack) == HANDLED)
             return HANDLED;
 
     return UNHANDLED;
 }
 
 
-EVENT_STATUS MenuButton::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    if (RectButton::onMouseButtonUp(mouse, button_id, transforms) == HANDLED)
+EVENT_STATUS MenuButton::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    if (RectButton::onMouseButtonUp(mouse, button_id, stack) == HANDLED)
         return HANDLED;
 
     if (!is_opened) return UNHANDLED;
 
-    TransformApplier add_transform(transforms, transform);
+    TransformApplier add_transform(stack, getTransform());
 
     for (size_t i = 0; i < buttons.size(); i++)
-        if (buttons[i]->onMouseButtonDown(mouse, button_id, transforms) == HANDLED)
+        if (buttons[i]->onMouseButtonDown(mouse, button_id, stack) == HANDLED)
             return HANDLED;
 
     return UNHANDLED;
@@ -140,15 +141,21 @@ MenuButton::~MenuButton() {
 }
 
 
+// ============================================================================
+
+
 Menu::Menu(
-    size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
+    size_t id_, const LayoutBox &layout_,
     const MenuStyle &style_
 ) :
-    Widget(id_, transform_, Vec2d(), z_index_, parent_),
+    Widget(id_, layout_),
     buttons(), style(style_), opened(INVALID_OPENED)
 {
     sf::Text btn_text("Test", style.font, style.font_size);
-    size.y = btn_text.getLocalBounds().height + add_size.y;
+
+    Vec2d auto_size(layout->getSize().x, btn_text.getLocalBounds().height + ADD_SIZE.y);
+
+    layout->setSize(auto_size);
 }
 
 
@@ -176,7 +183,7 @@ void Menu::openMenu(size_t menu_id) {
 }
 
 
-void Menu::addMenuButton(const sf::String &text) {
+void Menu::addMenuButton(const std::string &text) {
     ButtonStyle button_style(
         style.font,
         style.font_size,
@@ -185,65 +192,72 @@ void Menu::addMenuButton(const sf::String &text) {
         style.font_pressed
     );
 
-    MenuButton *last_menu_button = buttons.size() ? buttons.back() : nullptr;
+    MenuButton *prev_btn = buttons.size() ? buttons.back() : nullptr;
 
     sf::Text btn_text(text, style.font, style.font_size);
-    Vec2d new_size(btn_text.getLocalBounds().width + add_size.x, size.y);
+    Vec2d btn_size(btn_text.getLocalBounds().width + ADD_SIZE.x, layout->getSize().y);
+    Vec2d btn_pos;
 
-    Transform new_transform;
+    if (prev_btn)
+        btn_pos.x = prev_btn->getLayoutBox().getPosition().x + prev_btn->getLayoutBox().getSize().x;
 
-    if (last_menu_button) {
-        new_transform = last_menu_button->transform;
-        new_transform.offset.x += last_menu_button->size.x;
-    }
-
-    buttons.push_back(new MenuButton(
-        new_transform,
-        new_size,
-        this,
+    MenuButton *btn = new MenuButton(
+        AUTO_ID,
+        LazyLayoutBox(btn_pos, btn_size),
         text,
         button_style,
         style.normal,
         style.hover,
         style.pressed
-    ));
+    );
+
+    btn->setParent(this);
+
+    buttons.push_back(btn);
 }
 
 
-void Menu::addButton(size_t menu_id, const sf::String &text, ButtonAction *action) {
+void Menu::addButton(size_t menu_id, const std::string &text, ButtonAction *action) {
     ASSERT(menu_id < buttons.size(), "Invalid menu id!\n");
     buttons[menu_id]->addButton(text, action);
 }
 
 
-void Menu::draw(sf::RenderTarget &result, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+void Menu::draw(sf::RenderTarget &result, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
 
-    sf::RectangleShape rect(size);
-    rect.setPosition(transforms.front().offset);
+    sf::RectangleShape rect(global_size);
+    rect.setPosition(global_position);
     rect.setFillColor(style.normal);
+#ifdef DEBUG_DRAW
+    rect.setOutlineColor(sf::Color::Cyan);
+    rect.setOutlineThickness(1);
+#endif
     result.draw(rect);
 
+    TransformApplier add_transform(stack, getTransform());
+
     for (size_t i = 0; i < buttons.size(); i++)
-        buttons[i]->draw(result, transforms);
+        buttons[i]->draw(result, stack);
 }
 
 
-EVENT_STATUS Menu::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+EVENT_STATUS Menu::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
+    TransformApplier add_transform(stack, getTransform());
 
     for (size_t i = 0; i < buttons.size(); i++)
-        buttons[i]->onMouseMove(mouse, transforms);
+        buttons[i]->onMouseMove(mouse, stack);
 
     return UNHANDLED;
 }
 
 
-EVENT_STATUS Menu::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+EVENT_STATUS Menu::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    TransformApplier add_transform(stack, getTransform());
 
     for (size_t i = 0; i < buttons.size(); i++) {
-        if (buttons[i]->onMouseButtonDown(mouse, button_id, transforms) == HANDLED) {
+        if (buttons[i]->onMouseButtonDown(mouse, button_id, stack) == HANDLED) {
             openMenu(i);
             return HANDLED;
         }
@@ -258,19 +272,13 @@ EVENT_STATUS Menu::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Tra
 }
 
 
-EVENT_STATUS Menu::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+EVENT_STATUS Menu::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    TransformApplier add_transform(stack, getTransform());
 
     for (size_t i = 0; i < buttons.size(); i++)
-        if (buttons[i]->onMouseButtonUp(mouse, button_id, transforms) == HANDLED)
+        if (buttons[i]->onMouseButtonUp(mouse, button_id, stack) == HANDLED)
             return HANDLED;
 
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS Menu::onParentResize() {
-    tryResize(Vec2d(parent->size.x, size.y));
     return UNHANDLED;
 }
 
@@ -281,6 +289,9 @@ Menu::~Menu() {
         delete buttons[i];
     }
 }
+
+
+// ============================================================================
 
 
 #pragma GCC diagnostic pop

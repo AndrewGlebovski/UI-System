@@ -5,14 +5,46 @@
 Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
 
 
+class CanvasLayoutBox : public BasicLayoutBox {
+public:
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override {
+        bounds = parent_layout.getSize();
+        position = Vec2d();
+        size = bounds - Vec2d(30, 30); 
+    }
+
+    virtual LayoutBox *clone() const override {
+        return new CanvasLayoutBox();
+    }
+};
+
+
+class ScrollBarLayoutBox : public OffsetLayoutBox {
+public:
+    ScrollBarLayoutBox(const Vec2d &offset_, const Vec2d &origin_, const Vec2d &size_) :
+        OffsetLayoutBox(offset_, origin_, size_)
+    {
+        position = bounds * origin;
+    }
+
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override {
+        bounds = parent_layout.getSize();
+        position = bounds * origin + offset;
+        //if (size.x < 1.5) size = bounds * size;
+        //if (size.y < 1.5) size = bounds * size;
+    }
+
+    virtual LayoutBox *clone() const override {
+        return new ScrollBarLayoutBox(offset, origin, size);
+    }
+};
+
+
 Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
     // First we create to check if file is correct image
     Canvas *canvas = new Canvas(
         Widget::AUTO_ID,
-        Transform(),
-        Vec2d(),
-        0,
-        nullptr,
+        CanvasLayoutBox(),
         palette,
         group
     );
@@ -32,34 +64,33 @@ Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &gro
     // If file is correct we can create other stuff
     Window *subwindow = new Window(
         Widget::AUTO_ID,
-        Transform(Vec2d(300, 100)),
-        Vec2d(800, 600),
-        1,
-        nullptr,
+        BasicLayoutBox(Vec2d(300, 100), Vec2d(800, 600)),
         (filename) ? filename : "Canvas",
         window_style
     );
 
-    canvas->size = subwindow->getAreaSize() - Vec2d(30, 30);
+    canvas->getLayoutBox().setSize(subwindow->getAreaSize() - Vec2d(30, 30));
 
     subwindow->addChild(canvas);
 
     subwindow->addChild(new VScrollBar(
         Widget::AUTO_ID,
-        Transform(Vec2d(subwindow->getAreaSize().x - 20, 0)),
-        Vec2d(20, subwindow->getAreaSize().y - 30),
-        1,
-        nullptr,
+        ScrollBarLayoutBox(
+            Vec2d(-20, 0),
+            Vec2d(1, 0),
+            Vec2d(20, subwindow->getAreaSize().y - 20)
+        ),
         new VScrollCanvas(*canvas),
         scrollbar_style
     ));
 
     subwindow->addChild(new HScrollBar(
         Widget::AUTO_ID,
-        Transform(Vec2d(0, subwindow->getAreaSize().y - 20)),
-        Vec2d(subwindow->getAreaSize().x, 20),
-        1,
-        nullptr,
+        ScrollBarLayoutBox(
+            Vec2d(0, -20),
+            Vec2d(0, 1),
+            Vec2d(subwindow->getAreaSize().x, 20)
+        ),
         new HScrollCanvas(*canvas),
         scrollbar_style
     ));
@@ -177,9 +208,7 @@ public:
     virtual void operator () () override {
         window.addChild(new SelectFileDialog(
             Widget::AUTO_ID,
-            Transform(),
-            1000,
-            nullptr,
+            BasicLayoutBox(),
             "Open File",
             new OpenFileAction(
                 window,
@@ -237,9 +266,7 @@ public:
 
         window.addChild(new SelectFileDialog(
             Widget::AUTO_ID,
-            Transform(),
-            1000,
-            nullptr,
+            BasicLayoutBox(),
             "Save As",
             new SaveAsFileAction(group),
             new CancelAction(),

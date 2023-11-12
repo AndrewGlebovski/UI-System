@@ -37,31 +37,31 @@ const size_t TEXT_MAX_LENGTH = 256;                     ///< Text tool text max 
 
 
 /// Draws line on the texture
-void drawLine(const Vec2d &p1, const Vec2d &p2, const sf::Color &color, sf::RenderTarget &result);
+void drawLine(const Transform &trans, const Vec2d &p1, const Vec2d &p2, const sf::Color &color, sf::RenderTarget &result);
 
 
 /// Draws polygon or polyline based on the primitive type
-void drawPolygon(const Vec2d &offset, const List<Vec2d> &points, const sf::Color &color, sf::RenderTarget &result, sf::PrimitiveType type);
+void drawPolygon(const Transform &trans, const List<Vec2d> &points, const sf::Color &color, sf::RenderTarget &result, sf::PrimitiveType type);
 
 
 // ============================================================================
 
 
-void drawLine(const Vec2d &p1, const Vec2d &p2, const sf::Color &color, sf::RenderTarget &result) {
+void drawLine(const Transform &trans, const Vec2d &p1, const Vec2d &p2, const sf::Color &color, sf::RenderTarget &result) {
     sf::Vertex line[] = {
-        sf::Vertex(p1, color),
-        sf::Vertex(p2, color)
+        sf::Vertex(trans.apply(p1), color),
+        sf::Vertex(trans.apply(p2), color)
     };
 
     result.draw(line, 2, sf::Lines);
 }
 
 
-void drawPolygon(const Vec2d &offset, const List<Vec2d> &points, const sf::Color &color, sf::RenderTarget &result, sf::PrimitiveType type) {
+void drawPolygon(const Transform &trans, const List<Vec2d> &points, const sf::Color &color, sf::RenderTarget &result, sf::PrimitiveType type) {
     sf::Vertex *polygon = new sf::Vertex[points.size()];
 
     for (size_t i = 0; i < points.size(); i++)
-        polygon[i] = sf::Vertex(points[i] + offset, color);
+        polygon[i] = sf::Vertex(trans.apply(points[i]), color);
 
     result.draw(polygon, points.size(), type);
 
@@ -112,14 +112,15 @@ private:
 
 public:
     RectPreview(RectTool &tool_) :
-        Widget(1, Transform(Vec2d()), Vec2d(), 1, nullptr), tool(tool_) {}
+        Widget(1, BasicLayoutBox()), tool(tool_) {}
     
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override {
-        TransformApplier add_transform(transforms, transform);
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override {
+        Vec2d global_position = stack.apply(layout->getPosition());
+        Vec2d global_size = stack.apply_size(layout->getSize());
 
-        sf::RectangleShape rect(size);
-        rect.setPosition(transforms.front().offset);
+        sf::RectangleShape rect(global_size);
+        rect.setPosition(global_position);
         rect.setFillColor(sf::Color(0));
         rect.setOutlineThickness(RECT_PREVIEW_OUTLINE);
         rect.setOutlineColor(PREVIEW_COLOR);
@@ -153,8 +154,8 @@ void RectTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canva
         case PRESSED:
             is_drawing = true;
             draw_start = mouse;
-            rect_preview->transform.offset = mouse;
-            rect_preview->size = Vec2d();
+            rect_preview->getLayoutBox().setPosition(mouse);
+            rect_preview->getLayoutBox().setSize(Vec2d());
             break;
         case REALEASED:
             onConfirm(mouse, canvas);
@@ -166,8 +167,8 @@ void RectTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canva
 
 void RectTool::onMove(const Vec2d &mouse, Canvas &canvas) {
     sf::RectangleShape rect = createRect(draw_start, mouse);
-    rect_preview->transform.offset = rect.getPosition();
-    rect_preview->size = rect.getSize();
+    rect_preview->getLayoutBox().setPosition(rect.getPosition());
+    rect_preview->getLayoutBox().setSize(rect.getSize());
 }
 
 
@@ -206,15 +207,15 @@ public:
      * \note Transform offset used as line's first point and size as second
     */
     LinePreview(LineTool &tool_) :
-        Widget(1, Transform(Vec2d()), Vec2d(), 1, nullptr), tool(tool_) {}
+        Widget(1, BasicLayoutBox()), tool(tool_) {}
     
 
     /**
      * \note Transform offset used as line's first point and size as second
     */
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override {
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override {
         // REMAINDER: transform.offset = point1, size = point2
-        drawLine(transforms.front().offset + transform.offset, transforms.front().offset + size, PREVIEW_COLOR, result);
+        drawLine(stack.top(), layout->getPosition(), layout->getSize(), PREVIEW_COLOR, result);
     }
 };
 
@@ -229,8 +230,8 @@ void LineTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canva
         case PRESSED:
             is_drawing = true;
             draw_start = mouse;
-            line_preview->transform.offset = mouse;
-            line_preview->size = mouse;
+            line_preview->getLayoutBox().setPosition(mouse);
+            line_preview->getLayoutBox().setSize(mouse);
             break;
         case REALEASED:
             onConfirm(mouse, canvas);
@@ -241,13 +242,13 @@ void LineTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canva
 
 
 void LineTool::onMove(const Vec2d &mouse, Canvas &canvas) {
-    line_preview->size = mouse;
+    line_preview->getLayoutBox().setSize(mouse);
 }
 
 
 void LineTool::onConfirm(const Vec2d &mouse, Canvas &canvas) {
     if (is_drawing) {
-        drawLine(draw_start, mouse, canvas.getPalette()->getCurrentColor(), canvas.getTexture());
+        drawLine(Transform(), draw_start, mouse, canvas.getPalette()->getCurrentColor(), canvas.getTexture());
         is_drawing = false;
     }
 }
@@ -379,11 +380,11 @@ private:
 
 public:
     PolygonPreview(PolygonTool &tool_) :
-        Widget(1, Transform(), Vec2d(), 1, nullptr), tool(tool_) {}
+        Widget(1, BasicLayoutBox()), tool(tool_) {}
     
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override {
-        drawPolygon(transforms.front().offset, tool.getPoints(), PREVIEW_COLOR, result, sf::PrimitiveType::LineStrip);
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override {
+        drawPolygon(stack.top(), tool.getPoints(), PREVIEW_COLOR, result, sf::PrimitiveType::LineStrip);
     }
 };
 
@@ -453,10 +454,7 @@ TextTool::TextTool() : text_font(), text_preview(nullptr) {
 
     text_preview = new LineEdit(
         Widget::AUTO_ID,
-        Transform(),
-        Vec2d(SCREEN_W, TEXT_SIZE + TEXT_OFFSET * 2),
-        0,
-        nullptr,
+        LazyLayoutBox(Vec2d(), Vec2d(SCREEN_W, TEXT_SIZE + TEXT_OFFSET * 2)),
         style,
         TEXT_MAX_LENGTH
     );
@@ -466,7 +464,7 @@ TextTool::TextTool() : text_font(), text_preview(nullptr) {
 void TextTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) {
     if (state == PRESSED) {
         is_drawing = true;
-        text_preview->transform.offset = mouse;
+        text_preview->getLayoutBox().setPosition(mouse);
         text_preview->setKeyboardFocus(true);
     }
 }
@@ -475,7 +473,7 @@ void TextTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canva
 void TextTool::onConfirm(const Vec2d &mouse, Canvas &canvas) {
     if (is_drawing) {
         sf::Text text(text_preview->getString(), text_font, TEXT_SIZE);
-        text.setPosition(text_preview->transform.offset + Vec2d(TEXT_OFFSET, TEXT_OFFSET));
+        text.setPosition(text_preview->getLayoutBox().getPosition() + Vec2d(TEXT_OFFSET, TEXT_OFFSET));
         text.setFillColor(canvas.getPalette()->getCurrentColor());
         canvas.getTexture().draw(text);
         is_drawing = false;
@@ -582,27 +580,31 @@ void ToolPaletteView::updateToolButtons() {
 
 
 #define ADD_TOOL_BUTTON(TOOL_ID, TOOL_TEXTURE_ID, POSITION)     \
-buttons.addChild(new TextureIconButton(                         \
-    Widget::AUTO_ID + TOOL_ID + 1,                              \
-    Transform(POSITION),                                        \
-    0,                                                          \
-    nullptr,                                                    \
-    new PaletteAction(*palette, TOOL_ID),                       \
-    group,                                                      \
-    asset[PaletteViewAsset::NORMAL_TEXTURE],                    \
-    asset[PaletteViewAsset::NORMAL_TEXTURE],                    \
-    asset[PaletteViewAsset::SELECTED_TEXTURE],                  \
-    asset[TOOL_TEXTURE_ID]                                      \
-))
+do {                                                            \
+    TextureIconButton *btn =  new TextureIconButton(            \
+        Widget::AUTO_ID + TOOL_ID + 1,                          \
+        BasicLayoutBox(POSITION, Vec2d()),                      \
+        new PaletteAction(*palette, TOOL_ID),                   \
+        asset[PaletteViewAsset::NORMAL_TEXTURE],                \
+        asset[PaletteViewAsset::NORMAL_TEXTURE],                \
+        asset[PaletteViewAsset::SELECTED_TEXTURE],              \
+        asset[TOOL_TEXTURE_ID]                                  \
+    );                                                          \
+    btn->setButtonGroup(group);                                 \
+    buttons.addChild(btn);                                      \
+} while(0)
 
 
 ToolPaletteView::ToolPaletteView(
-    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+    size_t id_, const LayoutBox &layout_,
     ToolPalette *palette_, const PaletteViewAsset &asset_
 ) :
-    Widget(id_, transform_, size_, z_index_, parent_), 
-    buttons(1, Transform(), size, 0, this), palette(palette_), asset(asset_), group(nullptr)
+    Widget(id_, layout_), 
+    buttons(1, BasicLayoutBox(Vec2d(), layout->getSize()), false),
+    palette(palette_), asset(asset_), group(nullptr)
 {
+    buttons.setParent(this);
+
     group = new ButtonGroup();
 
     ADD_TOOL_BUTTON(ToolPalette::PENCIL_TOOL,   PaletteViewAsset::PENCIL_TEXTURE,   Vec2d());
@@ -621,33 +623,33 @@ ToolPaletteView::ToolPaletteView(
 #undef ADD_TOOL_BUTTON
 
 
-void ToolPaletteView::draw(sf::RenderTarget &result, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+void ToolPaletteView::draw(sf::RenderTarget &result, TransformStack &stack) {
+    TransformApplier add_transform(stack, getTransform());
 
     updateToolButtons();
 
-    buttons.draw(result, transforms);
+    buttons.draw(result, stack);
 }
 
 
-EVENT_STATUS ToolPaletteView::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+EVENT_STATUS ToolPaletteView::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
+    TransformApplier add_transform(stack, getTransform());
 
-    return buttons.onMouseMove(mouse, transforms);
+    return buttons.onMouseMove(mouse, stack);
 }
 
 
-EVENT_STATUS ToolPaletteView::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+EVENT_STATUS ToolPaletteView::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    TransformApplier add_transform(stack, getTransform());
 
-    return buttons.onMouseButtonDown(mouse, button_id, transforms);
+    return buttons.onMouseButtonDown(mouse, button_id, stack);
 }
 
 
-EVENT_STATUS ToolPaletteView::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+EVENT_STATUS ToolPaletteView::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    TransformApplier add_transform(stack, getTransform());
 
-    return buttons.onMouseButtonUp(mouse, button_id, transforms);
+    return buttons.onMouseButtonUp(mouse, button_id, stack);
 }
 
 
@@ -896,8 +898,19 @@ void CanvasGroup::addCanvas(Canvas *new_canvas) {
 void CanvasGroup::removeCanvas(Canvas *canvas) {
     size_t index = getIndex(canvas);
     if (index < canvases.size()) {
-        if (index == active) setActive(canvases[0]);
         canvases.remove(index);
+
+        if (canvases.size()) {
+            if (index < active) {
+                active--;
+                setActive(canvases[active]);
+            }
+            else if (index == active) {
+                active = 0;
+                setActive(canvases[active]);
+            }
+        }
+        else active = 0;
     }
 }
 
@@ -929,10 +942,10 @@ FilterAction *FilterAction::clone() { return new FilterAction(filter_id, palette
 
 
 Canvas::Canvas(
-    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
+    size_t id_, const LayoutBox &layout_,
     ToolPalette &palette_, CanvasGroup &group_
 ) :
-    Widget(id_, transform_, size_, z_index_, parent_),
+    Widget(id_, layout_),
     texture(), texture_offset(Vec2d(0, 0)),
     palette(&palette_), last_position(), group(&group_), filter_mask(),
     filename("")
@@ -1022,65 +1035,70 @@ bool Canvas::isActive() const {
 }
 
 
-void Canvas::draw(sf::RenderTarget &result, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+void Canvas::draw(sf::RenderTarget &result, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
 
     texture.display();
 
     sf::Sprite tool_sprite(texture.getTexture());
     sf::Vector2i offset_(texture_offset.x, texture_offset.y);
     sf::Vector2i size_(texture.getSize().x, texture.getSize().y);
-    if (size_.x > size.x) size_.x = size.x;
-    if (size_.y > size.y) size_.y = size.y;
+    if (size_.x > global_size.x) size_.x = global_size.x;
+    if (size_.y > global_size.y) size_.y = global_size.y;
     tool_sprite.setTextureRect(sf::IntRect(offset_, size_));
-    tool_sprite.setPosition(transforms.front().offset);
+    tool_sprite.setPosition(global_position);
 
     result.draw(tool_sprite);
 
     if (isActive() && palette->getCurrentTool()->getWidget()) {
-        TransformApplier texture_transform(transforms, Transform(-texture_offset));
-        palette->getCurrentTool()->getWidget()->draw(result, transforms);
+        TransformApplier canvas_transform(stack, getTransform());
+        TransformApplier texture_transform(stack, Transform(-texture_offset));
+        palette->getCurrentTool()->getWidget()->draw(result, stack);
     }
 }
 
 
-EVENT_STATUS Canvas::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+EVENT_STATUS Canvas::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
 
     last_position = mouse;
 
     palette->getCurrentTool()->onMove(
-        last_position - transforms.front().offset + texture_offset,
+        mouse - global_position + texture_offset,
         *this
     );
 
     if (palette->getCurrentTool()->getWidget()) {
-        TransformApplier texture_transform(transforms, -texture_offset);
-        return palette->getCurrentTool()->getWidget()->onMouseMove(mouse, transforms);
+        TransformApplier canvas_transform(stack, getTransform());
+        TransformApplier texture_transform(stack, Transform(-texture_offset));
+        return palette->getCurrentTool()->getWidget()->onMouseMove(mouse, stack);
     }
 
     return UNHANDLED;
 }
 
 
-EVENT_STATUS Canvas::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Canvas::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
     if (button_id != MouseLeft) return UNHANDLED;
 
-    TransformApplier add_transform(transforms, transform);
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
 
-    if (isInsideRect(transforms.front().offset, size, last_position)) {
+    if (isInsideRect(global_position, global_size, last_position)) {
         ASSERT(group, "Canvas must be assigned to group!\n");
         group->setActive(this);
 
         palette->getCurrentTool()->onMainButton(
             CanvasTool::PRESSED, 
-            last_position - transforms.front().offset + texture_offset,
+            mouse - global_position + texture_offset,
             *this
         );
 
         if (palette->getCurrentTool()->getWidget()) {
-            TransformApplier texture_transform(transforms, -texture_offset);
-            palette->getCurrentTool()->getWidget()->onMouseButtonDown(mouse, button_id, transforms);
+            TransformApplier canvas_transform(stack, getTransform());
+            TransformApplier texture_transform(stack, Transform(-texture_offset));
+            palette->getCurrentTool()->getWidget()->onMouseButtonDown(mouse, button_id, stack);
         }
         
         return HANDLED;
@@ -1090,32 +1108,22 @@ EVENT_STATUS Canvas::onMouseButtonDown(const Vec2d &mouse, int button_id, List<T
 }
 
 
-EVENT_STATUS Canvas::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
+EVENT_STATUS Canvas::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
     if (button_id != MouseLeft) return UNHANDLED;
 
-    TransformApplier add_transform(transforms, transform);
+    Vec2d global_position = stack.apply(layout->getPosition());
 
     palette->getCurrentTool()->onMainButton(
         CanvasTool::REALEASED, 
-        last_position - transforms.front().offset + texture_offset,
+        mouse - global_position + texture_offset,
         *this
     );
 
     if (palette->getCurrentTool()->getWidget()) {
-        TransformApplier texture_transform(transforms, -texture_offset);
-        return palette->getCurrentTool()->getWidget()->onMouseButtonUp(mouse, button_id, transforms);
+        TransformApplier canvas_transform(stack, getTransform());
+        TransformApplier texture_transform(stack, Transform(-texture_offset));
+        return palette->getCurrentTool()->getWidget()->onMouseButtonUp(mouse, button_id, stack);
     }
-
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS Canvas::onParentResize() {
-    Vec2d new_size = texture.getSize();
-    if (new_size.x > parent->size.x - 30) new_size.x = parent->size.x - 30;
-    if (new_size.y > parent->size.y - 30) new_size.y = parent->size.y - 30;
-
-    tryResize(new_size);
 
     return UNHANDLED;
 }
@@ -1187,7 +1195,7 @@ Canvas::~Canvas() {
 
 
 FilterHotkey::FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_) :
-    Widget(AUTO_ID, Transform(), Vec2d(), 0, parent_),
+    Widget(AUTO_ID, BasicLayoutBox()),
     palette(palette_), group(group_), ctrl_pressed(false)
 {}
 

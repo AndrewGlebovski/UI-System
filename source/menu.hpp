@@ -41,30 +41,38 @@ public:
 /// Drops down list of options
 class MenuButton : public RectButton {
 protected:
-    List<Widget*> buttons;
-    bool is_opened;
+    List<Widget*> buttons;      ///< Option buttons
+    bool is_opened;             ///< Shows if menu option list is visible
 
 public:
     MenuButton(
-        const Transform &transform_, const Vec2d &size_, Widget *parent_,
-        const sf::String &text_, const ButtonStyle &style_,
+        size_t id_, const LayoutBox &layout_,
+        const std::string &text_, const ButtonStyle &style_,
         const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
     );
 
+    /**
+     * \brief Adds another option button to menu
+    */
+    void addButton(const std::string &text_, ButtonAction *action_);
 
-    void addButton(const sf::String &text_, ButtonAction *action_);
-
-
+    /**
+     * \brief Opens or closes list of option buttons
+    */
     void setOpened(bool is_opened_);
 
+    /**
+     * \brief Draws menu button and list option buttons if it's open
+    */
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
 
-
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-
+    /**
+     * \brief Deletes option buttons
+    */
     virtual ~MenuButton() override;
 };
 
@@ -72,16 +80,14 @@ public:
 /// Container for menu buttons
 class Menu : public Widget {
 protected:
-    List<MenuButton*> buttons;
-    MenuStyle style;
-    size_t opened;
-
+    List<MenuButton*> buttons;      ///< Menu buttons
+    MenuStyle style;                ///< Menu style
+    size_t opened;                  ///< Index of opened menu button
 
     /**
      * \brief True if some menu button is opened
     */
     bool isMenuOpened() const;
-
 
     /**
      * \brief Sets menu button as opened
@@ -90,24 +96,31 @@ protected:
 
 public:
     Menu(
-        size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
+        size_t id_, const LayoutBox &layout_,
         const MenuStyle &style_
     );
 
+    /**
+     * \brief Adds menu button
+    */
+    virtual void addMenuButton(const std::string &text);
 
-    virtual void addMenuButton(const sf::String &text);
+    /**
+     * \brief Adds option button to menu button
+    */
+    virtual void addButton(size_t menu_id, const std::string &text, ButtonAction *action);
 
+    /**
+     * \brief Draws menu rect and menu buttons
+    */
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
-    virtual void addButton(size_t menu_id, const sf::String &text, ButtonAction *action);
+    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
 
-
-    virtual void draw(sf::RenderTarget &result, List<Transform> &transforms) override;
-
-
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) override;
-    virtual EVENT_STATUS onParentResize() override;
-
+    /**
+     * \brief Deletes menu buttons
+    */
     virtual ~Menu() override;
 };

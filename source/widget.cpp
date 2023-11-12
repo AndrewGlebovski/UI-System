@@ -6,70 +6,261 @@
 
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
+#include "configs.hpp"
 #include "list.hpp"
 #include "widget.hpp"
 
 
-Transform::Transform() : offset(Vec2d()) {}
+// ============================================================================
 
 
-Transform::Transform(const Vec2d &offset_) : offset(offset_) {}
+Transform::Transform() :
+    offset(Vec2d()), scale(Vec2d(1, 1)) {}
 
 
-void Transform::apply(const Transform &transform) {
-    offset += transform.offset;
+Transform::Transform(const Vec2d &offset_, const Vec2d &scale_) :
+    offset(offset_), scale(scale_) {}
+
+
+Vec2d Transform::getOffset() const { return offset; }
+
+
+void Transform::setOffset(const Vec2d &offset_) { offset = offset_; }
+
+
+Vec2d Transform::getScale() const { return scale; }
+
+
+void Transform::setScale(const Vec2d &scale_) { scale = scale_; }
+
+
+Vec2d Transform::apply(const Vec2d &vec) const {
+    return offset + vec * scale;
 }
 
 
-void Transform::cancel(const Transform &transform) {
-    offset -= transform.offset;
+Vec2d Transform::restore(const Vec2d &vec) const {
+    return (vec - offset) / scale;
 }
 
 
-bool Transform::operator == (const Transform &transform) {
-    return (offset == transform.offset);
+// ============================================================================
+
+
+TransformStack::TransformStack() : transforms() {
+    transforms.push_back(Transform());
 }
 
 
-TransformApplier::TransformApplier(List<Transform> &transforms_, const Transform &local_transform) :
-    transforms(transforms_)
-{
-    ASSERT(verify(), "Transform stack is corrupted!\n");
-    transforms.front().apply(local_transform);
-    transforms.push_back(local_transform);
+void TransformStack::enter(const Transform &transform) {
+    transforms.push_back(transform);
+
+    transforms.front().setOffset(transforms.front().getOffset() + transform.getOffset());
+    transforms.front().setScale(transforms.front().getScale() * transform.getScale());
 }
 
 
-bool TransformApplier::verify() const {
-    Transform top;
+void TransformStack::leave() {
+    Transform back = transforms.back();
 
-    for (size_t i = 1; i < transforms.size(); i++)
-        top.apply(transforms[i]);
-    
-    return (top == transforms.front());
-}
+    transforms.front().setOffset(transforms.front().getOffset() - back.getOffset());
+    transforms.front().setScale(transforms.front().getScale() / back.getScale());
 
-
-TransformApplier::~TransformApplier() {
-    ASSERT(verify(), "Transform stack is corrupted!\n");
-    transforms.front().cancel(transforms.back());
     transforms.pop_back();
 }
 
 
-Widget::Widget(size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_) :
-    id(generateId(id_)), status(PASS), transform(transform_), size(size_), z_index(z_index_), parent(parent_) {}
+Transform TransformStack::top() const {
+    return transforms.front();
+}
+
+
+Vec2d TransformStack::apply(const Vec2d &vec) const {
+    return top().apply(vec);
+}
+
+
+Vec2d TransformStack::restore(const Vec2d &vec) const {
+    return top().restore(vec);
+}
+
+
+Vec2d TransformStack::apply_size(const Vec2d &vec) const {
+    return vec * top().getScale();
+}
+
+
+// ============================================================================
+
+
+TransformApplier::TransformApplier(TransformStack &stack_, const Transform &transform) : stack(stack_)
+{ stack.enter(transform); }
+
+
+TransformApplier::~TransformApplier() { stack.leave(); }
+
+
+// ============================================================================
+
+
+BasicLayoutBox::BasicLayoutBox() : position(), size(), bounds(SCREEN_W, SCREEN_H) {}
+
+
+BasicLayoutBox::BasicLayoutBox(const Vec2d &position_, const Vec2d &size_) :
+    position(position_), size(size_), bounds(SCREEN_W, SCREEN_H) {}
+
+
+Vec2d BasicLayoutBox::getPosition() const { return position; }
+
+
+bool BasicLayoutBox::setPosition(const Vec2d& position_) {
+    Vec2d prev_pos = position;
+    position = position_;
+
+    if (position.x < 0)
+        position.x = 0;
+    else if (position.x + size.x > bounds.x)
+        position.x = bounds.x - size.x;
+
+    if (position.y < 0)
+        position.y = 0;
+    else if (position.y + size.y > bounds.y)
+        position.y = bounds.y - size.y;
+
+    return !(position == prev_pos);
+}
+
+
+Vec2d BasicLayoutBox::getSize() const { return size; }
+
+
+bool BasicLayoutBox::setSize(const Vec2d& size_) {
+    Vec2d prev_size = size;
+    size = size_;
+
+    if (size.x < 0)
+        size.x = 0;
+    else if (size_.x + position.x > bounds.x)
+        size.x = bounds.x - position.x;
+
+    if (size.y < 0)
+        size.y = 0;
+    else if (size.y + position.y > bounds.y)
+        size.y = bounds.y - position.y;
+
+    return !(size == prev_size);
+}
+
+
+void BasicLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
+    bounds = parent_layout.getSize();
+
+    if (position.x + size.x > bounds.x) {
+        if (size.x > bounds.x) {
+            position.x = 0;
+            size.x = bounds.x;
+        }
+        else position.x = bounds.x - size.x;
+    }
+
+    if (position.y + size.y > bounds.y) {
+        if (size.y > bounds.y) {
+            position.y = 0;
+            size.y = bounds.y;
+        }
+        else position.y = bounds.y - size.y;
+    }
+}
+
+
+LayoutBox *BasicLayoutBox::clone() const { return new BasicLayoutBox(position, size); }
+
+
+// ============================================================================
+
+
+OffsetLayoutBox::OffsetLayoutBox(const Vec2d &offset_, const Vec2d &origin_, const Vec2d &size_) :
+    BasicLayoutBox(Vec2d(), size_), offset(offset_), origin(origin_) {}
+
+
+void OffsetLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
+    bounds = parent_layout.getSize();
+
+    position = origin * bounds + offset;
+}
+
+
+LayoutBox *OffsetLayoutBox::clone() const {
+    return new OffsetLayoutBox(offset, origin, size);
+}
+
+
+// ============================================================================
+
+
+Widget::Widget(size_t id_, const LayoutBox &layout_) :
+    id(generateId(id_)),
+    layout(layout_.clone()),
+    z_index(0),
+    parent(nullptr),
+    status(PASS)
+{}
+
+
+Widget::Widget(const Widget &widget) :
+    id(AUTO_ID),
+    layout(widget.getLayoutBox().clone()),
+    z_index(0),
+    parent(nullptr),
+    status(PASS)
+{}
+
+
+Widget &Widget::operator = (const Widget &widget) {
+    if (this != &widget)
+        layout = widget.getLayoutBox().clone();
+    return *this;
+}
 
 
 size_t Widget::generateId(size_t requested_id) {
     if (requested_id != AUTO_ID) return requested_id;
-
     return size_t(this);
 }
 
 
-size_t Widget::getId() const {
-    return id;
+size_t Widget::getId() const { return id; }
+
+
+LayoutBox &Widget::getLayoutBox() { return *layout; }
+
+
+const LayoutBox &Widget::getLayoutBox() const { return *layout; }
+
+
+void Widget::setLayoutBox(const LayoutBox &layout_) { layout = layout_.clone(); }
+
+
+Transform Widget::getTransform() const { return Transform(layout->getPosition()); }
+
+
+int Widget::getZIndex() const { return z_index; }
+
+
+void Widget::setZIndex(int z_index_) { z_index = z_index_; }
+
+
+Widget *Widget::getParent() { return parent; }
+
+
+const Widget *Widget::getParent() const { return parent; }
+
+
+void Widget::setParent(Widget *parent_) {
+    parent = parent_;
+
+    if (parent)
+        layout->onParentUpdate(parent->getLayoutBox());
 }
 
 
@@ -90,69 +281,23 @@ void Widget::removeChild(size_t child_id) {
 }
 
 
-int Widget::getStatus() const {
-    return status;
-}
+int Widget::getStatus() const { return status; }
 
 
-void Widget::setStatus(WIDGET_STATUS new_status) {
-    status = new_status;
-}
+void Widget::setStatus(WIDGET_STATUS new_status) { status = new_status; }
 
 
-void Widget::draw(sf::RenderTarget &result, List<Transform> &transforms) {
-    TransformApplier add_transform(transforms, transform);
+void Widget::draw(sf::RenderTarget &result, TransformStack &stack) {
     /* DEBUG DRAWING
     sf::RectangleShape rect(Vec2d(25, 25));
     rect.setFillColor(sf::Color::Red);
-    rect.setPosition(transforms.front().offset);
+    rect.setPosition(stack.apply(layout->getPosition()));
     result.draw(rect);
     */
 }
 
 
-Vec2d Widget::onChildResize(Widget *child, const Vec2d &new_size) {
-    Vec2d allowed_size = new_size;
-
-    if (new_size.x < 0)
-        allowed_size.x = 0;
-    else if (child->transform.offset.x + new_size.x > size.x)
-        allowed_size.x = size.x - child->transform.offset.x;
-    
-    if (new_size.y < 0)
-        allowed_size.y = 0;
-    else if (child->transform.offset.y + new_size.y > size.y)
-        allowed_size.y = size.y - child->transform.offset.y;
-    
-    return allowed_size;
-}
-
-
-Transform Widget::onChildTransform(Widget *child, const Transform &new_transform) {
-    Transform allowed_transform = new_transform;
-
-    if (new_transform.offset.x < 0)
-        allowed_transform.offset.x = 0;
-    else if (new_transform.offset.x + child->size.x > size.x)
-        allowed_transform.offset.x = size.x - child->size.x;
-    
-    if (new_transform.offset.y < 0)
-        allowed_transform.offset.y = 0;
-    else if (new_transform.offset.y + child->size.y > size.y)
-        allowed_transform.offset.y = size.y - child->size.y;
-    
-    return allowed_transform;
-}
-
-
-void Widget::tryResize(const Vec2d &new_size) {
-    size = parent->onChildResize(this, new_size);
-}
-
-
-void Widget::tryTransform(const Transform &new_transform) {
-    transform = parent->onChildTransform(this, new_transform);
-}
+// ============================================================================
 
 
 bool isInsideRect(Vec2d position, Vec2d size, Vec2d point) {

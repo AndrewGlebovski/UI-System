@@ -79,6 +79,12 @@ vec_t dot(const Vec2d &a, const Vec2d &b);
 
 
 /**
+ * \brief Oriented area in standart basis
+*/
+vec_t cross(const Vec2d &a, const Vec2d &b);
+
+
+/**
  * \brief Adds B to A
 */
 Vec2d &operator += (Vec2d &a, const Vec2d &b);
@@ -94,6 +100,12 @@ Vec2d &operator -= (Vec2d &a, const Vec2d &b);
  * \brief Multiply each coordinate of A by B
 */
 Vec2d &operator *= (Vec2d &a, const Vec2d &b);
+
+
+/**
+ * \brief Divide each coordinate of A by B
+*/
+Vec2d &operator /= (Vec2d &a, const Vec2d &b);
 
 
 /**
@@ -130,6 +142,12 @@ Vec2d operator - (const Vec2d &a);
  * \brief Returns Vec2d(a.x * b.x, a.y * b.y)
 */
 Vec2d operator * (const Vec2d &a, const Vec2d &b);
+
+
+/**
+ * \brief Returns Vec2d(a.x / b.x, a.y / b.y)
+*/
+Vec2d operator / (const Vec2d &a, const Vec2d &b);
 
 
 /**

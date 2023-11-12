@@ -31,27 +31,27 @@ const sf::Color BUTTON_PRESSED_COLOR(0x000080ff);
 
 
 Dialog::Dialog(
-    size_t id_, const Transform &transform_, const Vec2d &size_, int z_index_, Widget *parent_,
-    const sf::String &title_, const WindowStyle &style_
+    size_t id_, const LayoutBox &layout_,
+    const std::string &title_, const WindowStyle &style_
 ) :
-    Window(id_, transform_, size_, z_index_, parent_, title_, style_, false, true, false)
+    Window(id_, layout_, title_, style_, false, true, false)
 {}
 
 
-EVENT_STATUS Dialog::onMouseMove(const Vec2d &mouse, List<Transform> &transforms) {
-    Window::onMouseMove(mouse, transforms);
+EVENT_STATUS Dialog::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
+    Window::onMouseMove(mouse, stack);
     return HANDLED;
 }
 
 
-EVENT_STATUS Dialog::onMouseButtonUp(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    Window::onMouseButtonUp(mouse, button_id, transforms);
+EVENT_STATUS Dialog::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    Window::onMouseButtonUp(mouse, button_id, stack);
     return HANDLED;
 }
 
 
-EVENT_STATUS Dialog::onMouseButtonDown(const Vec2d &mouse, int button_id, List<Transform> &transforms) {
-    Window::onMouseButtonDown(mouse, button_id,transforms);
+EVENT_STATUS Dialog::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
+    Window::onMouseButtonDown(mouse, button_id,stack);
     return HANDLED;
 }
 
@@ -72,26 +72,24 @@ EVENT_STATUS Dialog::onKeyDown(int key_id) {
 
 
 ConfirmDialog::ConfirmDialog(
-    size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
+    size_t id_, const LayoutBox &layout_,
     const std::string &title_,
     DialogAction *ok_action_,
     DialogAction *cancel_action_,
     const WindowStyle &window_style_,
     const ButtonStyle &button_style_
 ) :
-    Dialog(id_, transform_, Vec2d(200, 200), z_index_, parent_, title_, window_style_)
+    Dialog(id_, layout_, title_, window_style_)
 {
+    layout->setSize(Vec2d(400, 200));
+
     ok_action_->setDialog(*this);
     cancel_action_->setDialog(*this);
 
     container.addChild(new RectButton(
         1,
-        Transform(),
-        Vec2d(100, 50),
-        0,
-        nullptr,
+        BasicLayoutBox(Vec2d(), Vec2d(100, 50)),
         ok_action_,
-        nullptr,
         "Ok",
         button_style_,
         BUTTON_NORMAL_COLOR,
@@ -101,12 +99,8 @@ ConfirmDialog::ConfirmDialog(
 
     container.addChild(new RectButton(
         2,
-        Transform(Vec2d(120, 0)),
-        Vec2d(100, 50),
-        0,
-        nullptr,
+        BasicLayoutBox(Vec2d(120, 0), Vec2d(100, 50)),
         cancel_action_,
-        nullptr,
         "Cancel",
         button_style_,
         BUTTON_NORMAL_COLOR,
@@ -120,7 +114,7 @@ ConfirmDialog::ConfirmDialog(
 
 
 SelectFileDialog::SelectFileDialog(
-    size_t id_, const Transform &transform_, int z_index_, Widget *parent_,
+    size_t id_, const LayoutBox &layout_,
     const std::string &title_,
     DialogAction *select_action_,
     DialogAction *cancel_action_,
@@ -128,19 +122,17 @@ SelectFileDialog::SelectFileDialog(
     const ButtonStyle &button_style_,
     const LineEditStyle &line_edit_style_
 ) :
-    Dialog(id_, transform_, Vec2d(400, 200), z_index_, parent_, title_, window_style_)
+    Dialog(id_, layout_, title_, window_style_)
 {
+    setSize(Vec2d(400, 200));
+
     select_action_->setDialog(*this);
     cancel_action_->setDialog(*this);
 
     container.addChild(new RectButton(
         1,
-        Transform(Vec2d(0, 50)),
-        Vec2d(100, 50),
-        0,
-        nullptr,
+        BasicLayoutBox(Vec2d(0, 50), Vec2d(100, 50)),
         select_action_,
-        nullptr,
         "Select",
         button_style_,
         BUTTON_NORMAL_COLOR,
@@ -150,12 +142,8 @@ SelectFileDialog::SelectFileDialog(
 
     container.addChild(new RectButton(
         2,
-        Transform(Vec2d(120, 50)),
-        Vec2d(100, 50),
-        0,
-        nullptr,
+        BasicLayoutBox(Vec2d(120, 50), Vec2d(100, 50)),
         cancel_action_,
-        nullptr,
         "Cancel",
         button_style_,
         BUTTON_NORMAL_COLOR,
@@ -165,10 +153,7 @@ SelectFileDialog::SelectFileDialog(
 
     LineEdit *line_edit = new LineEdit(
         3,
-        Transform(),
-        Vec2d(getAreaSize().x, 30),
-        0,
-        nullptr,
+        BasicLayoutBox(Vec2d(), Vec2d(getAreaSize().x, 30)),
         line_edit_style_,
         256
     );
