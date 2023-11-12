@@ -169,8 +169,19 @@ void ButtonGroup::addButton(ActionButton *new_button) {
 void ButtonGroup::removeButton(ActionButton *button) {
     size_t index = getIndex(button);
     if (index < buttons.size()) {
-        if (index == pressed) setPressed(buttons[0]);
         buttons.remove(index);
+
+        if (buttons.size()) {
+            if (index < pressed) {
+                pressed--;
+                setPressed(buttons[pressed]);
+            }
+            else if (index == pressed) {
+                pressed = 0;
+                setPressed(buttons[pressed]);
+            }
+        }
+        else pressed = 0;
     }
 }
 
@@ -186,12 +197,11 @@ bool ButtonGroup::isInGroup(ActionButton *button) const {
 RectButton::RectButton(
     size_t id_, const LayoutBox &layout_,
     ButtonAction *action_,
-    const std::string &text_, const ButtonStyle &style_,
-    sf::Color normal_, sf::Color hover_, sf::Color pressed_
+    const std::string &text_,
+    const RectButtonStyle &style_
 ) :
     ActionButton(id_, layout_, action_),
-    text(text_), style(style_),
-    normal_color(normal_), hover_color(hover_), pressed_color(pressed_)
+    text(text_), style(style_)
 {}
 
 
@@ -214,15 +224,15 @@ void RectButton::draw(sf::RenderTarget &result, TransformStack &stack) {
 
     switch(status) {
         case BUTTON_NORMAL:
-            btn_rect.setFillColor(normal_color);
+            btn_rect.setFillColor(style.normal);
             btn_text.setFillColor(style.font_normal);
             break;
         case BUTTON_HOVER:
-            btn_rect.setFillColor(hover_color);
+            btn_rect.setFillColor(style.hover);
             btn_text.setFillColor(style.font_hover);
             break;
         case BUTTON_PRESSED:
-            btn_rect.setFillColor(pressed_color);
+            btn_rect.setFillColor(style.pressed);
             btn_text.setFillColor(style.font_pressed);
             break;
         default: ASSERT(0, "Invalid button status!\n");

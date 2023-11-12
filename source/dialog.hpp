@@ -57,8 +57,16 @@ public:
         DialogAction *ok_action_,
         DialogAction *cancel_action_,
         const WindowStyle &window_style_,
-        const ButtonStyle &button_style_
+        const RectButtonStyle &button_style_
     );
+};
+
+
+struct FileDialogStyle {
+    WindowStyle window;
+
+    FileDialogStyle(const WindowStyle &window_style_) :
+        window(window_style_) {}
 };
 
 
@@ -74,9 +82,7 @@ public:
         const std::string &title_,
         DialogAction *select_action_,
         DialogAction *cancel_action_,
-        const WindowStyle &window_style_,
-        const ButtonStyle &button_style_,
-        const LineEditStyle &line_edit_style_
+        const FileDialogStyle &style_
     );
 
     /**

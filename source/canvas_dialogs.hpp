@@ -181,28 +181,22 @@ private:
     Window &window;
     ToolPalette &palette;
     CanvasGroup &group;
-    WindowStyle &window_style;
+    FileDialogStyle &dialog_style;
     ScrollBarStyle &scrollbar_style;
-    LineEditStyle &line_edit_style;
-    ButtonStyle &button_style;
 
 public:
     CreateOpenFileDialog(
         Window &window_,
         ToolPalette &palette_,
         CanvasGroup &group_,
-        WindowStyle &window_style_,
-        ScrollBarStyle &scrollbar_style_,
-        LineEditStyle &line_edit_style_,
-        ButtonStyle &button_style_
+        FileDialogStyle &dialog_style_,
+        ScrollBarStyle &scrollbar_style_
     ) :
         window(window_),
         palette(palette_),
         group(group_),
-        window_style(window_style_),
-        scrollbar_style(scrollbar_style_),
-        line_edit_style(line_edit_style_),
-        button_style(button_style_)
+        dialog_style(dialog_style_),
+        scrollbar_style(scrollbar_style_)
     {}
 
     virtual void operator () () override {
@@ -214,13 +208,11 @@ public:
                 window,
                 palette,
                 group,
-                window_style,
+                dialog_style.window,
                 scrollbar_style
             ),
             new CancelAction(),
-            window_style,
-            button_style,
-            line_edit_style
+            dialog_style
         ));
     }
 
@@ -229,10 +221,8 @@ public:
             window,
             palette,
             group,
-            window_style,
-            scrollbar_style,
-            line_edit_style,
-            button_style
+            dialog_style,
+            scrollbar_style
         );
     }
 };
@@ -242,23 +232,17 @@ class CreateSaveAsFileDialog : public ButtonAction {
 private:
     Window &window;
     CanvasGroup &group;
-    WindowStyle &window_style;
-    LineEditStyle &line_edit_style;
-    ButtonStyle &button_style;
+    FileDialogStyle &dialog_style;
 
 public:
     CreateSaveAsFileDialog(
         Window &window_,
         CanvasGroup &group_,
-        WindowStyle &window_style_,
-        LineEditStyle &line_edit_style_,
-        ButtonStyle &button_style_
+        FileDialogStyle &dialog_style_
     ) :
         window(window_),
         group(group_),
-        window_style(window_style_),
-        line_edit_style(line_edit_style_),
-        button_style(button_style_)
+        dialog_style(dialog_style_)
     {}
 
     virtual void operator () () override {
@@ -270,9 +254,7 @@ public:
             "Save As",
             new SaveAsFileAction(group),
             new CancelAction(),
-            window_style,
-            button_style,
-            line_edit_style
+            dialog_style
         ));
     }
 
@@ -280,9 +262,7 @@ public:
         return new CreateSaveAsFileDialog(
             window,
             group,
-            window_style,
-            line_edit_style,
-            button_style
+            dialog_style
         );
     }
 };

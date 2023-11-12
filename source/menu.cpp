@@ -27,10 +27,9 @@ const Vec2d ADD_SIZE(20, 20);                                       ///< Additio
 
 MenuButton::MenuButton(
     size_t id_, const LayoutBox &layout_,
-    const std::string &text_, const ButtonStyle &style_,
-    const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
+    const std::string &text_, const RectButtonStyle &style_
 ) : 
-    RectButton(AUTO_ID, layout_, nullptr, text_, style_, normal_, hover_, pressed_), 
+    RectButton(AUTO_ID, layout_, nullptr, text_, style_), 
     buttons(), is_opened(false)
 {}
 
@@ -58,10 +57,7 @@ void MenuButton::addButton(const std::string &text_, ButtonAction *action_) {
         LazyLayoutBox(btn_pos, btn_size),
         action_,
         text_,
-        style,
-        normal_color,
-        hover_color,
-        pressed_color
+        style
     );
 
     btn->setParent(this);
@@ -146,10 +142,10 @@ MenuButton::~MenuButton() {
 
 Menu::Menu(
     size_t id_, const LayoutBox &layout_,
-    const MenuStyle &style_
+    const RectButtonStyle &style_, sf::Color background_
 ) :
     Widget(id_, layout_),
-    buttons(), style(style_), opened(INVALID_OPENED)
+    buttons(), style(style_), background(background_) ,opened(INVALID_OPENED)
 {
     sf::Text btn_text("Test", style.font, style.font_size);
 
@@ -184,14 +180,6 @@ void Menu::openMenu(size_t menu_id) {
 
 
 void Menu::addMenuButton(const std::string &text) {
-    ButtonStyle button_style(
-        style.font,
-        style.font_size,
-        style.font_normal,
-        style.font_hover,
-        style.font_pressed
-    );
-
     MenuButton *prev_btn = buttons.size() ? buttons.back() : nullptr;
 
     sf::Text btn_text(text, style.font, style.font_size);
@@ -205,10 +193,7 @@ void Menu::addMenuButton(const std::string &text) {
         AUTO_ID,
         LazyLayoutBox(btn_pos, btn_size),
         text,
-        button_style,
-        style.normal,
-        style.hover,
-        style.pressed
+        style
     );
 
     btn->setParent(this);
@@ -229,7 +214,7 @@ void Menu::draw(sf::RenderTarget &result, TransformStack &stack) {
 
     sf::RectangleShape rect(global_size);
     rect.setPosition(global_position);
-    rect.setFillColor(style.normal);
+    rect.setFillColor(background);
 #ifdef DEBUG_DRAW
     rect.setOutlineColor(sf::Color::Cyan);
     rect.setOutlineThickness(1);

@@ -49,39 +49,10 @@ int main() {
 
     ScrollBarStyle scrollbar_style(
         sf::Color(SCROLLBAR_FRAME_COLOR),
-        -3,
+        SCROLLBAR_FRAME_OUTLINE,
         sf::Color(SCROLLBAR_BACKGROUND_COLOR),
         sf::Color(SCROLLBAR_SCROLLER_COLOR),
         SCROLLBAR_SCROLLER_FACTOR
-    );
-
-    MenuStyle menu_style(
-        font,
-        25,
-        sf::Color::Black,
-        sf::Color::White,
-        sf::Color::White,
-        sf::Color(0xd4d0c8ff),
-        sf::Color(0x000080ff),
-        sf::Color(0x000080ff)
-    );
-
-    LineEditStyle line_edit_style(
-        font,
-        20,
-        sf::Color::Black,
-        sf::Color::White,
-        sf::Color::Black,
-        sf::Color::Black,
-        1
-    );
-
-    ButtonStyle button_style(
-        font,
-        20,
-        sf::Color::Black,
-        sf::Color::White,
-        sf::Color::White
     );
 
     ClockStyle clock_style(
@@ -100,35 +71,29 @@ int main() {
     Menu *main_menu = new Menu(
         Widget::AUTO_ID,
         BasicLayoutBox(),
-        menu_style
+        RectButtonStyle(
+            sf::Color(0xd4d0c8ff),
+            sf::Color(0x000080ff),
+            sf::Color(0x000080ff),
+            font,
+            25,
+            sf::Color::Black,
+            sf::Color::White,
+            sf::Color::White
+        ),
+        sf::Color(0xd4d0c8ff)
     );
 
     ToolPalette *palette = new ToolPalette();
     CanvasGroup *canvas_group = new CanvasGroup();
     FilterPalette *filter_palette = new FilterPalette();
-    
-    main_menu->addMenuButton("File");
-    main_menu->addButton(0, "Open", new CreateOpenFileDialog(
-        *main_window,
-        *palette,
-        *canvas_group,
-        window_style,
-        scrollbar_style,
-        line_edit_style,
-        button_style
-    ));
 
-    main_menu->addButton(0, "Save", new SaveFileAction(
-        *canvas_group
-    ));
-    
-    main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(
-        *main_window,
-        *canvas_group,
-        window_style,
-        line_edit_style,
-        button_style
-    ));
+    FileDialogStyle dialog_style(window_style);
+
+    main_menu->addMenuButton("File");
+    main_menu->addButton(0, "Open", new CreateOpenFileDialog(*main_window, *palette, *canvas_group, dialog_style, scrollbar_style));
+    main_menu->addButton(0, "Save", new SaveFileAction(*canvas_group));
+    main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(*main_window, *canvas_group, dialog_style));
     
     main_menu->addMenuButton("Filter");
     main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER, *filter_palette, *canvas_group));

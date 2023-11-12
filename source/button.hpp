@@ -7,35 +7,35 @@
 /// Base class for all buttons
 class BaseButton : public Widget {
 public:
+    /**
+     * \brief Constructs button
+    */
     BaseButton(size_t id_, const LayoutBox &layout_) :
         Widget(id_, layout_) {}
 
-
+    /**
+     * \brief Draws button
+    */
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override = 0;
-
-
-    virtual ~BaseButton() = default;
 };
 
 
 /// Base class for all button actions
 class ButtonAction {
 public:
-    ButtonAction() = default;
-
-
     /**
      * \brief Does something
     */
     virtual void operator () () = 0;
-
 
     /**
      * \brief Clones current action
     */
     virtual ButtonAction *clone() = 0;
 
-
+    /**
+     * \brief Default destructor
+    */
     virtual ~ButtonAction() = default;
 };
 
@@ -50,12 +50,10 @@ protected:
     ButtonGroup *group;
     int status;
 
-
     /**
      * \brief Checks if group != nullptr
     */
     bool isInGroup() const;
-
 
     /**
      * \brief Checks if group != nullptr and button is pressed
@@ -69,7 +67,6 @@ public:
         BUTTON_HOVER    = 2,    ///< Mouse is hovering over button
         BUTTON_PRESSED  = 3     ///< Button was clicked but haven't been released yet 
     };
-
 
     /**
      * \brief Creates new button with action
@@ -115,7 +112,6 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override = 0;
 
-
     virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
     virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
     virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
@@ -133,7 +129,6 @@ private:
     List<ActionButton*> buttons;        ///< Buttons in this group
     size_t pressed;                     ///< Currently pressed button
 
-
     /**
      * \brief Returns index of the button in buttons
     */
@@ -145,30 +140,26 @@ public:
     */
     ButtonGroup();
 
-
     /**
      * \brief Set pressed button
     */
     void setPressed(ActionButton *new_pressed);
-
 
     /**
      * \brief Get pressed button
     */
     ActionButton *getPressed();
 
-
     /**
      * \brief Adds button to this group
     */
     void addButton(ActionButton *new_button);
 
-
     /**
      * \brief Removes button from this group
+     * \note If active element got removed, first one will become active 
     */
     void removeButton(ActionButton *button);
-
 
     /**
      * \brief Checks if the button is in this group
@@ -178,26 +169,45 @@ public:
 
 
 /// Contains rect button style
-class ButtonStyle {
-public:
+struct RectButtonStyle {
+    sf::Color normal;           ///< Button pressed color
+    sf::Color hover;            ///< Button hover color
+    sf::Color pressed;          ///< Button pressed color
     const sf::Font &font;       ///< Font
     unsigned font_size;         ///< Font size
     sf::Color font_normal;      ///< Font color normal
     sf::Color font_hover;       ///< Font color hover
     sf::Color font_pressed;     ///< Font color pressed
 
-
-    ButtonStyle(
-        const sf::Font &font_,
-        unsigned font_size_,
-        const sf::Color &font_normal_,
-        const sf::Color &font_hover_,
-        const sf::Color &font_pressed_
+    /**
+     * \brief Constructs style
+    */
+    RectButtonStyle(
+        sf::Color normal_, sf::Color hover_, sf::Color pressed_,
+        const sf::Font &font_, unsigned font_size_,
+        sf::Color font_normal_,
+        sf::Color font_hover_,
+        sf::Color font_pressed_
     ) :
+        normal(normal_), hover(hover_), pressed(pressed_),
         font(font_), font_size(font_size_),
         font_normal(font_normal_),
         font_hover(font_hover_),
         font_pressed(font_pressed_)
+    {}
+
+    /**
+     * \brief Constructs style but font doesn't change color
+    */
+    RectButtonStyle(
+        sf::Color normal_, sf::Color hover_, sf::Color pressed_,
+        const sf::Font &font_, unsigned font_size_, sf::Color font_color_
+    ) :
+        normal(normal_), hover(hover_), pressed(pressed_),
+        font(font_), font_size(font_size_),
+        font_normal(font_color_),
+        font_hover(font_color_),
+        font_pressed(font_color_)
     {}
 };
 
@@ -206,17 +216,14 @@ public:
 class RectButton : public ActionButton {
 protected:
     std::string text;
-    ButtonStyle style;
-    sf::Color normal_color;
-    sf::Color hover_color;
-    sf::Color pressed_color;
+    RectButtonStyle style;
 
 public:
     RectButton(
         size_t id_, const LayoutBox &layout_,
         ButtonAction *action_,
-        const std::string &text_, const ButtonStyle &style_,
-        sf::Color normal_, sf::Color hover_, sf::Color pressed_
+        const std::string &text_,
+        const RectButtonStyle &style_
     );
 
 

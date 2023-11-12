@@ -4,40 +4,6 @@
 */
 
 
-/// Contains menu style
-class MenuStyle {
-public:
-    const sf::Font &font;       ///< Font
-    unsigned font_size;         ///< Font size
-    sf::Color font_normal;      ///< Font color normal
-    sf::Color font_hover;       ///< Font color hover
-    sf::Color font_pressed;     ///< Font color pressed
-    sf::Color normal;           ///< Menu and buttons background color
-    sf::Color hover;            ///< Buttons hover color
-    sf::Color pressed;          ///< Button color when button is pressed
-
-
-    MenuStyle(
-        const sf::Font &font_,
-        unsigned font_size_,
-        const sf::Color &font_normal_,
-        const sf::Color &font_hover_,
-        const sf::Color &font_pressed_,
-        const sf::Color &normal_,
-        const sf::Color &hover_,
-        const sf::Color &pressed_
-    ) :
-        font(font_), font_size(font_size_),
-        font_normal(font_normal_),
-        font_hover(font_hover_),
-        font_pressed(font_pressed_),
-        normal(normal_),
-        hover(hover_),
-        pressed(pressed_)
-    {}
-};
-
-
 /// Drops down list of options
 class MenuButton : public RectButton {
 protected:
@@ -47,8 +13,7 @@ protected:
 public:
     MenuButton(
         size_t id_, const LayoutBox &layout_,
-        const std::string &text_, const ButtonStyle &style_,
-        const sf::Color &normal_, const sf::Color &hover_, const sf::Color &pressed_
+        const std::string &text_, const RectButtonStyle &style_
     );
 
     /**
@@ -81,7 +46,8 @@ public:
 class Menu : public Widget {
 protected:
     List<MenuButton*> buttons;      ///< Menu buttons
-    MenuStyle style;                ///< Menu style
+    RectButtonStyle style;          ///< Button style
+    sf::Color background;           ///< Menu background color
     size_t opened;                  ///< Index of opened menu button
 
     /**
@@ -97,7 +63,7 @@ protected:
 public:
     Menu(
         size_t id_, const LayoutBox &layout_,
-        const MenuStyle &style_
+        const RectButtonStyle &style_, sf::Color background_
     );
 
     /**
