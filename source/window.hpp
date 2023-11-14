@@ -33,39 +33,6 @@ public:
 
 /// Frame with widgets inside
 class Window : public Widget {
-protected:
-    std::string title;           ///< Window title
-    WindowStyle style;          ///< Window style
-    Container buttons;          ///< Window title bar and resize buttons
-    Container container;        ///< Window content manager
-    Menu *menu;                 ///< Window menu
-
-private:
-    /**
-     * \brief Adds buttons for managing window
-    */
-    void addButtons(bool can_resize, bool can_move, bool can_close);
-
-    /**
-     * \brief Adds close button to window
-    */
-    void addCloseButton();
-
-    /**
-     * \brief Adds expand button to window
-    */
-    void addExpandButton();
-
-    /**
-     * \brief Adds move button to window
-    */
-    void addMoveButton();
-
-    /**
-     * \brief Adds resize buttons to window
-    */
-    void addResizeButtons();
-
 public:
     /**
      * \brief Contstructs window
@@ -139,15 +106,12 @@ public:
      * \brief Draws window frame, title bar and its content
     */
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
-
-
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onKeyUp(int key_id) override;
-    virtual EVENT_STATUS onKeyDown(int key_id) override;
-    virtual EVENT_STATUS onTimer(float delta_time) override;
     
+    /**
+     * \brief Broadcast events to window children
+    */
+    virtual void onEvent(const Event &event, EHC &ehc) override;
+
     /**
      * \brief Allows widget to change its position and size according to parent
     */
@@ -162,6 +126,42 @@ public:
      * \brief Delete menu if window has one
     */
     virtual ~Window() override;
+
+protected:
+    std::string title;          ///< Window title
+    WindowStyle style;          ///< Window style
+    Container buttons;          ///< Window title bar and resize buttons
+    Container container;        ///< Window content manager
+    Menu *menu;                 ///< Window menu
+
+    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
+    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+
+private:
+    /**
+     * \brief Adds buttons for managing window
+    */
+    void addButtons(bool can_resize, bool can_move, bool can_close);
+
+    /**
+     * \brief Adds close button to window
+    */
+    void addCloseButton();
+
+    /**
+     * \brief Adds expand button to window
+    */
+    void addExpandButton();
+
+    /**
+     * \brief Adds move button to window
+    */
+    void addMoveButton();
+
+    /**
+     * \brief Adds resize buttons to window
+    */
+    void addResizeButtons();
 };
 
 

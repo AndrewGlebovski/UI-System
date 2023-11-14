@@ -6,6 +6,12 @@
 
 /// Base class for all dialogs
 class Dialog : public Window {
+public:
+    /**
+     * \brief Dialog always stops event broadcasting
+    */
+    virtual void onEvent(const Event &event, EHC &ehc) override;
+
 protected:
     /**
      * \brief Dialog contrusctor that copies window constructor
@@ -15,13 +21,6 @@ protected:
         size_t id_, const LayoutBox &layout_,
         const std::string &title_, const WindowStyle &style_
     );
-
-public:
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onKeyUp(int key_id) override;
-    virtual EVENT_STATUS onKeyDown(int key_id) override;
 };
 
 

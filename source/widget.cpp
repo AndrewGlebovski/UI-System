@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "configs.hpp"
+#include "key-id.hpp"
 #include "list.hpp"
 #include "widget.hpp"
 
@@ -93,8 +94,8 @@ Vec2d TransformStack::apply_size(const Vec2d &vec) const {
 // ============================================================================
 
 
-TransformApplier::TransformApplier(TransformStack &stack_, const Transform &transform) : stack(stack_)
-{ stack.enter(transform); }
+TransformApplier::TransformApplier(TransformStack &stack_, const Transform &transform) :
+    stack(stack_) { stack.enter(transform); }
 
 
 TransformApplier::~TransformApplier() { stack.leave(); }
@@ -288,12 +289,25 @@ void Widget::setStatus(WIDGET_STATUS new_status) { status = new_status; }
 
 
 void Widget::draw(sf::RenderTarget &result, TransformStack &stack) {
-    /* DEBUG DRAWING
+#ifdef DEBUG_DRAW
     sf::RectangleShape rect(Vec2d(25, 25));
     rect.setFillColor(sf::Color::Red);
     rect.setPosition(stack.apply(layout->getPosition()));
     result.draw(rect);
-    */
+#endif
+}
+
+
+void Widget::onEvent(const Event &event, EHC &ehc) {
+    switch(event.getType()) {
+        case Tick: onTick(static_cast<const TickEvent&>(event), ehc); break;
+        case MouseMove: onMouseMove(static_cast<const MouseMoveEvent&>(event), ehc); break;
+        case MousePressed: onMousePressed(static_cast<const MousePressedEvent&>(event), ehc); break;
+        case MouseReleased: onMouseReleased(static_cast<const MouseReleasedEvent&>(event), ehc); break;
+        case KeyboardPressed: onKeyboardPressed(static_cast<const KeyboardPressedEvent&>(event), ehc); break;
+        case KeyboardReleased: onKeyboardReleased(static_cast<const KeyboardReleasedEvent&>(event), ehc); break;
+        default: printf("Uknown event type!\n"); abort();
+    }
 }
 
 

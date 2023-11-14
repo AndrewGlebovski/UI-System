@@ -12,6 +12,7 @@
 #include <limits>
 #include "vector.hpp"
 #include "list.hpp"
+#include "key-id.hpp"
 #include "asset.hpp"
 #include "widget.hpp"
 #include "button.hpp"
@@ -83,49 +84,18 @@ void MenuButton::draw(sf::RenderTarget &result, TransformStack &stack) {
 }
 
 
-EVENT_STATUS MenuButton::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
-    RectButton::onMouseMove(mouse, stack);
+void MenuButton::onEvent(const Event &event, EHC &ehc) {
+    RectButton::onEvent(event, ehc);
+    if (ehc.stopped) return;
 
-    if (!is_opened) return UNHANDLED;
+    if (!is_opened) return;
 
-    TransformApplier add_transform(stack, getTransform());
+    TransformApplier add_transform(ehc.stack, getTransform());
 
-    for (size_t i = 0; i < buttons.size(); i++)
-        buttons[i]->onMouseMove(mouse, stack);
-
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS MenuButton::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    if (RectButton::onMouseButtonDown(mouse, button_id, stack) == HANDLED)
-        return HANDLED;
-
-    if (!is_opened) return UNHANDLED;
-
-    TransformApplier add_transform(stack, getTransform());
-
-    for (size_t i = 0; i < buttons.size(); i++)
-        if (buttons[i]->onMouseButtonDown(mouse, button_id, stack) == HANDLED)
-            return HANDLED;
-
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS MenuButton::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    if (RectButton::onMouseButtonUp(mouse, button_id, stack) == HANDLED)
-        return HANDLED;
-
-    if (!is_opened) return UNHANDLED;
-
-    TransformApplier add_transform(stack, getTransform());
-
-    for (size_t i = 0; i < buttons.size(); i++)
-        if (buttons[i]->onMouseButtonDown(mouse, button_id, stack) == HANDLED)
-            return HANDLED;
-
-    return UNHANDLED;
+    for (size_t i = 0; i < buttons.size(); i++) {
+        buttons[i]->onEvent(event, ehc);
+        if (ehc.stopped) break;
+    }
 }
 
 
@@ -228,43 +198,16 @@ void Menu::draw(sf::RenderTarget &result, TransformStack &stack) {
 }
 
 
-EVENT_STATUS Menu::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
-    TransformApplier add_transform(stack, getTransform());
-
-    for (size_t i = 0; i < buttons.size(); i++)
-        buttons[i]->onMouseMove(mouse, stack);
-
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS Menu::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    TransformApplier add_transform(stack, getTransform());
+void Menu::onEvent(const Event &event, EHC &ehc) {
+    TransformApplier add_transform(ehc.stack, getTransform());
 
     for (size_t i = 0; i < buttons.size(); i++) {
-        if (buttons[i]->onMouseButtonDown(mouse, button_id, stack) == HANDLED) {
-            openMenu(i);
-            return HANDLED;
+        buttons[i]->onEvent(event, ehc);
+        if (ehc.stopped) {
+            if (event.getType() == MousePressed) openMenu(i);
+            break;
         }
     }
-
-    if (isMenuOpened()) {
-        buttons[opened]->setOpened(false);
-        opened = INVALID_OPENED;
-    }
-    
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS Menu::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    TransformApplier add_transform(stack, getTransform());
-
-    for (size_t i = 0; i < buttons.size(); i++)
-        if (buttons[i]->onMouseButtonUp(mouse, button_id, stack) == HANDLED)
-            return HANDLED;
-
-    return UNHANDLED;
 }
 
 

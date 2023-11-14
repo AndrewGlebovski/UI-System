@@ -18,11 +18,6 @@ public:
 
 /// Shows current time
 class Clock : public Widget {
-private:
-    size_t daytime;
-    ClockStyle style;
-    float time_passed;
-
 public:
     Clock(
         size_t id_, const LayoutBox &layout_,
@@ -59,16 +54,18 @@ public:
         result.draw(text);
     }
 
+protected:
+    size_t daytime;
+    ClockStyle style;
+    double time_passed;
 
-    virtual EVENT_STATUS onTimer(float delta_time) override {
-        time_passed += delta_time;
+    virtual void onTick(const TickEvent &event, EHC &ehc) override {
+        time_passed += event.delta_time;
 
         if (time_passed > 1) {
             time_passed = 0;
             daytime++;
             daytime %= 24 * 60 * 60;
         }
-
-        return UNHANDLED;
     }
 };

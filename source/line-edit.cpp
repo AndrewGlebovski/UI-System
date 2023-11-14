@@ -43,22 +43,22 @@ void LineEdit::setCursorVisible() {
 }
 
 
-bool LineEdit::isCorrectKey(int key_id) const {
+bool LineEdit::isCorrectKey(int key_id, bool shift) const {
     if (key_id >= A && key_id <= Z) return true;
     if (key_id >= Num0 && key_id <= Num9) return true;
-    if (!shift_pressed && key_id == Slash) return true;
-    if (!shift_pressed && key_id == Period) return true;
-    if (shift_pressed && key_id == Hyphen) return true;
+    if (!shift && key_id == Slash) return true;
+    if (!shift && key_id == Period) return true;
+    if (shift && key_id == Hyphen) return true;
     return false;
 }
 
 
-char LineEdit::convertKey(int key_id) const {
+char LineEdit::convertKey(int key_id, bool shift) const {
     if (key_id >= Num0 && key_id <= Num9) return key_id - Num0 + '0';
     if (key_id == Hyphen) return '_';
     if (key_id == Period) return '.';
     if (key_id == Slash) return '/';
-    if (shift_pressed) return key_id + 'A';
+    if (shift) return key_id + 'A';
     return key_id + 'a';
 }
 
@@ -148,84 +148,75 @@ void LineEdit::draw(sf::RenderTarget &result, TransformStack &stack) {
 }
 
 
-EVENT_STATUS LineEdit::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+void LineEdit::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
 
-    if (isInsideRect(global_position, global_size, mouse)) {
+    if (isInsideRect(global_position, global_size, event.pos)) {
         setKeyboardFocus(true);
-        return HANDLED;
+        ehc.stopped = true;
+        return;
     }
 
     setKeyboardFocus(false);
-    return UNHANDLED;
 }
 
 
-EVENT_STATUS LineEdit::onKeyDown(int key_id) {
-    switch (key_id) {
+void LineEdit::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
+    switch (event.key_id) {
         case Escape: 
         case Enter: 
-            setKeyboardFocus(false); return HANDLED;
+            setKeyboardFocus(false);
+            ehc.stopped = true;
+            break;
         case Left:
             if (cursor_pos > 0) cursor_pos--;
             setCursorVisible();
-            return HANDLED;
+            ehc.stopped = true;
+            break;
         case Right:
             if (cursor_pos < str.length()) cursor_pos++;
             setCursorVisible();
-            return HANDLED;
+            ehc.stopped = true;
+            break;
         case Backspace:
             if (is_typing && str.length() > 0 && cursor_pos > 0) {
                 str.erase(str.begin() + cursor_pos - 1);
                 cursor_pos--;
                 setCursorVisible();
             }
-            return (is_typing) ? HANDLED : UNHANDLED;
+            ehc.stopped = is_typing;
+            break;
         case Delete:
             if (is_typing && str.length() > 0 && cursor_pos < str.length()) {
                 str.erase(str.begin() + cursor_pos);
                 setCursorVisible();
             }
-            return (is_typing) ? HANDLED : UNHANDLED;
-        case LShift:
-        case RShift:
-            shift_pressed = true; return UNHANDLED;
+            ehc.stopped = is_typing;
+            break;
         default:
-            if (is_typing && isCorrectKey(key_id) && str.length() < max_length) {
+            if (is_typing && isCorrectKey(event.key_id, event.shift) && str.length() < max_length) {
                 if (cursor_pos == str.length())
-                    str.push_back(convertKey(key_id));
+                    str.push_back(convertKey(event.key_id, event.shift));
                 else
-                    str.insert(str.begin() + cursor_pos, convertKey(key_id));
+                    str.insert(str.begin() + cursor_pos, convertKey(event.key_id, event.shift));
                 
                 cursor_pos++;
                 setCursorVisible();
             }
-            return (is_typing) ? HANDLED : UNHANDLED;
+            ehc.stopped = is_typing;
+            break;
     }
 }
 
 
-EVENT_STATUS LineEdit::onKeyUp(int key_id) {
-    switch (key_id) {
-        case LShift:
-        case RShift:
-            shift_pressed = false; return UNHANDLED;
-        default:
-            return UNHANDLED;
-    }
-}
-
-
-EVENT_STATUS LineEdit::onTimer(float delta_time) {
-    blink_time += delta_time;
+void LineEdit::onTick(const TickEvent &event, EHC &ehc) {
+    blink_time += event.delta_time;
 
     if (blink_time > CURSOR_BLINK_TIME) {
         is_cursor_hidden = !is_cursor_hidden;
         blink_time = 0;
     }
-
-    return UNHANDLED;
 }
 
 

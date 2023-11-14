@@ -6,10 +6,6 @@
 
 /// Drops down list of options
 class MenuButton : public RectButton {
-protected:
-    List<Widget*> buttons;      ///< Option buttons
-    bool is_opened;             ///< Shows if menu option list is visible
-
 public:
     MenuButton(
         size_t id_, const LayoutBox &layout_,
@@ -31,14 +27,19 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+    /**
+     * \brief Broadcast events to option buttons
+    */
+    virtual void onEvent(const Event &event, EHC &ehc) override;
 
     /**
      * \brief Deletes option buttons
     */
     virtual ~MenuButton() override;
+
+protected:
+    List<Widget*> buttons;      ///< Option buttons
+    bool is_opened;             ///< Shows if menu option list is visible
 };
 
 
@@ -81,9 +82,10 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+    /**
+     * \brief Broadcast events to menu buttons
+    */
+    virtual void onEvent(const Event &event, EHC &ehc) override;
 
     /**
      * \brief Deletes menu buttons

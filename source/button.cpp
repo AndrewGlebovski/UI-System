@@ -11,6 +11,7 @@
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "list.hpp"
+#include "key-id.hpp"
 #include "asset.hpp"
 #include "widget.hpp"
 #include "button.hpp"
@@ -78,50 +79,47 @@ void ActionButton::setButtonGroup(ButtonGroup *group_) {
 ButtonGroup *ActionButton::getButtonGroup() { return group; }
 
 
-EVENT_STATUS ActionButton::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
-
-    if (isInsideButton(mouse - global_position, global_size)) {
+void ActionButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    
+    if (isInsideButton(event.pos - global_position, global_size)) {
         if (status != BUTTON_PRESSED)
             setButtonStatus(BUTTON_HOVER);
 
-        return HANDLED;
+        ehc.overlapped = true;
+        return;
     }
     
     if (!isPressedInGroup()) setButtonStatus(BUTTON_NORMAL);
-
-    return UNHANDLED;
 }
 
 
-EVENT_STATUS ActionButton::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
-
-    if (!isInsideButton(mouse - global_position, global_size)) return UNHANDLED;
+void ActionButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    
+    if (!isInsideButton(event.pos - global_position, global_size)) return;
 
     setButtonStatus(BUTTON_PRESSED);
     if (isInGroup()) group->setPressed(this);
 
     if (action) (*action)();
-    return HANDLED;
+    ehc.stopped = true;
 }
 
 
-EVENT_STATUS ActionButton::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+void ActionButton::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
 
-    if (isInsideButton(mouse - global_position, global_size)) {
+    if (isInsideButton(event.pos - global_position, global_size)) {
         if (!isPressedInGroup()) setButtonStatus(BUTTON_HOVER);
-
-        return HANDLED;
+        ehc.stopped = true;
+        return;
     }
     
     if (!isPressedInGroup()) setButtonStatus(BUTTON_NORMAL);
-
-    return UNHANDLED;
 }
 
 

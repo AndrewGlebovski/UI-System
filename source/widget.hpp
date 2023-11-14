@@ -4,12 +4,6 @@
 */
 
 
-using EVENT_STATUS = bool;              ///< Shows if event was handled or not
-
-const EVENT_STATUS UNHANDLED = false;   ///< Event was not handled (father broadcasting is required)
-const EVENT_STATUS HANDLED = true;      ///< Event was handled (father broadcasting is not required)
-
-
 /// Holds transformation
 class Transform {
 private:
@@ -231,19 +225,83 @@ public:
 
 /// Base class for all widgets
 class Widget {
-protected:
-    const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
-    LayoutBox *layout;      ///< Widget position and size encapsulated
-    int z_index;            ///< Shows order in which widgets are drawn
-    Widget *parent;         ///< Parent that holds this widget
-    int status;             ///< Shows parent if some actions requiered
-
-    /**
-     * \brief If requested_id != AUTO_ID returns requested_id, otherwise returns unique id
-    */
-    size_t generateId(size_t requested_id);
-
 public:
+    struct EHC {
+        TransformStack &stack;
+        bool stopped;
+        bool overlapped;
+
+        EHC(TransformStack &stack_, bool stopped_, bool overlapped_) :
+            stack(stack_), stopped(stopped_), overlapped(overlapped_) {}
+    };
+
+    enum EventType {
+        Tick,
+        MouseMove,
+        MousePressed,
+        MouseReleased,
+        KeyboardPressed,
+        KeyboardReleased,
+    };
+
+    class Event {
+    private:
+        const size_t type;
+    public:
+        Event (size_t type_) : type(type_) {}
+
+        size_t getType() const { return type; }
+    };
+
+    struct TickEvent : public Event {
+        double delta_time;
+
+        TickEvent(double delta_time_) :
+            Event(Tick), delta_time(delta_time_) {}
+    };
+
+    struct MouseMoveEvent : public Event {
+        bool shift, ctrl, alt;
+        Vec2d pos;
+
+        MouseMoveEvent(bool shift_, bool ctrl_, bool alt_, const Vec2d &pos_) :
+            Event(MouseMove), shift(shift_), ctrl(ctrl_), alt(alt_), pos(pos_) {}
+    };
+
+    struct MousePressedEvent : public Event {
+        MOUSE_BUTTON_ID button_id;
+        bool shift, ctrl, alt;
+        Vec2d pos;
+
+        MousePressedEvent(MOUSE_BUTTON_ID button_id_, bool shift_, bool ctrl_, bool alt_, const Vec2d &pos_) :
+            Event(MousePressed), button_id(button_id_), shift(shift_), ctrl(ctrl_), alt(alt_), pos(pos_) {}
+    };
+
+    struct MouseReleasedEvent : public Event {
+        MOUSE_BUTTON_ID button_id;
+        bool shift, ctrl, alt;
+        Vec2d pos;
+
+        MouseReleasedEvent(MOUSE_BUTTON_ID button_id_, bool shift_, bool ctrl_, bool alt_, const Vec2d &pos_) :
+            Event(MouseReleased), button_id(button_id_), shift(shift_), ctrl(ctrl_), alt(alt_), pos(pos_) {}
+    };
+
+    struct KeyboardPressedEvent : public Event {
+        KEY_ID key_id;
+        bool shift, ctrl, alt;
+
+        KeyboardPressedEvent(KEY_ID key_id_, bool shift_, bool ctrl_, bool alt_) :
+            Event(KeyboardPressed), key_id(key_id_), shift(shift_), ctrl(ctrl_), alt(alt_) {}
+    };
+
+    struct KeyboardReleasedEvent : public Event {
+        KEY_ID key_id;
+        bool shift, ctrl, alt;
+
+        KeyboardReleasedEvent(KEY_ID key_id_, bool shift_, bool ctrl_, bool alt_) :
+            Event(KeyboardReleased), key_id(key_id_), shift(shift_), ctrl(ctrl_), alt(alt_) {}
+    };
+
     /// Pass into constructor to generate new ID
     static const size_t AUTO_ID = 0;
 
@@ -355,12 +413,10 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, TransformStack &stack);
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) { return UNHANDLED; }
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) { return UNHANDLED; }
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) { return UNHANDLED; }
-    virtual EVENT_STATUS onKeyUp(int key_id) { return UNHANDLED; }
-    virtual EVENT_STATUS onKeyDown(int key_id) { return UNHANDLED; }
-    virtual EVENT_STATUS onTimer(float delta_time) { return UNHANDLED; }
+    /**
+     * \brief Handle all sorts of events event
+    */
+    virtual void onEvent(const Event &event, EHC &ehc);
 
     /**
      * \brief Allows widget to change its position and size according to parent
@@ -377,6 +433,25 @@ public:
      * \brief Delete layout box
     */
     virtual ~Widget() { delete layout; };
+
+protected:
+    const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
+    LayoutBox *layout;      ///< Widget position and size encapsulated
+    int z_index;            ///< Shows order in which widgets are drawn
+    Widget *parent;         ///< Parent that holds this widget
+    int status;             ///< Shows parent if some actions requiered
+
+    /**
+     * \brief If requested_id != AUTO_ID returns requested_id, otherwise returns unique id
+    */
+    size_t generateId(size_t requested_id);
+
+    virtual void onTick(const TickEvent &event, EHC &ehc) {}
+    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) {}
+    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) {}
+    virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {}
+    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {}
+    virtual void onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc) {}
 };
 
 

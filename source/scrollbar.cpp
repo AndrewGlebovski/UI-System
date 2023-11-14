@@ -12,6 +12,7 @@
 #include "vector.hpp"
 #include "list.hpp"
 #include "asset.hpp"
+#include "key-id.hpp"
 #include "widget.hpp"
 #include "scrollbar.hpp"
 
@@ -48,41 +49,36 @@ void ScrollBar::draw(sf::RenderTarget &result, TransformStack &stack) {
 }
 
 
-EVENT_STATUS ScrollBar::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
+void ScrollBar::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
     if (is_moving) {
-        scrollTo(mouse - mouse_prev);
-        mouse_prev = mouse;
+        scrollTo(event.pos - mouse_prev);
+        mouse_prev = event.pos;
 
-        return HANDLED;
+        ehc.overlapped = true;
     }
-
-    return UNHANDLED;
 }
 
 
-EVENT_STATUS ScrollBar::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+void ScrollBar::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
 
-    if (isInsideRect(global_position, global_size, mouse)) {
+    if (isInsideRect(global_position, global_size, event.pos)) {
         Vec2d scroller_absolute = global_position + scroller.getPosition();
 
-        if (!isInsideRect(scroller_absolute, scroller.getSize(), mouse))
-            scrollTo(mouse - (scroller_absolute + scroller.getSize() / 2));
+        if (!isInsideRect(scroller_absolute, scroller.getSize(), event.pos))
+            scrollTo(event.pos - (scroller_absolute + scroller.getSize() / 2));
 
         is_moving = true;
-        mouse_prev = mouse;
+        mouse_prev = event.pos;
 
-        return HANDLED;
+        ehc.stopped = true;
     }
-
-    return UNHANDLED;
 }
 
 
-EVENT_STATUS ScrollBar::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
+void ScrollBar::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
     is_moving = false;
-    return UNHANDLED;
 }
 
 

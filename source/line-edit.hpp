@@ -43,24 +43,6 @@ struct LineEditStyle {
 
 /// Receives user input
 class LineEdit : public Widget {
-protected:
-    std::string str;            ///< Char buffer
-    LineEditStyle style;        ///< Style
-    bool is_typing;             ///< This widget is in user focus
-    size_t max_length;          ///< Max amount characters in string
-    bool shift_pressed;         ///< Shift key is pressed
-    bool is_cursor_hidden;      ///< Cursor is hidden at this moment
-    float blink_time;           ///< Time passed since last switch between cursor blink states
-    size_t cursor_pos;          ///< Cursor position
-    sf::RenderTexture *visible_rect;     ///< Visible part of the text
-    float visible_rect_x;                ///< Visible rect offset from text begin
-
-
-    /**
-     * \brief Resets blink time to zero and sets cursor visible
-    */
-    void setCursorVisible();
-
 public:
     /**
      * \brief Constructs LineEdit from style and max length
@@ -77,12 +59,12 @@ public:
     /**
      * \brief Checks if key can be added to string
     */
-    virtual bool isCorrectKey(int key_id) const;
+    virtual bool isCorrectKey(int key_id, bool shift) const;
 
     /**
      * \brief Converts key_id from enum to ASCII character
     */
-    virtual char convertKey(int key_id) const;
+    virtual char convertKey(int key_id, bool shift) const;
 
     /**
      * \brief Returns char buffer
@@ -114,13 +96,29 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onKeyDown(int key_id) override;
-    virtual EVENT_STATUS onKeyUp(int key_id) override;
-    virtual EVENT_STATUS onTimer(float delta_time) override;
-
     /**
      * \brief Delete visible rect
     */
     virtual ~LineEdit() override;
+
+protected:
+    std::string str;            ///< Char buffer
+    LineEditStyle style;        ///< Style
+    bool is_typing;             ///< This widget is in user focus
+    size_t max_length;          ///< Max amount characters in string
+    bool shift_pressed;         ///< Shift key is pressed
+    bool is_cursor_hidden;      ///< Cursor is hidden at this moment
+    float blink_time;           ///< Time passed since last switch between cursor blink states
+    size_t cursor_pos;          ///< Cursor position
+    sf::RenderTexture *visible_rect;     ///< Visible part of the text
+    float visible_rect_x;                ///< Visible rect offset from text begin
+
+    /**
+     * \brief Resets blink time to zero and sets cursor visible
+    */
+    void setCursorVisible();
+
+    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
+    virtual void onTick(const TickEvent &event, EHC &ehc) override;
 };

@@ -12,6 +12,7 @@
 #include "vector.hpp"
 #include "list.hpp"
 #include "asset.hpp"
+#include "key-id.hpp"
 #include "configs.hpp"
 #include "widget.hpp"
 #include "container.hpp"
@@ -54,33 +55,9 @@ Dialog::Dialog(
 {}
 
 
-EVENT_STATUS Dialog::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
-    Window::onMouseMove(mouse, stack);
-    return HANDLED;
-}
-
-
-EVENT_STATUS Dialog::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    Window::onMouseButtonUp(mouse, button_id, stack);
-    return HANDLED;
-}
-
-
-EVENT_STATUS Dialog::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    Window::onMouseButtonDown(mouse, button_id,stack);
-    return HANDLED;
-}
-
-
-EVENT_STATUS Dialog::onKeyUp(int key_id) {
-    Window::onKeyUp(key_id);
-    return HANDLED;
-}
-
-
-EVENT_STATUS Dialog::onKeyDown(int key_id) {
-    Window::onKeyDown(key_id);
-    return HANDLED;
+void Dialog::onEvent(const Event &event, EHC &ehc) {
+    Window::onEvent(event, ehc);
+    ehc.stopped = true;
 }
 
 

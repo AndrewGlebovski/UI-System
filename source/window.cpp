@@ -13,6 +13,7 @@
 #include "list.hpp"
 #include "asset.hpp"
 #include "configs.hpp"
+#include "key-id.hpp"
 #include "widget.hpp"
 #include "container.hpp"
 #include "button.hpp"
@@ -21,8 +22,8 @@
 
 
 const float MIN_OUTLINE = 0.0001f;                          ///< If outline is smaller then window can not be resized
-const Vec2d CLOSE_OFFSET = Vec2d(-45, 12);            ///< Window close button offset from window top-right corner
-const Vec2d EXPAND_OFFSET = Vec2d(-85, 12);           ///< Window expand button offset from window top-right corner
+const Vec2d CLOSE_OFFSET = Vec2d(-45, 12);                  ///< Window close button offset from window top-right corner
+const Vec2d EXPAND_OFFSET = Vec2d(-85, 12);                 ///< Window expand button offset from window top-right corner
 const size_t CLOSE_BUTTON_ID = Widget::AUTO_ID + 1;         ///< Window append button ID
 const size_t EXPAND_BUTTON_ID = Widget::AUTO_ID + 2;        ///< Window close button ID
 const size_t BUTTONS_ID = Widget::AUTO_ID + 3;              ///< Window buttons container ID
@@ -37,11 +38,6 @@ class MoveLayoutBox;
 
 /// Invisible button for moving windows
 class MoveButton : public BaseButton {
-protected:
-    Window &window;         ///< Window to move
-    Vec2d prev_mouse;       ///< Previous mouse click position
-    bool is_moving;         ///< If moving is active
-
 public:
     friend MoveLayoutBox;
 
@@ -52,9 +48,14 @@ public:
     */
     void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
-    EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+protected:
+    Window &window;         ///< Window to move
+    Vec2d prev_mouse;       ///< Previous mouse click position
+    bool is_moving;         ///< If moving is active
+
+    void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
+    void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
 };
 
 
@@ -82,12 +83,6 @@ class ResizeLayoutBox;
 
 /// Invisible button for resizing windows
 class ResizeButton : public BaseButton {
-protected:
-    Window &window;         ///< Window to move
-    Vec2d prev_mouse;       ///< Previous mouse click position
-    bool is_moving;         ///< If moving is active
-    const int resize_dir;   ///< Resize direction
-
 public:
     friend ResizeLayoutBox;
 
@@ -109,9 +104,15 @@ public:
     */
     void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
-    EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
+protected:
+    Window &window;         ///< Window to move
+    Vec2d prev_mouse;       ///< Previous mouse click position
+    bool is_moving;         ///< If moving is active
+    const int resize_dir;   ///< Resize direction
+
+    void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
+    void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
 };
 
 
@@ -297,14 +298,14 @@ void Window::addMoveButton() {
 
 
 void Window::addResizeButtons() {
-    buttons.addChild(new ResizeButton( Widget::AUTO_ID, *this,  ResizeButton::LEFT));
-    buttons.addChild(new ResizeButton( Widget::AUTO_ID, *this,  ResizeButton::TOP));
-    buttons.addChild(new ResizeButton( Widget::AUTO_ID, *this,  ResizeButton::BOTTOM));
-    buttons.addChild(new ResizeButton( Widget::AUTO_ID, *this,  ResizeButton::RIGHT));
-    buttons.addChild(new ResizeButton( Widget::AUTO_ID, *this,  ResizeButton::TOP_LEFT));
-    buttons.addChild(new ResizeButton( Widget::AUTO_ID, *this,  ResizeButton::TOP_RIGHT));
-    buttons.addChild(new ResizeButton( Widget::AUTO_ID, *this,  ResizeButton::BOTTOM_LEFT));
-    buttons.addChild(new ResizeButton( Widget::AUTO_ID, *this,  ResizeButton::BOTTOM_RIGHT));
+    buttons.addChild(new ResizeButton(Widget::AUTO_ID, *this, ResizeButton::LEFT));
+    buttons.addChild(new ResizeButton(Widget::AUTO_ID, *this, ResizeButton::TOP));
+    buttons.addChild(new ResizeButton(Widget::AUTO_ID, *this, ResizeButton::BOTTOM));
+    buttons.addChild(new ResizeButton(Widget::AUTO_ID, *this, ResizeButton::RIGHT));
+    buttons.addChild(new ResizeButton(Widget::AUTO_ID, *this, ResizeButton::TOP_LEFT));
+    buttons.addChild(new ResizeButton(Widget::AUTO_ID, *this, ResizeButton::TOP_RIGHT));
+    buttons.addChild(new ResizeButton(Widget::AUTO_ID, *this, ResizeButton::BOTTOM_LEFT));
+    buttons.addChild(new ResizeButton(Widget::AUTO_ID, *this, ResizeButton::BOTTOM_RIGHT));
 }
 
 
@@ -405,76 +406,49 @@ void Window::removeChild(size_t child_id) {
 }
 
 
-#define BROADCAST_MOUSE_EVENT(CALL_FUNC)                    \
-do {                                                        \
-    if (buttons.CALL_FUNC == HANDLED)                       \
-        return HANDLED;                                     \
-    if (menu && menu->CALL_FUNC == HANDLED)                 \
-        return HANDLED;                                     \
-    if (container.CALL_FUNC == HANDLED)                     \
-        return HANDLED;                                     \
-    if (isInsideRect(global_position, global_size, mouse))  \
-        return HANDLED;                                     \
+#define CHECK_EHC(CALL_FUNC)    \
+do {                            \
+    CALL_FUNC;                  \
+    if (ehc.stopped) {          \
+        ehc.stack.leave();      \
+        return;                 \
+    }                           \
 } while(0)
 
 
-EVENT_STATUS Window::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+void Window::onEvent(const Event &event, EHC &ehc) {
+    ehc.stack.enter(getTransform());
 
-    TransformApplier add_transform(stack, getTransform());
+    CHECK_EHC(buttons.onEvent(event, ehc));
 
-    BROADCAST_MOUSE_EVENT(onMouseMove(mouse, stack));
+    if (menu) CHECK_EHC(menu->onEvent(event, ehc));
 
-    return UNHANDLED;
+    CHECK_EHC(container.onEvent(event, ehc));
+
+    ehc.stack.leave();
+
+    Widget::onEvent(event, ehc);
 }
 
 
-EVENT_STATUS Window::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+#undef CHECK_EHC
 
-    TransformApplier add_transform(stack, getTransform());
 
-    BROADCAST_MOUSE_EVENT(onMouseButtonUp(mouse, button_id, stack));
+void Window::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
 
-    return UNHANDLED;
+    if (isInsideRect(global_position, global_size, event.pos))
+        ehc.overlapped = true;
 }
 
 
-EVENT_STATUS Window::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+void Window::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
 
-    TransformApplier add_transform(stack, getTransform());
-
-    BROADCAST_MOUSE_EVENT(onMouseButtonDown(mouse, button_id, stack));
-
-    return UNHANDLED;
-}
-
-
-#undef BROADCAST_MOUSE_EVENT
-
-
-EVENT_STATUS Window::onKeyUp(int key_id) {
-    if (buttons.onKeyUp(key_id) == HANDLED) return HANDLED;
-    if (container.onKeyUp(key_id) == HANDLED) return HANDLED;
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS Window::onKeyDown(int key_id) {
-    if (buttons.onKeyDown(key_id) == HANDLED) return HANDLED;
-    if (container.onKeyDown(key_id) == HANDLED) return HANDLED;
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS Window::onTimer(float delta_time) {
-    buttons.onTimer(delta_time);
-    container.onTimer(delta_time);
-    return UNHANDLED;
+    if (isInsideRect(global_position, global_size, event.pos))
+        ehc.stopped = true;
 }
 
 
@@ -535,17 +509,56 @@ void MainWindow::onParentUpdate(const LayoutBox &parent_layout) {
 
 
 void MainWindow::parseEvent(const sf::Event &event, TransformStack &stack) {
+    static bool shift = false, ctrl = false, alt = false;
+
+    EHC ehc(stack, false, false);
+
     switch (event.type) {
-        case sf::Event::KeyPressed:
-            onKeyDown(event.key.code); break;
-        case sf::Event::KeyReleased:
-            onKeyUp(event.key.code); break;
-        case sf::Event::MouseButtonPressed:
-            onMouseButtonDown(Vec2d(event.mouseButton.x, event.mouseButton.y), event.mouseButton.button, stack); break;
-        case sf::Event::MouseButtonReleased:
-            onMouseButtonUp(Vec2d(event.mouseButton.x, event.mouseButton.y), event.mouseButton.button, stack); break;
-        case sf::Event::MouseMoved:
-            onMouseMove(Vec2d(event.mouseMove.x, event.mouseMove.y), stack); break;
+        case sf::Event::KeyPressed: {
+            if (KEY_ID(event.key.code) == LShift) shift = true;
+            if (KEY_ID(event.key.code) == RShift) shift = true;
+            if (KEY_ID(event.key.code) == LControl) ctrl = true;
+            if (KEY_ID(event.key.code) == RControl) ctrl = true;
+            if (KEY_ID(event.key.code) == LAlt) alt = true;
+            if (KEY_ID(event.key.code) == RAlt) alt = true;
+
+            KeyboardPressedEvent event_(KEY_ID(event.key.code), shift, ctrl, alt);
+            onEvent(event_, ehc); break;
+        }
+        case sf::Event::KeyReleased: {
+            if (KEY_ID(event.key.code) == LShift) shift = false;
+            if (KEY_ID(event.key.code) == RShift) shift = false;
+            if (KEY_ID(event.key.code) == LControl) ctrl = false;
+            if (KEY_ID(event.key.code) == RControl) ctrl = false;
+            if (KEY_ID(event.key.code) == LAlt) alt = false;
+            if (KEY_ID(event.key.code) == RAlt) alt = false;
+
+            KeyboardReleasedEvent event_(KEY_ID(event.key.code), shift, ctrl, alt);
+            onEvent(event_, ehc); break;
+        }
+        case sf::Event::MouseButtonPressed: {
+            MousePressedEvent event_(
+                MOUSE_BUTTON_ID(event.mouseButton.button),
+                shift, ctrl, alt,
+                Vec2d(event.mouseButton.x, event.mouseButton.y)
+            );
+            onEvent(event_, ehc); break;
+        }
+        case sf::Event::MouseButtonReleased: {
+            MouseReleasedEvent event_(
+                MOUSE_BUTTON_ID(event.mouseButton.button),
+                shift, ctrl, alt,
+                Vec2d(event.mouseButton.x, event.mouseButton.y)
+            );
+            onEvent(event_, ehc); break;
+        }
+        case sf::Event::MouseMoved: {
+            MouseMoveEvent event_(
+                shift, ctrl, alt,
+                Vec2d(event.mouseMove.x, event.mouseMove.y)
+            );
+            onEvent(event_, ehc); break;
+        }
         default:
             return;
     }
@@ -578,39 +591,36 @@ void MoveButton::draw(sf::RenderTarget &result, TransformStack &stack) {
 }
 
 
-EVENT_STATUS MoveButton::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
-    if (!is_moving) return UNHANDLED;
+void MoveButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
+    if (!is_moving) return;
 
     // WE CHANGED WINDOW POSITION SO CURRENT TRANSFORM WILL BE INCORRECT
     // BUT IT DOESN'T MATTER CAUSE EVENT IS HANDLED
     // AND FARTHER BROADCASTING IS NOT NEEDED
 
-    Vec2d new_position = window.getLayoutBox().getPosition() + (mouse - prev_mouse);
-    prev_mouse = mouse;
+    Vec2d new_position = window.getLayoutBox().getPosition() + (event.pos - prev_mouse);
+    prev_mouse = event.pos;
 
     window.setPosition(new_position);
 
-    return HANDLED;
+    ehc.overlapped = true;
 }
 
 
-EVENT_STATUS MoveButton::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+void MoveButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
 
-    if (isInsideRect(global_position, global_size, mouse)) {
+    if (isInsideRect(global_position, global_size, event.pos)) {
         is_moving = true;
-        prev_mouse = mouse;
-        return HANDLED;
+        prev_mouse = event.pos;
+        ehc.stopped = true;
     }
-
-    return UNHANDLED;
 }
 
 
-EVENT_STATUS MoveButton::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
+void MoveButton::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
     is_moving = false;
-    return UNHANDLED;
 }
 
 
@@ -660,11 +670,11 @@ void ResizeButton::draw(sf::RenderTarget &result, TransformStack &stack) {
 }
 
 
-EVENT_STATUS ResizeButton::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
-    if (!is_moving) return UNHANDLED;
+void ResizeButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
+    if (!is_moving) return;
 
-    Vec2d shift = mouse - prev_mouse;
-    prev_mouse = mouse;
+    Vec2d shift = event.pos - prev_mouse;
+    prev_mouse = event.pos;
 
     Vec2d prev_position = window.getLayoutBox().getPosition();
     Vec2d prev_size = window.getLayoutBox().getSize();
@@ -682,9 +692,7 @@ EVENT_STATUS ResizeButton::onMouseMove(const Vec2d &mouse, TransformStack &stack
             if (window.setPosition(prev_position + shift)) {
                 shift = window.getLayoutBox().getPosition() - prev_position;
                 window.setSize(prev_size - shift);
-                printf("WTF!\n");
             }
-            printf("shift\n");
             break;
         case BOTTOM:
             shift.x = 0;
@@ -719,27 +727,24 @@ EVENT_STATUS ResizeButton::onMouseMove(const Vec2d &mouse, TransformStack &stack
             printf("Unknown resize direction!\n"); abort();
     }
 
-    return HANDLED;
+    ehc.overlapped = true;
 }
 
 
-EVENT_STATUS ResizeButton::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+void ResizeButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
 
-    if (isInsideRect(global_position, global_size, mouse)) {
+    if (isInsideRect(global_position, global_size, event.pos)) {
         is_moving = true;
-        prev_mouse = mouse;
-        return HANDLED;
+        prev_mouse = event.pos;
+        ehc.stopped = true;
     }
-
-    return UNHANDLED;
 }
 
 
-EVENT_STATUS ResizeButton::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
+void ResizeButton::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
     is_moving = false;
-    return UNHANDLED;
 }
 
 

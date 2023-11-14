@@ -18,17 +18,17 @@ all: run
 
 
 # Скомпилировать и запустить
-run: compile
+run: build
 	./$(EXE_NAME)
 
 
 # Скомпилировать и запустить под valgrind (предварительно лучше скомпилировать с -O0 или -O1)
-memcheck: compile
+memcheck: build
 	valgrind --leak-check=yes --log-file="log.txt" ./$(EXE_NAME)
 
 
 # Скомпилировать
-compile: $(BIN_DIR) $(EXE_NAME)
+build: $(BIN_DIR) $(EXE_NAME)
 
 
 # Завершение сборки

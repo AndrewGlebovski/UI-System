@@ -3,6 +3,7 @@
 #include <time.h>
 #include <sys/stat.h>
 #include "vector.hpp"
+#include "key-id.hpp"
 #include "list.hpp"
 #include "configs.hpp"
 #include "asset.hpp"
@@ -67,7 +68,7 @@ int main() {
         "Paint",
         window_style
     );
-
+    
     Menu *main_menu = new Menu(
         Widget::AUTO_ID,
         BasicLayoutBox(),
@@ -108,7 +109,7 @@ int main() {
         BasicLayoutBox(Vec2d(), Vec2d(100, 50)),
         clock_style
     ));
-
+    
     main_window->addChild(new FilterHotkey(
         main_window,
         *filter_palette,
@@ -117,7 +118,7 @@ int main() {
     
     main_window->addChild(openPicture(nullptr, *palette, *canvas_group, window_style, scrollbar_style));
     main_window->addChild(createToolPaletteView(palette, window_style, palette_asset));
-
+    
     TransformStack stack;
 
     sf::Clock timer;
@@ -140,10 +141,12 @@ int main() {
             
             main_window->parseEvent(event, stack);
         }
+        
+        Widget::EHC ehc(stack, false, false);
 
-        main_window->onTimer(timer.getElapsedTime().asSeconds());
+        main_window->onEvent(Widget::TickEvent(timer.getElapsedTime().asSeconds()), ehc);
         timer.restart();
-
+        
         render_window.clear();
 
         main_window->draw(render_window, stack);

@@ -6,16 +6,6 @@
 
 /// Manages widgets
 class Container : public Widget {
-private:
-    List<Widget*> widgets;          ///< List of widgets sorted by z-index
-    size_t focused;                 ///< Focused widget draws on top and gets events first
-    bool focus_enabled;             ///< Container set focus between widgets
-
-    /**
-     * \brief Remvoes widget by its index in widgets array
-    */
-    void removeWidget(size_t index);
-
 public:
     /**
      * \brief Constructs container
@@ -47,12 +37,10 @@ public:
     */
     virtual void removeChild(size_t child_id) override;
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onKeyUp(int key_id) override;
-    virtual EVENT_STATUS onKeyDown(int key_id) override;
-    virtual EVENT_STATUS onTimer(float delta_time) override;
+    /**
+     * \brief Broadcast events to container children
+    */
+    virtual void onEvent(const Event &event, EHC &ehc) override;
 
     /**
      * \brief Allows widget to change its position and size according to parent
@@ -64,6 +52,19 @@ public:
     */
     virtual void checkChildren() override;
 
-
+    /**
+     * \brief Deletes children
+    */
     ~Container();
+
+protected:
+    List<Widget*> widgets;          ///< List of widgets sorted by z-index
+    size_t focused;                 ///< Focused widget draws on top and gets events first
+    bool focus_enabled;             ///< Container set focus between widgets
+
+    /**
+     * \brief Remvoes widget by its index in widgets array
+    */
+    void removeWidget(size_t index);
+
 };

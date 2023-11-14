@@ -112,7 +112,7 @@ private:
 
 public:
     RectPreview(RectTool &tool_) :
-        Widget(1, BasicLayoutBox()), tool(tool_) {}
+        Widget(1, LazyLayoutBox()), tool(tool_) {}
     
 
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override {
@@ -207,7 +207,7 @@ public:
      * \note Transform offset used as line's first point and size as second
     */
     LinePreview(LineTool &tool_) :
-        Widget(1, BasicLayoutBox()), tool(tool_) {}
+        Widget(1, LazyLayoutBox()), tool(tool_) {}
     
 
     /**
@@ -380,7 +380,7 @@ private:
 
 public:
     PolygonPreview(PolygonTool &tool_) :
-        Widget(1, BasicLayoutBox()), tool(tool_) {}
+        Widget(1, LazyLayoutBox()), tool(tool_) {}
     
 
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override {
@@ -632,39 +632,32 @@ void ToolPaletteView::draw(sf::RenderTarget &result, TransformStack &stack) {
 }
 
 
-EVENT_STATUS ToolPaletteView::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
-    TransformApplier add_transform(stack, getTransform());
+void ToolPaletteView::onEvent(const Event &event, EHC &ehc) {
+    Widget::onEvent(event, ehc);
+    if (ehc.stopped) return;
 
-    return buttons.onMouseMove(mouse, stack);
+    TransformApplier canvas_transform(ehc.stack, getTransform());
+    buttons.onEvent(event, ehc);
 }
 
 
-EVENT_STATUS ToolPaletteView::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    TransformApplier add_transform(stack, getTransform());
+void ToolPaletteView::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
+    // No modifiers pressed
+    if (event.alt || event.ctrl || event.shift) return;
 
-    return buttons.onMouseButtonDown(mouse, button_id, stack);
-}
-
-
-EVENT_STATUS ToolPaletteView::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    TransformApplier add_transform(stack, getTransform());
-
-    return buttons.onMouseButtonUp(mouse, button_id, stack);
-}
-
-
-EVENT_STATUS ToolPaletteView::onKeyDown(int key_id) {
-    switch(key_id) {
-        case P: palette->setCurrentTool(ToolPalette::PENCIL_TOOL); return HANDLED;
-        case R: palette->setCurrentTool(ToolPalette::RECT_TOOL); return HANDLED;
-        case L: palette->setCurrentTool(ToolPalette::LINE_TOOL); return HANDLED;
-        case E: palette->setCurrentTool(ToolPalette::ERASER_TOOL); return HANDLED;
-        case C: palette->setCurrentTool(ToolPalette::COLOR_PICKER); return HANDLED;
-        case F: palette->setCurrentTool(ToolPalette::BUCKET_TOOL); return HANDLED;
-        case O: palette->setCurrentTool(ToolPalette::POLYGON_TOOL); return HANDLED;
-        case T: palette->setCurrentTool(ToolPalette::TEXT_TOOL); return HANDLED;
-        default: return UNHANDLED;
+    switch(event.key_id) {
+        case P: palette->setCurrentTool(ToolPalette::PENCIL_TOOL); break;
+        case R: palette->setCurrentTool(ToolPalette::RECT_TOOL); break;
+        case L: palette->setCurrentTool(ToolPalette::LINE_TOOL); break;
+        case E: palette->setCurrentTool(ToolPalette::ERASER_TOOL); break;
+        case C: palette->setCurrentTool(ToolPalette::COLOR_PICKER); break;
+        case F: palette->setCurrentTool(ToolPalette::BUCKET_TOOL); break;
+        case O: palette->setCurrentTool(ToolPalette::POLYGON_TOOL); break;
+        case T: palette->setCurrentTool(ToolPalette::TEXT_TOOL); break;
+        default: return;
     }
+
+    ehc.stopped = true;
 }
 
 
@@ -1059,31 +1052,38 @@ void Canvas::draw(sf::RenderTarget &result, TransformStack &stack) {
 }
 
 
-EVENT_STATUS Canvas::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
+void Canvas::onEvent(const Event &event, EHC &ehc) {
+    if (ehc.overlapped) return;
 
-    last_position = mouse;
+    Widget::onEvent(event, ehc);
 
-    palette->getCurrentTool()->onMove(
-        mouse - global_position + texture_offset,
-        *this
-    );
-
-    if (palette->getCurrentTool()->getWidget()) {
-        TransformApplier canvas_transform(stack, getTransform());
-        TransformApplier texture_transform(stack, Transform(-texture_offset));
-        return palette->getCurrentTool()->getWidget()->onMouseMove(mouse, stack);
+    if (isActive() && palette->getCurrentTool()->getWidget()) {
+        TransformApplier canvas_transform(ehc.stack, getTransform());
+        TransformApplier texture_transform(ehc.stack, Transform(-texture_offset));
+        palette->getCurrentTool()->getWidget()->onEvent(event, ehc);
     }
-
-    return UNHANDLED;
 }
 
 
-EVENT_STATUS Canvas::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    if (button_id != MouseLeft) return UNHANDLED;
+void Canvas::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
 
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    last_position = event.pos;
+
+    palette->getCurrentTool()->onMove(
+        event.pos - global_position + texture_offset,
+        *this
+    );
+
+    ehc.overlapped = true;
+}
+
+
+void Canvas::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
+    if (event.button_id != MouseLeft) return;
+
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
 
     if (isInsideRect(global_position, global_size, last_position)) {
         ASSERT(group, "Canvas must be assigned to group!\n");
@@ -1091,46 +1091,32 @@ EVENT_STATUS Canvas::onMouseButtonDown(const Vec2d &mouse, int button_id, Transf
 
         palette->getCurrentTool()->onMainButton(
             CanvasTool::PRESSED, 
-            mouse - global_position + texture_offset,
+            event.pos - global_position + texture_offset,
             *this
         );
-
-        if (palette->getCurrentTool()->getWidget()) {
-            TransformApplier canvas_transform(stack, getTransform());
-            TransformApplier texture_transform(stack, Transform(-texture_offset));
-            palette->getCurrentTool()->getWidget()->onMouseButtonDown(mouse, button_id, stack);
-        }
         
-        return HANDLED;
+        ehc.stopped = true;
     }
-
-    return UNHANDLED;
 }
 
 
-EVENT_STATUS Canvas::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    if (button_id != MouseLeft) return UNHANDLED;
+void Canvas::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
+    if (event.button_id != MouseLeft) return;
 
-    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_position = ehc.stack.apply(layout->getPosition());
 
     palette->getCurrentTool()->onMainButton(
         CanvasTool::REALEASED, 
-        mouse - global_position + texture_offset,
+        event.pos - global_position + texture_offset,
         *this
     );
 
-    if (palette->getCurrentTool()->getWidget()) {
-        TransformApplier canvas_transform(stack, getTransform());
-        TransformApplier texture_transform(stack, Transform(-texture_offset));
-        return palette->getCurrentTool()->getWidget()->onMouseButtonUp(mouse, button_id, stack);
-    }
-
-    return UNHANDLED;
+    ehc.stopped = true;
 }
 
 
-EVENT_STATUS Canvas::onKeyDown(int key_id) {
-    switch (key_id) {
+void Canvas::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
+    switch (event.key_id) {
         case Escape: 
             palette->getCurrentTool()->onCancel(); break;
         case Enter: 
@@ -1147,16 +1133,11 @@ EVENT_STATUS Canvas::onKeyDown(int key_id) {
         default:
             break;
     }
-
-    if (palette->getCurrentTool()->getWidget())
-        return palette->getCurrentTool()->getWidget()->onKeyDown(key_id);
-    
-    return UNHANDLED;
 }
 
 
-EVENT_STATUS Canvas::onKeyUp(int key_id) {
-    switch (key_id) {
+void Canvas::onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc) {
+    switch (event.key_id) {
         case LShift:
         case RShift:
             palette->getCurrentTool()->onModifier1(CanvasTool::REALEASED, last_position, *this); break;
@@ -1169,19 +1150,6 @@ EVENT_STATUS Canvas::onKeyUp(int key_id) {
         default:
             break;
     }
-
-    if (palette->getCurrentTool()->getWidget())
-        return palette->getCurrentTool()->getWidget()->onKeyUp(key_id);
-    
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS Canvas::onTimer(float delta_time) {
-    if (palette->getCurrentTool()->getWidget())
-        palette->getCurrentTool()->getWidget()->onTimer(delta_time);
-    
-    return UNHANDLED;
 }
 
 
@@ -1196,36 +1164,22 @@ Canvas::~Canvas() {
 
 FilterHotkey::FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_) :
     Widget(AUTO_ID, BasicLayoutBox()),
-    palette(palette_), group(group_), ctrl_pressed(false)
+    palette(palette_), group(group_)
 {}
 
 
-EVENT_STATUS FilterHotkey::onKeyDown(int key_id) {
-    switch (key_id) {
+void FilterHotkey::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
+    switch (event.key_id) {
         case F: 
-            if (ctrl_pressed) {
+            if (event.ctrl) {
                 palette.getLastFilter()->applyFilter(*group.getActive());
-                return HANDLED;
+                break;
             }
-
-            return UNHANDLED;
-        case LControl:
-        case RControl:
-            ctrl_pressed = true; return HANDLED;
-        default:
-            return UNHANDLED;
+            return;
+        default: return;
     }
-}
 
-
-EVENT_STATUS FilterHotkey::onKeyUp(int key_id) {
-    switch (key_id) {
-        case LControl:
-        case RControl:
-            ctrl_pressed = false; return HANDLED;
-        default:
-            return UNHANDLED;
-    }
+    ehc.stopped = true;
 }
 
 

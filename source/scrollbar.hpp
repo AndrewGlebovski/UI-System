@@ -44,6 +44,25 @@ public:
 
 /// Base class for scroll bars
 class ScrollBar : public Widget {
+public:
+    ScrollBar(
+        size_t id_, const LayoutBox &layout_,
+        ScrollAction *action_, const ScrollBarStyle &style_
+    );
+
+    ScrollBar(const ScrollBar &scrollbar) = delete;
+    ScrollBar &operator = (const ScrollBar& scrollbar) = delete;
+
+    /**
+     * \brief Draws background, border and scroller
+    */
+    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+
+    /**
+     * \brief Deletes scroll action
+    */
+    virtual ~ScrollBar() override;
+
 protected:
     ScrollAction *action;               ///< Triggers when scroller moves
     ScrollBarStyle style;               ///< Style
@@ -51,29 +70,14 @@ protected:
     bool is_moving;                     ///< Scroller is moving right now
     Vec2d mouse_prev;                   ///< Previous mouse click position
 
-
+    /**
+     * \brief Sets scroller position and calls scroll action
+    */
     virtual void scrollTo(const Vec2d &shift) = 0;
 
-public:
-    ScrollBar(
-        size_t id_, const LayoutBox &layout_,
-        ScrollAction *action_, const ScrollBarStyle &style_
-    );
-
-
-    ScrollBar(const ScrollBar &scrollbar) = delete;
-    ScrollBar &operator = (const ScrollBar& scrollbar) = delete;
-
-
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
-
-
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-
-
-    virtual ~ScrollBar();
+    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
+    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
 };
 
 

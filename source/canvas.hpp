@@ -54,8 +54,8 @@ public:
 /// Tool for drawing rectangle
 class RectTool : public CanvasTool {
 protected:
-    Vec2d draw_start;            ///< Previous mouse click position
-    Widget *rect_preview;           ///< Widget that draws preview of the rectangle
+    Vec2d draw_start;           ///< Previous mouse click position
+    Widget *rect_preview;       ///< Widget that draws preview of the rectangle
 
 
     /**
@@ -84,8 +84,8 @@ public:
 /// Tool for drawing line
 class LineTool : public CanvasTool {
 protected:
-    Vec2d draw_start;            ///< Previous mouse click position
-    Widget *line_preview;           ///< Widget that draws preview of the line
+    Vec2d draw_start;           ///< Previous mouse click position
+    Widget *line_preview;       ///< Widget that draws preview of the line
 
 public:
     LineTool();
@@ -136,8 +136,8 @@ public:
 /// Tool for drawing polygon
 class PolygonTool : public CanvasTool {
 protected:
-    List<Vec2d> points;          ///< Points that form polygon
-    Widget *polygon_preview;        ///< Widget that draws preview of the polygon
+    List<Vec2d> points;         ///< Points that form polygon
+    Widget *polygon_preview;    ///< Widget that draws preview of the polygon
 
 public:
     PolygonTool();
@@ -231,18 +231,6 @@ public:
 
 /// GUI for ToolPalette
 class ToolPaletteView : public Widget {
-protected:
-    Container buttons;                  ///< ToolPalette buttons for tool selection
-    ToolPalette *palette;               ///< ToolPalette which this ToolPaletteView affects
-    const PaletteViewAsset &asset;      ///< Assets for buttons
-    ButtonGroup *group;                 ///< Tool buttons group
-
-
-    /**
-     * \brief Checks which tool is active and sets corresponding button as pressed in group
-    */
-    void updateToolButtons();
-
 public:
     ToolPaletteView(
         size_t id_, const LayoutBox &layout_,
@@ -253,17 +241,33 @@ public:
     ToolPaletteView(const ToolPaletteView &palette_view) = default;
     ToolPaletteView &operator = (const ToolPaletteView &palette_view) = default;
 
-
+    /**
+     * \brief Draws tool buttons
+    */
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
+    /**
+     * \brief Broadcast events to tool buttons
+    */
+    virtual void onEvent(const Event &event, EHC &ehc) override;
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onKeyDown(int key_id) override;
-
-
+    /**
+     * \brief Deletes tool buttons
+    */
     virtual ~ToolPaletteView();
+
+protected:
+    Container buttons;                  ///< ToolPalette buttons for tool selection
+    ToolPalette *palette;               ///< ToolPalette which this ToolPaletteView affects
+    const PaletteViewAsset &asset;      ///< Assets for buttons
+    ButtonGroup *group;                 ///< Tool buttons group
+
+    /**
+     * \brief Checks which tool is active and sets corresponding button as pressed in group
+    */
+    void updateToolButtons();
+
+    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
 };
 
 
@@ -467,19 +471,9 @@ class HScrollCanvas;
 
 /// Holds texture to draw on
 class Canvas : public Widget {
-protected:
-    sf::RenderTexture texture;
-    Vec2d texture_offset;
-    ToolPalette *palette;
-    Vec2d last_position;
-    CanvasGroup *group;
-    FilterMask filter_mask;
-    std::string filename;
-
 public:
     friend VScrollCanvas;
     friend HScrollCanvas;
-
 
     /**
      * \brief Creates empty canvas
@@ -561,17 +555,30 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onKeyDown(int key_id) override;
-    virtual EVENT_STATUS onKeyUp(int key_id) override;
-    virtual EVENT_STATUS onTimer(float delta_time) override;
+    /**
+     * \brief Broadcast events to tool widget
+    */
+    virtual void onEvent(const Event &event, EHC &ehc) override;
 
     /**
      * \brief Removes canvas from his group
     */
     virtual ~Canvas() override;
+
+protected:
+    sf::RenderTexture texture;
+    Vec2d texture_offset;
+    ToolPalette *palette;
+    Vec2d last_position;
+    CanvasGroup *group;
+    FilterMask filter_mask;
+    std::string filename;
+
+    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
+    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
+    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
+    virtual void onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc) override;
 };
 
 
@@ -611,14 +618,13 @@ public:
 
 /// Supports hot keys for applying filters
 class FilterHotkey : public Widget {
-private:
-    FilterPalette &palette;
-    CanvasGroup &group;
-    bool ctrl_pressed;
-
 public:
     FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_);
 
-    virtual EVENT_STATUS onKeyDown(int key_id) override;
-    virtual EVENT_STATUS onKeyUp(int key_id) override;
+protected:
+    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
+
+private:
+    FilterPalette &palette;
+    CanvasGroup &group;
 };

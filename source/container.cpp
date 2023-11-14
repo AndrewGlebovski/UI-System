@@ -11,6 +11,7 @@
 #include <SFML/Graphics.hpp>
 #include "vector.hpp"
 #include "list.hpp"
+#include "key-id.hpp"
 #include "widget.hpp"
 #include "container.hpp"
 
@@ -114,87 +115,40 @@ void Container::removeChild(size_t child_id) {
 }
 
 
-/**
- * \brief Special define for short loops inside container's event handler
-*/
-#define CONTAINER_FOR(CALL_FUNC, ...)                                               \
-do {                                                                                \
-    if (focus_enabled) {                                                            \
-        if (widgets[focused]->CALL_FUNC == HANDLED) return HANDLED;                 \
-        \
-        for (size_t i = 0; i < focused; i++)                                        \
-            if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; }  \
-        \
-        for (size_t i = focused + 1; i < widgets.size(); i++)                       \
-            if (widgets[i]->CALL_FUNC == HANDLED) { __VA_ARGS__; return HANDLED; }  \
-    }                                                                               \
-    else {                                                                          \
-        for (size_t i = 0; i < widgets.size(); i++)                                 \
-            if (widgets[i]->CALL_FUNC == HANDLED) return HANDLED;                   \
-    }                                                                               \
+#define CHECK_EHC(CALL_FUNC)                    \
+do {                                            \
+    CALL_FUNC;                                  \
+    if (ehc.stopped) {                          \
+        if (event.getType() == MousePressed)    \
+            focused = i;                        \
+        return;                                 \
+    }                                           \
 } while(0)
 
 
-EVENT_STATUS Container::onMouseMove(const Vec2d &mouse, TransformStack &stack) {
-    if (widgets.size() == 0) return UNHANDLED;
+void Container::onEvent(const Event &event, EHC &ehc) {
+    if (widgets.size() == 0) return;
 
-    TransformApplier add_transform(stack, getTransform());
+    TransformApplier add_transform(ehc.stack, getTransform());
 
-    CONTAINER_FOR(onMouseMove(mouse, stack));
-    
-    return UNHANDLED;
+    if (focus_enabled) {
+        widgets[focused]->onEvent(event, ehc);
+        if (ehc.stopped) return;
+
+        for (size_t i = 0; i < focused; i++)
+            CHECK_EHC(widgets[i]->onEvent(event, ehc));
+
+        for (size_t i = focused + 1; i < widgets.size(); i++)
+            CHECK_EHC(widgets[i]->onEvent(event, ehc));
+    }
+    else {
+        for (size_t i = 0; i < widgets.size(); i++)
+            CHECK_EHC(widgets[i]->onEvent(event, ehc));
+    }
 }
 
 
-EVENT_STATUS Container::onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    if (widgets.size() == 0) return UNHANDLED;
-
-    TransformApplier add_transform(stack, getTransform());
-
-    CONTAINER_FOR(onMouseButtonUp(mouse, button_id, stack));
-    
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS Container::onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) {
-    if (widgets.size() == 0) return UNHANDLED;
-
-    TransformApplier add_transform(stack, getTransform());
-
-    CONTAINER_FOR(onMouseButtonDown(mouse, button_id, stack), focused = i);
-    
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS Container::onKeyUp(int key_id) {
-    if (widgets.size() == 0) return UNHANDLED;
-
-    CONTAINER_FOR(onKeyUp(key_id));
-    
-    return UNHANDLED;
-}
-
-
-EVENT_STATUS Container::onKeyDown(int key_id) {
-    if (widgets.size() == 0) return UNHANDLED;
-
-    CONTAINER_FOR(onKeyDown(key_id));
-    
-    return UNHANDLED;
-}
-
-
-#undef CONTAINER_FOR
-
-
-EVENT_STATUS Container::onTimer(float delta_time) {
-    for (size_t i = 0; i < widgets.size(); i++)
-        widgets[i]->onTimer(delta_time);
-    
-    return UNHANDLED;
-}
+#undef CHECK_EHC
 
 
 void Container::onParentUpdate(const LayoutBox &parent_layout) {

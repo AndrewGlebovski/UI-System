@@ -45,21 +45,6 @@ class ButtonGroup;
 
 /// Button that holds action, can be in group and have status
 class ActionButton : public BaseButton {
-protected:
-    ButtonAction *action;
-    ButtonGroup *group;
-    int status;
-
-    /**
-     * \brief Checks if group != nullptr
-    */
-    bool isInGroup() const;
-
-    /**
-     * \brief Checks if group != nullptr and button is pressed
-    */
-    bool isPressedInGroup() const;
-
 public:
     /// Button status
     enum BUTTON_STATUS {
@@ -112,14 +97,29 @@ public:
     */
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override = 0;
 
-    virtual EVENT_STATUS onMouseMove(const Vec2d &mouse, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonDown(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-    virtual EVENT_STATUS onMouseButtonUp(const Vec2d &mouse, int button_id, TransformStack &stack) override;
-
     /**
      * \brief Delete action if button has one
     */
     virtual ~ActionButton() override;
+
+protected:
+    ButtonAction *action;
+    ButtonGroup *group;
+    int status;
+
+    /**
+     * \brief Checks if group != nullptr
+    */
+    bool isInGroup() const;
+
+    /**
+     * \brief Checks if group != nullptr and button is pressed
+    */
+    bool isPressedInGroup() const;
+
+    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
+    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
 };
 
 
