@@ -22,8 +22,8 @@
 
 
 const float MIN_OUTLINE = 0.0001f;                          ///< If outline is smaller then window can not be resized
-const Vec2d CLOSE_OFFSET = Vec2d(-45, 12);                  ///< Window close button offset from window top-right corner
-const Vec2d EXPAND_OFFSET = Vec2d(-85, 12);                 ///< Window expand button offset from window top-right corner
+const Vec2d CLOSE_OFFSET = Vec2d(-45, 12);                 ///< Window close button offset from window top-right corner
+const Vec2d EXPAND_OFFSET = Vec2d(-85, 12);                ///< Window expand button offset from window top-right corner
 const size_t CLOSE_BUTTON_ID = Widget::AUTO_ID + 1;         ///< Window append button ID
 const size_t EXPAND_BUTTON_ID = Widget::AUTO_ID + 2;        ///< Window close button ID
 const size_t BUTTONS_ID = Widget::AUTO_ID + 3;              ///< Window buttons container ID
@@ -62,7 +62,7 @@ protected:
 // ============================================================================
 
 
-class MoveLayoutBox : public BasicLayoutBox {
+class MoveLayoutBox : public BoundLayoutBox {
 private:
     MoveButton &btn;
 
@@ -119,7 +119,7 @@ protected:
 // ============================================================================
 
 
-class ResizeLayoutBox : public BasicLayoutBox {
+class ResizeLayoutBox : public BoundLayoutBox {
 private:
     ResizeButton &btn;
 
@@ -135,24 +135,13 @@ public:
 // ============================================================================
 
 
-class ContainerLayoutBox : public BasicLayoutBox {
+class ContainerLayoutBox : public BoundLayoutBox {
 private:
     Window &window;
 
 public:
     ContainerLayoutBox(Window &window_);
 
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
-
-    virtual LayoutBox *clone() const override;
-};
-
-
-// ============================================================================
-
-
-class FillLayoutBox : public BasicLayoutBox {
-public:
     virtual void onParentUpdate(const LayoutBox &parent_layout) override;
 
     virtual LayoutBox *clone() const override;
@@ -233,12 +222,21 @@ Window::Window(
 ) :
     Widget(id_, layout_),
     title(title_), style(style_),
-    buttons(BUTTONS_ID, FillLayoutBox(), false), 
+    buttons(
+        BUTTONS_ID,
+        AnchorLayoutBox(
+            Vec2d(),
+            Vec2d(SCREEN_W, SCREEN_H),
+            Vec2d(),
+            Vec2d(SCREEN_W, SCREEN_H)
+        ),
+        false
+    ), 
     container(CONTAINER_ID, ContainerLayoutBox(*this)),
     menu(nullptr)
 {
-    buttons.onParentUpdate(*layout);
-    container.onParentUpdate(*layout);
+    buttons.setParent(this);
+    container.setParent(this);
 
     addButtons(can_resize, can_move, can_close);
 }
@@ -257,7 +255,12 @@ void Window::addButtons(bool can_resize, bool can_move, bool can_close) {
 void Window::addCloseButton() {
     TextureIconButton *close_btn = new TextureIconButton(
         CLOSE_BUTTON_ID,
-        OffsetLayoutBox(CLOSE_OFFSET, Vec2d(1, 0), Vec2d()),
+        AnchorLayoutBox(
+            CLOSE_OFFSET,
+            Vec2d(),
+            Vec2d(SCREEN_W, 0),
+            Vec2d()
+        ),
         new CloseAction(*this),
         style.asset[WindowAsset::BUTTON_NORMAL],
         style.asset[WindowAsset::BUTTON_HOVER],
@@ -268,15 +271,18 @@ void Window::addCloseButton() {
     close_btn->setZIndex(1);
 
     buttons.addChild(close_btn);
-
-    close_btn->onParentUpdate(buttons.getLayoutBox());
 }
 
 
 void Window::addExpandButton() {
     TextureIconButton *expand_btn = new TextureIconButton(
         EXPAND_BUTTON_ID,
-        OffsetLayoutBox(EXPAND_OFFSET, Vec2d(1, 0), Vec2d()),
+        AnchorLayoutBox(
+            EXPAND_OFFSET,
+            Vec2d(),
+            Vec2d(SCREEN_W, 0),
+            Vec2d()
+        ),
         new ExpandAction(*this),
         style.asset[WindowAsset::BUTTON_NORMAL],
         style.asset[WindowAsset::BUTTON_HOVER],
@@ -287,8 +293,6 @@ void Window::addExpandButton() {
     expand_btn->setZIndex(1);
 
     buttons.addChild(expand_btn);
-
-    expand_btn->onParentUpdate(buttons.getLayoutBox());
 }
 
 
@@ -515,23 +519,38 @@ void MainWindow::parseEvent(const sf::Event &event, TransformStack &stack) {
 
     switch (event.type) {
         case sf::Event::KeyPressed: {
-            if (KEY_ID(event.key.code) == LShift) shift = true;
-            if (KEY_ID(event.key.code) == RShift) shift = true;
-            if (KEY_ID(event.key.code) == LControl) ctrl = true;
-            if (KEY_ID(event.key.code) == RControl) ctrl = true;
-            if (KEY_ID(event.key.code) == LAlt) alt = true;
-            if (KEY_ID(event.key.code) == RAlt) alt = true;
+            switch (KEY_ID(event.key.code)) {
+                case LShift:
+                case RShift:
+                    shift = true; break;
+                case LControl:
+                case RControl:
+                    ctrl = true; break;
+                case LAlt:
+                case RAlt:
+                    alt = true; break;
+                default:
+                    break;
+            }
 
             KeyboardPressedEvent event_(KEY_ID(event.key.code), shift, ctrl, alt);
+
             onEvent(event_, ehc); break;
         }
         case sf::Event::KeyReleased: {
-            if (KEY_ID(event.key.code) == LShift) shift = false;
-            if (KEY_ID(event.key.code) == RShift) shift = false;
-            if (KEY_ID(event.key.code) == LControl) ctrl = false;
-            if (KEY_ID(event.key.code) == RControl) ctrl = false;
-            if (KEY_ID(event.key.code) == LAlt) alt = false;
-            if (KEY_ID(event.key.code) == RAlt) alt = false;
+            switch (KEY_ID(event.key.code)) {
+                case LShift:
+                case RShift:
+                    shift = false; break;
+                case LControl:
+                case RControl:
+                    ctrl = false; break;
+                case LAlt:
+                case RAlt:
+                    alt = false; break;
+                default:
+                    break;
+            }
 
             KeyboardReleasedEvent event_(KEY_ID(event.key.code), shift, ctrl, alt);
             onEvent(event_, ehc); break;
@@ -573,9 +592,7 @@ MoveButton::MoveButton(
 ) :
     BaseButton(id_, MoveLayoutBox(*this)),
     window(window_), prev_mouse(Vec2d()), is_moving(false)
-{
-    layout->onParentUpdate(window.getLayoutBox());
-}
+{}
 
 
 void MoveButton::draw(sf::RenderTarget &result, TransformStack &stack) {
@@ -652,9 +669,7 @@ ResizeButton::ResizeButton(
 ) :
     BaseButton(id_, ResizeLayoutBox(*this)),
     window(window_), prev_mouse(Vec2d()), is_moving(false), resize_dir(resize_dir_)
-{
-    onParentUpdate(window.getLayoutBox());
-}
+{}
 
 
 void ResizeButton::draw(sf::RenderTarget &result, TransformStack &stack) {
@@ -810,29 +825,14 @@ ContainerLayoutBox::ContainerLayoutBox(Window &window_) :
 
 
 void ContainerLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
-    bounds = window.getAreaSize();
+    bound = window.getAreaSize();
     position = window.getAreaPosition();
-    size = bounds;
+    size = bound;
 }
 
 
 LayoutBox *ContainerLayoutBox::clone() const {
     return new ContainerLayoutBox(window);
-}
-
-
-// ============================================================================
-
-
-void FillLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
-    bounds = parent_layout.getSize();
-    position = Vec2d();
-    size = bounds;
-}
-
-
-LayoutBox *FillLayoutBox::clone() const {
-    return new FillLayoutBox();
 }
 
 

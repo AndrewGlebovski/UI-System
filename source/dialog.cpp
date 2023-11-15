@@ -81,7 +81,7 @@ ConfirmDialog::ConfirmDialog(
 
     container.addChild(new RectButton(
         1,
-        BasicLayoutBox(Vec2d(), Vec2d(100, 50)),
+        LazyLayoutBox(Vec2d(), Vec2d(100, 50)),
         ok_action_,
         "Ok",
         button_style_
@@ -89,7 +89,7 @@ ConfirmDialog::ConfirmDialog(
 
     container.addChild(new RectButton(
         2,
-        BasicLayoutBox(Vec2d(120, 0), Vec2d(100, 50)),
+        LazyLayoutBox(Vec2d(120, 0), Vec2d(100, 50)),
         cancel_action_,
         "Cancel",
         button_style_
@@ -137,7 +137,7 @@ SelectFileDialog::SelectFileDialog(
 
     container.addChild(new RectButton(
         1,
-        BasicLayoutBox(Vec2d(0, 50), Vec2d(100, 50)),
+        LazyLayoutBox(Vec2d(0, 50), Vec2d(100, 50)),
         select_action_,
         "Select",
         button_style
@@ -145,7 +145,7 @@ SelectFileDialog::SelectFileDialog(
 
     container.addChild(new RectButton(
         2,
-        BasicLayoutBox(Vec2d(120, 50), Vec2d(100, 50)),
+        LazyLayoutBox(Vec2d(120, 50), Vec2d(100, 50)),
         cancel_action_,
         "Cancel",
         button_style
@@ -153,7 +153,7 @@ SelectFileDialog::SelectFileDialog(
 
     LineEdit *line_edit = new LineEdit(
         3,
-        BasicLayoutBox(Vec2d(), Vec2d(getAreaSize().x, 30)),
+        LazyLayoutBox(Vec2d(), Vec2d(getAreaSize().x, 30)),
         line_edit_style,
         MAX_FILENAME_LENGTH
     );

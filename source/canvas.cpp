@@ -583,7 +583,7 @@ void ToolPaletteView::updateToolButtons() {
 do {                                                            \
     TextureIconButton *btn =  new TextureIconButton(            \
         Widget::AUTO_ID + TOOL_ID + 1,                          \
-        BasicLayoutBox(POSITION, Vec2d()),                      \
+        LazyLayoutBox(POSITION, Vec2d()),                       \
         new PaletteAction(*palette, TOOL_ID),                   \
         asset[PaletteViewAsset::NORMAL_TEXTURE],                \
         asset[PaletteViewAsset::NORMAL_TEXTURE],                \
@@ -600,7 +600,7 @@ ToolPaletteView::ToolPaletteView(
     ToolPalette *palette_, const PaletteViewAsset &asset_
 ) :
     Widget(id_, layout_), 
-    buttons(1, BasicLayoutBox(Vec2d(), layout->getSize()), false),
+    buttons(1, LazyLayoutBox(Vec2d(), layout->getSize()), false),
     palette(palette_), asset(asset_), group(nullptr)
 {
     buttons.setParent(this);
@@ -1163,7 +1163,7 @@ Canvas::~Canvas() {
 
 
 FilterHotkey::FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_) :
-    Widget(AUTO_ID, BasicLayoutBox()),
+    Widget(AUTO_ID, BoundLayoutBox()),
     palette(palette_), group(group_)
 {}
 

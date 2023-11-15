@@ -64,14 +64,14 @@ int main() {
 
     MainWindow *main_window = new MainWindow(
         Widget::AUTO_ID,
-        BasicLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H)),
+        BoundLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H)),
         "Paint",
         window_style
     );
     
     Menu *main_menu = new Menu(
         Widget::AUTO_ID,
-        BasicLayoutBox(),
+        BoundLayoutBox(),
         RectButtonStyle(
             sf::Color(0xd4d0c8ff),
             sf::Color(0x000080ff),
@@ -106,7 +106,7 @@ int main() {
     
     main_window->addChild(new Clock(
         Widget::AUTO_ID,
-        BasicLayoutBox(Vec2d(), Vec2d(100, 50)),
+        BoundLayoutBox(Vec2d(), Vec2d(100, 50)),
         clock_style
     ));
     
@@ -170,7 +170,7 @@ Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, P
 
     Window *subwindow = new Window(
         Widget::AUTO_ID,
-        BasicLayoutBox(Vec2d(0, 100), Vec2d(218, 451)),
+        BoundLayoutBox(Vec2d(0, 100), Vec2d(218, 451)),
         "Tools",
         subwindow_style,
         false,
@@ -180,7 +180,7 @@ Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, P
 
     subwindow->addChild(new ToolPaletteView(
         Widget::AUTO_ID,
-        BasicLayoutBox(Vec2d(), Vec2d(188, 376)),
+        BoundLayoutBox(Vec2d(), Vec2d(188, 376)),
         palette,
         palette_asset
     ));

@@ -157,16 +157,12 @@ public:
 };
 
 
-class BasicLayoutBox : public LayoutBox {
-protected:
-    Vec2d position;         ///< Widget position
-    Vec2d size;             ///< Widget size
-    Vec2d bounds;           ///< Parent size
-
+/// Simply stores given position and size
+class LazyLayoutBox : public LayoutBox {
 public:
-    BasicLayoutBox();
+    LazyLayoutBox();
 
-    BasicLayoutBox(const Vec2d &position_, const Vec2d &size_);
+    LazyLayoutBox(const Vec2d &position_, const Vec2d &size_);
     
     virtual Vec2d getPosition() const override;
 
@@ -178,48 +174,91 @@ public:
 
     virtual void onParentUpdate(const LayoutBox &parent_layout) override;
 
+    virtual LayoutBox *clone() const override;
+
+protected:
+    Vec2d position;         ///< Widget position
+    Vec2d size;             ///< Widget size
+};
+
+
+/// Respects parent's size and can't go outside of it
+class BoundLayoutBox : public LazyLayoutBox {
+public:
+    /**
+     * \brief Zero position and size
+     * \note Bound is set to SCREEN SIZE
+    */
+    BoundLayoutBox();
+
+    /**
+     * \brief Sets position and size
+     * \note Bound is set to SCREEN SIZE
+    */
+    BoundLayoutBox(const Vec2d &position_, const Vec2d &size_);
+
+    /**
+     * \brief Sets position according to bound
+    */
+    virtual bool setPosition(const Vec2d& position_) override;
+
+    /**
+     * \brief Sets size according to bound
+    */
+    virtual bool setSize(const Vec2d& size_) override;
+
+    /**
+     * \brief Updates bound and changes size and position according to new bound
+    */
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+
     /**
      * \brief Clones position and size but not bounds
     */
     virtual LayoutBox *clone() const override;
+
+protected:
+    Vec2d bound;           ///< Parent size
 };
 
 
-class OffsetLayoutBox : public BasicLayoutBox {
-protected:
-    Vec2d offset;
-    Vec2d origin;
-
+/// Anchor implementation
+class AnchorLayoutBox : public LazyLayoutBox {
 public:
-    OffsetLayoutBox(const Vec2d &offset_, const Vec2d &origin_, const Vec2d &size_);
+    /**
+     * \brief Sets anchor
+     * \note One unit is one pixel, max size is Vec2d(SCREEN_W, SCREEN_H)
+    */
+    AnchorLayoutBox(
+        const Vec2d &offset_, const Vec2d &size_,
+        const Vec2d &anchor_position_, const Vec2d &anchor_size_
+    );
 
+    /**
+     * \brief Sets widget offset from anchor
+    */
+    virtual bool setPosition(const Vec2d& offset_) override;
+
+    /**
+     * \brief Sets widget basic size
+    */
+    virtual bool setSize(const Vec2d& basic_size_) override;
+
+    /**
+     * \brief Updates widget position and size
+    */
     virtual void onParentUpdate(const LayoutBox &parent_layout) override;
 
+    /**
+     * \brief Copies all information
+    */
     virtual LayoutBox *clone() const override;
-};
 
-
-class LazyLayoutBox : public BasicLayoutBox {
-public:
-    using BasicLayoutBox::BasicLayoutBox;
-
-    virtual bool setPosition(const Vec2d& position_) override {
-        position = position_;
-        return true;
-    }
-
-    virtual bool setSize(const Vec2d& size_) override {
-        size = size_;
-        return true;
-    }
-
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override {
-        bounds = parent_layout.getSize();
-    }
-
-    virtual LayoutBox *clone() const override {
-        return new LazyLayoutBox(position, size);
-    }
+protected:
+    Vec2d offset;               ///< Widget offset from anchor top-left corner
+    Vec2d basic_size;           ///< Widget basic size (without scaling)
+    Vec2d anchor_position;      ///< Anchor's top-left corner position
+    Vec2d anchor_size;          ///< Defines anchor's bottom-right corner position
 };
 
 
