@@ -10,17 +10,7 @@
 
 
 #include <SFML/Graphics.hpp>
-#include "vector.hpp"
-#include "list.hpp"
-#include "configs.hpp"
-#include "key-id.hpp"
-#include "asset.hpp"
-#include "widget.hpp"
-#include "container.hpp"
-#include "button.hpp"
-#include "scrollbar.hpp"
-#include "line-edit.hpp"
-#include "canvas.hpp"
+#include "canvas/canvas.hpp"
 
 
 const sf::Color PREVIEW_COLOR = sf::Color::Blue;        ///< Standart color for all previews

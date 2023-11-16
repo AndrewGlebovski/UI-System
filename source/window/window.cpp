@@ -9,21 +9,12 @@
 
 
 #include <SFML/Graphics.hpp>
-#include "vector.hpp"
-#include "list.hpp"
-#include "asset.hpp"
-#include "configs.hpp"
-#include "key-id.hpp"
-#include "widget.hpp"
-#include "container.hpp"
-#include "button.hpp"
-#include "menu.hpp"
-#include "window.hpp"
+#include "window/window.hpp"
 
 
 const float MIN_OUTLINE = 0.0001f;                          ///< If outline is smaller then window can not be resized
-const Vec2d CLOSE_OFFSET = Vec2d(-45, 12);                 ///< Window close button offset from window top-right corner
-const Vec2d EXPAND_OFFSET = Vec2d(-85, 12);                ///< Window expand button offset from window top-right corner
+const Vec2d CLOSE_OFFSET = Vec2d(-45, 12);                  ///< Window close button offset from window top-right corner
+const Vec2d EXPAND_OFFSET = Vec2d(-85, 12);                 ///< Window expand button offset from window top-right corner
 const size_t CLOSE_BUTTON_ID = Widget::AUTO_ID + 1;         ///< Window append button ID
 const size_t EXPAND_BUTTON_ID = Widget::AUTO_ID + 2;        ///< Window close button ID
 const size_t BUTTONS_ID = Widget::AUTO_ID + 3;              ///< Window buttons container ID

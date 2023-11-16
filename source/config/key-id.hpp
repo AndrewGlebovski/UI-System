@@ -4,6 +4,10 @@
 */
 
 
+#ifndef _KEY_ID_H_
+#define _KEY_ID_H_
+
+
 /// IDs of keyboard keys
 enum KEY_ID {
     Unknown = -1, ///< Unhandled key
@@ -119,3 +123,6 @@ enum MOUSE_BUTTON_ID {
     XButton1,       ///< The first extra mouse button
     XButton2,       ///< The second extra mouse button
 };
+
+
+#endif

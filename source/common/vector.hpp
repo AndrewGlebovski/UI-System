@@ -4,6 +4,10 @@
 */
 
 
+#ifndef _VECTOR_H_
+#define _VECTOR_H_
+
+
 /// Vector component type
 typedef double vec_t;
 
@@ -178,3 +182,6 @@ bool operator == (const Vec2d &a, const Vec2d &b);
  * \brief Checks if two floats are equal
 */
 bool isEqual(vec_t a, vec_t b);
+
+
+#endif

@@ -4,6 +4,14 @@
 */
 
 
+#ifndef _BUTTONS_H_
+#define _BUTTONS_H_
+
+
+#include "common/asset.hpp"
+#include "widget/widget.hpp"
+
+
 /// Base class for all buttons
 class BaseButton : public Widget {
 public:
@@ -275,3 +283,6 @@ public:
 
     virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
 };
+
+
+#endif

@@ -4,6 +4,13 @@
 */
 
 
+#ifndef _SCROLLBAR_H_
+#define _SCROLLBAR_H_
+
+
+#include "widget/widget.hpp"
+
+
 /// Triggers when scroller moves
 class ScrollAction {
 public:
@@ -109,3 +116,6 @@ public:
 
     virtual void onParentUpdate(const LayoutBox &parent_layout) override;
 };
+
+
+#endif

@@ -10,12 +10,7 @@
 
 
 #include <SFML/Graphics.hpp>
-#include "vector.hpp"
-#include "list.hpp"
-#include "key-id.hpp"
-#include "configs.hpp"
-#include "widget.hpp"
-#include "line-edit.hpp"
+#include "basic/line-edit.hpp"
 
 
 // ============================================================================

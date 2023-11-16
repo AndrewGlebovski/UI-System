@@ -4,6 +4,15 @@
 */
 
 
+#ifndef _WINDOW_H_
+#define _WINDOW_H_
+
+
+#include "basic/container.hpp"
+#include "basic/button.hpp"
+#include "window/menu.hpp"
+
+
 /// Controls how window looks
 class WindowStyle {
 public:
@@ -184,3 +193,6 @@ public:
     */
     virtual void onParentUpdate(const LayoutBox &parent_layout) override;
 };
+
+
+#endif

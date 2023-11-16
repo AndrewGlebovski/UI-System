@@ -1,3 +1,10 @@
+#ifndef _CLOCK_H_
+#define _CLOCK_H_
+
+
+#include "widget/widget.hpp"
+
+
 /// Controls how clock looks
 class ClockStyle {
 public:
@@ -69,3 +76,6 @@ protected:
         }
     }
 };
+
+
+#endif

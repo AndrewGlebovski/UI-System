@@ -4,6 +4,18 @@
 */
 
 
+#ifndef _CANVAS_H_
+#define _CANVAS_H_
+
+
+#include "common/asset.hpp"
+#include "widget/widget.hpp"
+#include "basic/container.hpp"
+#include "basic/button.hpp"
+#include "basic/line-edit.hpp"
+#include "basic/scrollbar.hpp"
+
+
 class Canvas;
 
 
@@ -628,3 +640,6 @@ private:
     FilterPalette &palette;
     CanvasGroup &group;
 };
+
+
+#endif

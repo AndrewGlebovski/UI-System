@@ -3,6 +3,14 @@
  * \brief This file contains import constant values
 */
 
+
+#ifndef _CONFIGS_H_
+#define _CONFIGS_H_
+
+
+#include "common/vector.hpp"
+
+
 const int SCREEN_W = 1920;                      ///< Screen width in pixels
 const int SCREEN_H = 1080;                      ///< Screen height in pixels
 
@@ -38,3 +46,6 @@ const float CURSOR_OFFSET = 2;              ///< Cursor position offset from Lin
 
 /// Path to font file
 #define FONT_FILE "assets/MainFont.ttf"
+
+
+#endif

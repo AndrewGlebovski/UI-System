@@ -2,22 +2,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <sys/stat.h>
-#include "vector.hpp"
-#include "key-id.hpp"
-#include "list.hpp"
-#include "configs.hpp"
-#include "asset.hpp"
-#include "widget.hpp"
-#include "container.hpp"
-#include "button.hpp"
-#include "line-edit.hpp"
-#include "scrollbar.hpp"
-#include "menu.hpp"
-#include "window.hpp"
-#include "canvas.hpp"
-#include "clock.hpp"
-#include "dialog.hpp"
-#include "canvas_dialogs.hpp"
+#include "basic/clock.hpp"
+#include "canvas/canvas_dialogs.hpp"
 
 
 /// Creates palette view in new subwindow

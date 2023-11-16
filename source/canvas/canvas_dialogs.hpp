@@ -1,3 +1,12 @@
+#ifndef _CANVAS_DIALOGS_H_
+#define _CANVAS_DIALOGS_H_
+
+
+#include "canvas/canvas.hpp"
+#include "window/dialog.hpp"
+#include "basic/scrollbar.hpp"
+
+
 /**
  * \brief Opens picture on canvas in new subwindow with scrollbars
  * \note If image fails to open, then nullptr will be returned
@@ -256,3 +265,6 @@ public:
         return new SaveAsFileAction(group);
     }
 };
+
+
+#endif

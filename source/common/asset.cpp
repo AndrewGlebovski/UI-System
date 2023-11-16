@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "asset.hpp"
+#include "common/asset.hpp"
 
 
 const size_t MAX_PATH = 256;

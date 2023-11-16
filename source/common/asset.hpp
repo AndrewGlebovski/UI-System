@@ -4,6 +4,10 @@
 */
 
 
+#ifndef _ASSET_H_
+#define _ASSET_H_
+
+
 /// Base class for all assets
 class Asset {
 protected:
@@ -98,3 +102,6 @@ public:
 
     const sf::Texture &operator [] (TEXTURE_ID id) const;
 };
+
+
+#endif

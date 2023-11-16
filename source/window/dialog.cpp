@@ -9,18 +9,7 @@
 
 
 #include <SFML/Graphics.hpp>
-#include "vector.hpp"
-#include "list.hpp"
-#include "asset.hpp"
-#include "key-id.hpp"
-#include "configs.hpp"
-#include "widget.hpp"
-#include "container.hpp"
-#include "button.hpp"
-#include "menu.hpp"
-#include "window.hpp"
-#include "line-edit.hpp"
-#include "dialog.hpp"
+#include "window/dialog.hpp"
 
 
 // ============================================================================

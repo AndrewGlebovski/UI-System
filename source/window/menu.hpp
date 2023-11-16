@@ -4,6 +4,14 @@
 */
 
 
+#ifndef _MENU_H_
+#define _MENU_H_
+
+
+#include "widget/widget.hpp"
+#include "basic/button.hpp"
+
+
 /// Drops down list of options
 class MenuButton : public RectButton {
 public:
@@ -92,3 +100,6 @@ public:
     */
     virtual ~Menu() override;
 };
+
+
+#endif

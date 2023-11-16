@@ -4,6 +4,13 @@
 */
 
 
+#ifndef _CONTAINER_H_
+#define _CONTAINER_H_
+
+
+#include "widget/widget.hpp"
+
+
 /// Manages widgets
 class Container : public Widget {
 public:
@@ -66,5 +73,7 @@ protected:
      * \brief Remvoes widget by its index in widgets array
     */
     void removeWidget(size_t index);
-
 };
+
+
+#endif

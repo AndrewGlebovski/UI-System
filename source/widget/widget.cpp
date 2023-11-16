@@ -6,10 +6,6 @@
 
 #include <SFML/Graphics.hpp>
 #include <cmath>
-#include "vector.hpp"
-#include "configs.hpp"
-#include "key-id.hpp"
-#include "list.hpp"
 #include "widget.hpp"
 
 

@@ -10,13 +10,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <limits>
-#include "vector.hpp"
-#include "list.hpp"
-#include "key-id.hpp"
-#include "asset.hpp"
-#include "widget.hpp"
-#include "button.hpp"
-#include "menu.hpp"
+#include "window/menu.hpp"
 
 
 const size_t INVALID_OPENED = std::numeric_limits<size_t>::max();   ///< No opened menu at the moment

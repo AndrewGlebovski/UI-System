@@ -9,11 +9,7 @@
 
 
 #include <SFML/Graphics.hpp>
-#include "vector.hpp"
-#include "list.hpp"
-#include "key-id.hpp"
-#include "widget.hpp"
-#include "container.hpp"
+#include "basic/container.hpp"
 
 
 Container::Container(

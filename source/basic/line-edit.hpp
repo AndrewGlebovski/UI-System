@@ -4,6 +4,13 @@
 */
 
 
+#ifndef _LINE_EDIT_H_
+#define _LINE_EDIT_H_
+
+
+#include "widget/widget.hpp"
+
+
 /// Controls how LineEdit looks like
 struct LineEditStyle {
     const sf::Font *font;       ///< Font
@@ -122,3 +129,6 @@ protected:
     virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
     virtual void onTick(const TickEvent &event, EHC &ehc) override;
 };
+
+
+#endif

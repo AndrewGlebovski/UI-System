@@ -4,7 +4,7 @@
 #include "vector.hpp"
 
 
-const vec_t EPS = 0.0001;           ///< Requiered for comparsion
+const vec_t EPS = 1e-5;             ///< Requiered for comparsion
 
 
 Vec2d::Vec2d() : x(0), y(0) {}

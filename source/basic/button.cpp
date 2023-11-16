@@ -9,12 +9,7 @@
 
 
 #include <SFML/Graphics.hpp>
-#include "vector.hpp"
-#include "list.hpp"
-#include "key-id.hpp"
-#include "asset.hpp"
-#include "widget.hpp"
-#include "button.hpp"
+#include "basic/button.hpp"
 
 
 // ============================================================================

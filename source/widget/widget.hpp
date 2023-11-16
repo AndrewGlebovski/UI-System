@@ -4,6 +4,16 @@
 */
 
 
+#ifndef _WIDGET_H_
+#define _WIDGET_H_
+
+
+#include "config/configs.hpp"
+#include "config/key-id.hpp"
+#include "common/list.hpp"
+#include "common/vector.hpp"
+
+
 /// Holds transformation
 class Transform {
 private:
@@ -503,3 +513,6 @@ protected:
  * \brief Checks if point is inside rectangle
 */
 bool isInsideRect(Vec2d position, Vec2d size, Vec2d point);
+
+
+#endif

@@ -70,4 +70,4 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 # Удаляет результаты компиляции
 .PHONY : clean
 clean :
-	@rm $(BIN) $(OBJ) $(DEP)
+	@rm -rf $(BIN) $(BUILD_DIR)

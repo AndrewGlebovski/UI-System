@@ -4,6 +4,10 @@
 */
 
 
+#ifndef _LIST_H_
+#define _LIST_H_
+
+
 #define ASSERT(condition, message)                                          \
 do {                                                                        \
     if (!(condition)) {                                                     \
@@ -279,3 +283,6 @@ public:
         capacity_ = 0;
     }
 };
+
+
+#endif

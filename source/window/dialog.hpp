@@ -4,6 +4,14 @@
 */
 
 
+#ifndef _DIALOG_H_
+#define _DIALOG_H_
+
+
+#include "window/window.hpp"
+#include "basic/line-edit.hpp"
+
+
 /// Base class for all dialogs
 class Dialog : public Window {
 public:
@@ -89,3 +97,6 @@ public:
     */
     const char *getFilename();
 };
+
+
+#endif
