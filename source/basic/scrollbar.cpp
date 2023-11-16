@@ -4,10 +4,6 @@
 */
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
-
 #include <SFML/Graphics.hpp>
 #include "basic/scrollbar.hpp"
 
@@ -154,6 +150,3 @@ void HScrollBar::onParentUpdate(const LayoutBox &parent_layout) {
     scroller.setSize(Vec2d(style.scroller_factor * layout->getSize().x, layout->getSize().y));
     scroller.setPosition(Vec2d(prev * (layout->getSize().x - scroller.getSize().x), scroller.getPosition().y));
 }
-
-
-#pragma GCC diagnostic pop

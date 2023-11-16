@@ -4,10 +4,6 @@
 */
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
-
 #include <SFML/Graphics.hpp>
 #include "basic/button.hpp"
 
@@ -296,9 +292,3 @@ void TextureIconButton::draw(sf::RenderTarget &result, TransformStack &stack) {
     icon_sprite.setPosition(global_position);
     result.draw(icon_sprite);
 }
-
-
-// ============================================================================
-
-
-#pragma GCC diagnostic pop

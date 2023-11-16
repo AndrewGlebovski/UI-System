@@ -4,10 +4,6 @@
 */
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
-
 #include <SFML/Graphics.hpp>
 #include "window/dialog.hpp"
 
@@ -159,9 +155,3 @@ const char *SelectFileDialog::getFilename() {
 
     return line_edit->getString();
 }
-
-
-// ============================================================================
-
-
-#pragma GCC diagnostic pop

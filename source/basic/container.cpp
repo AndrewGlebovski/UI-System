@@ -4,10 +4,6 @@
 */
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
-
 #include <SFML/Graphics.hpp>
 #include "basic/container.hpp"
 
@@ -182,6 +178,3 @@ Container::~Container() {
         delete widgets[i];
     }
 }
-
-
-#pragma GCC diagnostic pop

@@ -4,11 +4,6 @@
 */
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wfloat-conversion"
-
-
 #include <SFML/Graphics.hpp>
 #include "basic/line-edit.hpp"
 
@@ -218,9 +213,3 @@ void LineEdit::onTick(const TickEvent &event, EHC &ehc) {
 LineEdit::~LineEdit() {
     delete visible_rect;
 }
-
-
-// ============================================================================
-
-
-#pragma GCC diagnostic pop

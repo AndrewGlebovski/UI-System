@@ -4,10 +4,6 @@
 */
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
-
 #include <SFML/Graphics.hpp>
 #include <limits>
 #include "window/menu.hpp"
@@ -211,9 +207,3 @@ Menu::~Menu() {
         delete buttons[i];
     }
 }
-
-
-// ============================================================================
-
-
-#pragma GCC diagnostic pop

@@ -4,10 +4,6 @@
 */
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
-
 #include <SFML/Graphics.hpp>
 #include "window/window.hpp"
 
@@ -825,9 +821,3 @@ void ContainerLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
 LayoutBox *ContainerLayoutBox::clone() const {
     return new ContainerLayoutBox(window);
 }
-
-
-// ============================================================================
-
-
-#pragma GCC diagnostic pop
