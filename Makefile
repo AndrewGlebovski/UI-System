@@ -1,101 +1,67 @@
 # Путь к компилятору
-COMPILER=g++
+COMPILER = g++
 
 # Флаги компиляции
-FLAGS=-Wno-unused-parameter -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wmissing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -D_DEBUG -D_EJUDGE_CLIENT_
+FLAGS = \
+ -Wno-unused-parameter -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal 							\
+ -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-default -Weffc++ -Wmain 				\
+ -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body -Wformat-security 			\
+ -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wmissing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual 			\
+ -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings 	\
+ -D_DEBUG -D_EJUDGE_CLIENT_
 
 # Папка с объектами
-BIN_DIR=binary
+BUILD_DIR = ./build
 
 # Папка с исходниками и заголовками
-SRC_DIR=source
+SRC_DIR = ./source
 
 # Имя исполняемого файла
-EXE_NAME=run.exe
+BIN = run.exe
 
+# Все исходники
+CPP = $(wildcard $(SRC_DIR)/*.cpp)
 
-all: run
+# Все объекты
+OBJ = $(CPP:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
+# Файлы зависимостей
+DEP = $(OBJ:%.o=%.d)
 
-# Скомпилировать и запустить
-run: build
-	./$(EXE_NAME)
+# Цель по умолчанию
+all : run
 
+# Собирает и запускает
+.PHONY : run
+run : build
+	./$(BIN)
 
-# Скомпилировать и запустить под valgrind (предварительно лучше скомпилировать с -O0 или -O1)
-memcheck: build
-	valgrind --leak-check=yes --log-file="log.txt" ./$(EXE_NAME)
+# Собирает и запускает под Valgrind (предварительно лучше собрать с оптимизацией -O0 или -O1)
+.PHONY : memcheck
+memcheck : build
+	valgrind --leak-check=yes --log-file="log.txt" ./$(BIN)
 
+# Только собирает
+.PHONY : build
+build : $(BIN)
 
-# Скомпилировать
-build: $(BIN_DIR) $(EXE_NAME)
+# Завершает сборку
+$(BIN) : $(OBJ)
+	mkdir -p $(@D)
+	$(COMPILER) $^ -o $(BIN) -lsfml-graphics -lsfml-window -lsfml-system
 
+# Подключает зависимости
+# '-include' подключает файл, только если он существует
+-include $(DEP)
 
-# Завершение сборки
-$(EXE_NAME): $(addprefix $(BIN_DIR)/, main.o vector.o window.o widget.o canvas.o button.o scrollbar.o asset.o container.o menu.o line-edit.o dialog.o) 
-	$(COMPILER) $^ -o $(EXE_NAME) -lsfml-graphics -lsfml-window -lsfml-system
+# Собирает каждый объект в папке build
+# mkdir копирует структуру source в build
+# флаг -MMD генерирует файл с зависимостями
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
+	mkdir -p $(@D)
+	$(COMPILER) $(FLAGS) -MMD -c $< -o $@
 
-
-# Предварительная сборка main.cpp
-$(BIN_DIR)/main.o: $(addprefix $(SRC_DIR)/, main.cpp configs.hpp window.hpp vector.hpp list.hpp widget.hpp button.hpp scrollbar.hpp canvas.hpp asset.hpp clock.hpp container.hpp menu.hpp line-edit.hpp dialog.hpp canvas_dialogs.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка vector.cpp
-$(BIN_DIR)/vector.o: $(addprefix $(SRC_DIR)/, vector.cpp vector.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка window.cpp
-$(BIN_DIR)/window.o: $(addprefix $(SRC_DIR)/, window.cpp window.hpp vector.hpp list.hpp widget.hpp button.hpp configs.hpp container.hpp menu.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка widget.cpp
-$(BIN_DIR)/widget.o: $(addprefix $(SRC_DIR)/, widget.cpp widget.hpp vector.hpp list.hpp configs.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка canvas.cpp
-$(BIN_DIR)/canvas.o: $(addprefix $(SRC_DIR)/, canvas.cpp canvas.hpp vector.hpp list.hpp widget.hpp key-id.hpp configs.hpp button.hpp container.hpp line-edit.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка button.cpp
-$(BIN_DIR)/button.o: $(addprefix $(SRC_DIR)/, button.cpp button.hpp vector.hpp list.hpp widget.hpp asset.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка scrollbar.cpp
-$(BIN_DIR)/scrollbar.o: $(addprefix $(SRC_DIR)/, scrollbar.cpp scrollbar.hpp vector.hpp list.hpp widget.hpp asset.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка asset.cpp
-$(BIN_DIR)/asset.o: $(addprefix $(SRC_DIR)/, asset.cpp asset.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка container.cpp
-$(BIN_DIR)/container.o: $(addprefix $(SRC_DIR)/, container.cpp container.hpp vector.hpp list.hpp widget.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка menu.cpp
-$(BIN_DIR)/menu.o: $(addprefix $(SRC_DIR)/, menu.cpp menu.hpp button.hpp vector.hpp list.hpp widget.hpp asset.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка line-edit.cpp
-$(BIN_DIR)/line-edit.o: $(addprefix $(SRC_DIR)/, line-edit.cpp line-edit.hpp vector.hpp list.hpp widget.hpp configs.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Предварительная сборка dialog.cpp
-$(BIN_DIR)/dialog.o: $(addprefix $(SRC_DIR)/, dialog.cpp dialog.hpp vector.hpp list.hpp widget.hpp container.hpp window.hpp button.hpp configs.hpp asset.hpp menu.hpp)
-	$(COMPILER) $(FLAGS) -c $< -o $@
-
-
-# Создание папки для объектников, если она еще не существует
-$(BIN_DIR):
-	mkdir $@
+# Удаляет результаты компиляции
+.PHONY : clean
+clean :
+	rm $(BIN) $(OBJ) $(DEP)
