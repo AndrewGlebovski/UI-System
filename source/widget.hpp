@@ -50,6 +50,11 @@ public:
      * \brief Restores position using transform
     */
     Vec2d restore(const Vec2d &vec) const;
+
+    /**
+     * \brief Combines parent transform with this one
+    */
+    Transform combine(const Transform &parent_transform) const;
 };
 
 

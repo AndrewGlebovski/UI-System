@@ -46,6 +46,14 @@ Vec2d Transform::restore(const Vec2d &vec) const {
 }
 
 
+Transform Transform::combine(const Transform &parent_transform) const {
+    return Transform(
+        parent_transform.getOffset() + offset * parent_transform.getScale(),
+        scale * parent_transform.getScale()
+    );
+}
+
+
 // ============================================================================
 
 
@@ -55,25 +63,17 @@ TransformStack::TransformStack() : transforms() {
 
 
 void TransformStack::enter(const Transform &transform) {
-    transforms.push_back(transform);
-
-    transforms.front().setOffset(transforms.front().getOffset() + transform.getOffset());
-    transforms.front().setScale(transforms.front().getScale() * transform.getScale());
+    transforms.push_back(transforms.back().combine(transform));
 }
 
 
 void TransformStack::leave() {
-    Transform back = transforms.back();
-
-    transforms.front().setOffset(transforms.front().getOffset() - back.getOffset());
-    transforms.front().setScale(transforms.front().getScale() / back.getScale());
-
     transforms.pop_back();
 }
 
 
 Transform TransformStack::top() const {
-    return transforms.front();
+    return transforms.back();
 }
 
 
