@@ -1,11 +1,11 @@
 /**
  * \file
- * \brief Contains dialog actions classes for opening and closing files
+ * \brief Contains classes that work with canvas
 */
 
 
-#ifndef _CANVAS_DIALOGS_H_
-#define _CANVAS_DIALOGS_H_
+#ifndef _CANVAS_STUFF_H_
+#define _CANVAS_STUFF_H_
 
 
 #include "canvas/canvas.hpp"
@@ -18,6 +18,62 @@
  * \note If image fails to open, then nullptr will be returned
 */
 Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
+
+
+/// Moves canvas texture in vertical direction
+class VScrollCanvas : public ScrollAction {
+protected:
+    Canvas &canvas;
+
+public:
+    VScrollCanvas(Canvas &canvas_);
+
+    virtual void operator () (vec_t param) override;
+};
+
+
+/// Moves canvas texture in horizontal direction
+class HScrollCanvas : public ScrollAction {
+protected:
+    Canvas &canvas;
+
+public:
+    HScrollCanvas(Canvas &canvas_);
+
+    virtual void operator () (vec_t param) override;
+};
+
+
+/// Supports hot keys for applying filters
+class FilterHotkey : public Widget {
+public:
+    FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_);
+
+protected:
+    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
+
+private:
+    FilterPalette &palette;
+    CanvasGroup &group;
+};
+
+
+/// Applies specified filter to the active canvas
+class FilterAction : public ButtonAction {
+private:
+    FilterPalette::FILTERS filter_id;
+    FilterPalette &palette;
+    CanvasGroup &group;
+
+public:
+    FilterAction(FilterPalette::FILTERS filter_id_, FilterPalette &palette_, CanvasGroup &group_);
+
+
+    virtual void operator () () override;
+
+
+    virtual FilterAction *clone() override;
+};
 
 
 /// Uses openPicture() to open image

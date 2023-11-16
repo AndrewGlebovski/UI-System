@@ -1,6 +1,6 @@
 /**
  * \file
- * \brief Contains canvas and his tools classes and protypes of their functions 
+ * \brief Contains canvas, palettes and protypes of their functions 
 */
 
 
@@ -12,8 +12,7 @@
 #include "widget/widget.hpp"
 #include "basic/container.hpp"
 #include "basic/button.hpp"
-#include "basic/line-edit.hpp"
-#include "basic/scrollbar.hpp"
+#include "canvas/selection_mask.hpp"
 
 
 class Canvas;
@@ -46,153 +45,6 @@ public:
 
 
     virtual ~CanvasTool() = default;
-};
-
-
-/// Standart pencil tool
-class PencilTool : public CanvasTool {
-protected:
-    Vec2d prev_position;        ///< Previous mouse click position
-
-public:
-    PencilTool();
-
-
-    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
-    virtual void onMove(const Vec2d &mouse, Canvas &canvas) override;
-};
-
-
-/// Tool for drawing rectangle
-class RectTool : public CanvasTool {
-protected:
-    Vec2d draw_start;           ///< Previous mouse click position
-    Widget *rect_preview;       ///< Widget that draws preview of the rectangle
-
-
-    /**
-     * \brief Creates SFML rectangle based on two points 
-    */
-    sf::RectangleShape createRect(const Vec2d &p1, const Vec2d &p2) const;
-
-public:
-    RectTool();
-
-
-    RectTool(const RectTool &rect_tool) = delete;
-    RectTool &operator = (const RectTool &rect_tool) = delete;
-
-
-    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
-    virtual void onMove(const Vec2d &mouse, Canvas &canvas) override;
-    virtual void onConfirm(const Vec2d &mouse, Canvas &canvas) override;
-    virtual Widget *getWidget() override;
-
-
-    virtual ~RectTool() override;
-};
-
-
-/// Tool for drawing line
-class LineTool : public CanvasTool {
-protected:
-    Vec2d draw_start;           ///< Previous mouse click position
-    Widget *line_preview;       ///< Widget that draws preview of the line
-
-public:
-    LineTool();
-
-
-    LineTool(const LineTool &line_tool) = delete;
-    LineTool &operator = (const LineTool &line_tool) = delete;
-
-
-    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
-    virtual void onMove(const Vec2d &mouse, Canvas &canvas) override;
-    virtual void onConfirm(const Vec2d &mouse, Canvas &canvas) override;
-    virtual Widget *getWidget() override;
-
-
-    virtual ~LineTool() override;
-};
-
-
-/// Eraser tool
-class EraserTool : public CanvasTool {
-protected:
-    Vec2d prev_position;        ///< Previous mouse click position
-
-public:
-    EraserTool();
-
-
-    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
-    virtual void onMove(const Vec2d &mouse, Canvas &canvas) override;
-};
-
-
-/// Changes palette color to color of pixel under mouse
-class ColorPicker : public CanvasTool {
-public:
-    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
-};
-
-
-/// Fill all pixels with the same color to palette color
-class BucketTool : public CanvasTool {
-public:
-    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
-};
-
-
-/// Tool for drawing polygon
-class PolygonTool : public CanvasTool {
-protected:
-    List<Vec2d> points;         ///< Points that form polygon
-    Widget *polygon_preview;    ///< Widget that draws preview of the polygon
-
-public:
-    PolygonTool();
-
-
-    PolygonTool(const PolygonTool &polygon_tool) = delete;
-    PolygonTool &operator = (const PolygonTool &polygon_tool) = delete;
-
-
-    List<Vec2d> &getPoints();
-
-
-    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
-    virtual void onConfirm(const Vec2d &mouse, Canvas &canvas) override;
-    virtual void onCancel() override;
-    virtual Widget *getWidget() override;
-
-
-    virtual ~PolygonTool() override;
-};
-
-
-/// Draws text on the canvas
-class TextTool : public CanvasTool {
-protected:
-    sf::Font text_font;             ///< Text font
-    LineEdit *text_preview;         ///< Widget that draws preview of the polygon
-
-public:
-    TextTool();
-
-
-    TextTool(const TextTool &text_tool) = delete;
-    TextTool &operator = (const TextTool &text_tool) = delete;
-
-
-    virtual void onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) override;
-    virtual void onConfirm(const Vec2d &mouse, Canvas &canvas) override;
-    virtual void onCancel() override;
-    virtual Widget *getWidget() override;
-
-
-    virtual ~TextTool() override;
 };
 
 
@@ -283,83 +135,12 @@ protected:
 };
 
 
-class FilterMask {
-private:
-    bool *mask;
-    size_t width;
-    size_t height;
-
-public:
-    FilterMask();
-
-
-    FilterMask(const FilterMask &mask) = delete;
-    FilterMask &operator = (const FilterMask &mask) = delete;
-
-
-    void initMask(size_t width_, size_t height_);
-
-
-    bool getPixelMask(size_t x, size_t y) const;
-
-
-    size_t getWidth() const;
-
-
-    size_t getHeight() const;
-
-
-    void setPixelMask(size_t x, size_t y, bool flag);
-    
-    
-    void fill(bool value);
-    
-    
-    void invert();
-
-
-    ~FilterMask();
-};
-
-
 class CanvasFilter {
 public:
     virtual void applyFilter(Canvas &canvas) const = 0;
 
 
     virtual ~CanvasFilter() = default;
-};
-
-
-/// Changes image colors intensity
-class IntensityFilter : public CanvasFilter {
-private:
-    int intensity;
-
-    unsigned char clip(int channel) const;
-
-public:
-    IntensityFilter(char intensity_);
-
-    virtual void applyFilter(Canvas &canvas) const override;
-};
-
-
-/// Change image colors to black and white style
-class MonochromeFilter : public CanvasFilter {
-public:
-    MonochromeFilter();
-
-    virtual void applyFilter(Canvas &canvas) const override;
-};
-
-
-/// Change image colors negative
-class NegativeFilter : public CanvasFilter {
-public:
-    NegativeFilter();
-
-    virtual void applyFilter(Canvas &canvas) const override;
 };
 
 
@@ -460,33 +241,12 @@ public:
 };
 
 
-class FilterAction : public ButtonAction {
-private:
-    FilterPalette::FILTERS filter_id;
-    FilterPalette &palette;
-    CanvasGroup &group;
-
-public:
-    FilterAction(FilterPalette::FILTERS filter_id_, FilterPalette &palette_, CanvasGroup &group_);
-
-
-    virtual void operator () () override;
-
-
-    virtual FilterAction *clone() override;
-};
-
-
-class VScrollCanvas;
-class HScrollCanvas;
+const sf::Color CANVAS_BACKGROUND = sf::Color::White;   ///< Canvas background color
 
 
 /// Holds texture to draw on
 class Canvas : public Widget {
 public:
-    friend VScrollCanvas;
-    friend HScrollCanvas;
-
     /**
      * \brief Creates empty canvas
     */
@@ -555,12 +315,22 @@ public:
     /**
      * \brief Returns canvas filter mask
     */
-    FilterMask &getFilterMask();
+    SelectionMask &getSelectionMask();
 
     /**
      * \brief Returns true if canvas is active in his group
     */
     bool isActive() const;
+
+    /**
+     * \brief Returns texture offset
+    */
+    const Vec2d &getTextureOffset() const;
+
+    /**
+     * \brief Sets texture offset
+    */
+    void setTextureOffset(const Vec2d &texture_offset_);
 
     /**
      * \brief Draws canvas inner texture
@@ -583,7 +353,7 @@ protected:
     ToolPalette *palette;
     Vec2d last_position;
     CanvasGroup *group;
-    FilterMask filter_mask;
+    SelectionMask filter_mask;
     std::string filename;
 
     virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
@@ -591,54 +361,6 @@ protected:
     virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
     virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
     virtual void onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc) override;
-};
-
-
-/// Moves canvas texture in vertical direction
-class VScrollCanvas : public ScrollAction {
-protected:
-    Canvas &canvas;
-
-public:
-    VScrollCanvas(Canvas &canvas_) : canvas(canvas_) {}
-
-    virtual void operator () (vec_t param) override {
-        vec_t canvas_y = canvas.getLayoutBox().getSize().y;
-
-        if (canvas.getTextureSize().y > canvas_y)
-            canvas.texture_offset.y = param * (canvas.getTextureSize().y - canvas_y);
-    }
-};
-
-
-/// Moves canvas texture in horizontal direction
-class HScrollCanvas : public ScrollAction {
-protected:
-    Canvas &canvas;
-
-public:
-    HScrollCanvas(Canvas &canvas_) : canvas(canvas_) {}
-
-    virtual void operator () (vec_t param) override {
-        vec_t canvas_x = canvas.getLayoutBox().getSize().x;
-
-        if (canvas.getTextureSize().x > canvas_x)
-            canvas.texture_offset.x = param * (canvas.getTextureSize().x - canvas_x);
-    }
-};
-
-
-/// Supports hot keys for applying filters
-class FilterHotkey : public Widget {
-public:
-    FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_);
-
-protected:
-    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
-
-private:
-    FilterPalette &palette;
-    CanvasGroup &group;
 };
 
 

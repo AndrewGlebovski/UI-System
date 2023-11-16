@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "basic/clock.hpp"
-#include "canvas/canvas_dialogs.hpp"
+#include "canvas/canvas_stuff.hpp"
 
 
 /// Creates palette view in new subwindow

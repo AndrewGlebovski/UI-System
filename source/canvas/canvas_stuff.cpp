@@ -1,11 +1,11 @@
 /**
  * \file
- * \brief Contains sources of dialog actions classes functions
+ * \brief Contains implementation of classes that work with canvas
 */
 
 
 #include <SFML/Graphics.hpp>
-#include "canvas/canvas_dialogs.hpp"
+#include "canvas/canvas_stuff.hpp"
 
 
 // ============================================================================
@@ -73,6 +73,85 @@ Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &gro
     
     return subwindow;
 }
+
+
+// ============================================================================
+
+
+VScrollCanvas::VScrollCanvas(Canvas &canvas_) : canvas(canvas_) {}
+
+
+void VScrollCanvas::operator () (vec_t param) {
+    Vec2d canvas_size = canvas.getLayoutBox().getSize();
+    Vec2d texture_offset = canvas.getTextureOffset();
+
+    if (canvas.getTextureSize().y > canvas_size.y) {
+        canvas.setTextureOffset(Vec2d(
+            texture_offset.x,
+            param * (canvas.getTextureSize().y - canvas_size.y)
+        ));
+    }
+}
+
+
+// ============================================================================
+
+
+HScrollCanvas::HScrollCanvas(Canvas &canvas_) : canvas(canvas_) {}
+
+void HScrollCanvas::operator () (vec_t param) {
+    Vec2d canvas_size = canvas.getLayoutBox().getSize();
+    Vec2d texture_offset = canvas.getTextureOffset();
+
+    if (canvas.getTextureSize().x > canvas_size.x) {
+        canvas.setTextureOffset(Vec2d(
+            param * (canvas.getTextureSize().x - canvas_size.x),
+            texture_offset.y
+        ));
+    }
+}
+
+
+// ============================================================================
+
+
+FilterHotkey::FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_) :
+    Widget(AUTO_ID, BoundLayoutBox()),
+    palette(palette_), group(group_)
+{}
+
+
+void FilterHotkey::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
+    switch (event.key_id) {
+        case F: 
+            if (event.ctrl) {
+                palette.getLastFilter()->applyFilter(*group.getActive());
+                break;
+            }
+            return;
+        default: return;
+    }
+
+    ehc.stopped = true;
+}
+
+
+// ============================================================================
+
+
+FilterAction::FilterAction(FilterPalette::FILTERS filter_id_, FilterPalette &palette_, CanvasGroup &group_) : 
+    filter_id(filter_id_), palette(palette_), group(group_) {}
+
+
+void FilterAction::operator () () {
+    if (group.getActive()) {
+        palette.getFilter(filter_id)->applyFilter(*group.getActive());
+        palette.setLastFilter(filter_id);
+    }
+}
+
+
+FilterAction *FilterAction::clone() { return new FilterAction(filter_id, palette, group); }
 
 
 // ============================================================================
