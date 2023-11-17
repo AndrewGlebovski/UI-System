@@ -8,14 +8,7 @@
 #define _LIST_H_
 
 
-#define ASSERT(condition, message)                                          \
-do {                                                                        \
-    if (!(condition)) {                                                     \
-        printf("%s(%i) in %s:\n", __FILE__, __LINE__, __PRETTY_FUNCTION__); \
-        printf(message);                                                    \
-        exit(1);                                                            \
-    }                                                                       \
-} while(0)
+#include "common/assert.hpp"
 
 
 /// Array of objects with type T

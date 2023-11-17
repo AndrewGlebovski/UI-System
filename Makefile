@@ -15,6 +15,9 @@ BUILD_DIR = ./build
 # Папка с исходниками и заголовками
 SRC_DIR = ./source
 
+# Директория для логов
+LOG_DIR = ./log
+
 # Имя исполняемого файла
 BIN = ./run.out
 
@@ -42,14 +45,16 @@ all : build
 # Собирает и запускает под Valgrind (предварительно лучше собрать с оптимизацией -O0 или -O1)
 .PHONY : memcheck
 memcheck : build
-	@valgrind --leak-check=yes --log-file="log.txt" ./$(BIN)
+	@valgrind --leak-check=yes --log-file="$(LOG_DIR)/memcheck-log.txt" ./$(BIN)
 
 # Только собирает
 .PHONY : build
 build : $(BIN)
 
 # Завершает сборку
+# Также создает папку для логов
 $(BIN) : $(OBJ)
+	@mkdir -p $(LOG_DIR)
 	@mkdir -p $(@D)
 	@$(COMPILER) $^ -o $(BIN) -lsfml-graphics -lsfml-window -lsfml-system
 
@@ -67,4 +72,4 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 # Удаляет результаты компиляции
 .PHONY : clean
 clean :
-	@rm -rf $(BIN) $(BUILD_DIR)
+	@rm -rf $(BIN) $(BUILD_DIR) $(LOG_DIR)

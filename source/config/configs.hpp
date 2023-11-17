@@ -47,5 +47,7 @@ const float CURSOR_OFFSET = 2;              ///< Cursor position offset from Lin
 /// Path to font file
 #define FONT_FILE "assets/MainFont.ttf"
 
+/// Path to log file
+#define LOG_FILE "log/log.txt"
 
 #endif
