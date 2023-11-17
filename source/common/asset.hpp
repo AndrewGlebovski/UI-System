@@ -8,6 +8,10 @@
 #define _ASSET_H_
 
 
+#include <cstdio>
+#include <SFML/Graphics.hpp>
+
+
 /// Base class for all assets
 class Asset {
 protected:

@@ -4,11 +4,9 @@
 */
 
 
-#include <SFML/Graphics.hpp>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cassert>
+#include "common/assert.hpp"
 #include "common/asset.hpp"
 
 
@@ -19,10 +17,10 @@ Asset::Asset() : textures(nullptr), count(0) {}
 
 
 Asset::Asset(const Asset &arg) : textures(nullptr), count(arg.count) {
-    assert(arg.textures);
+    ASSERT(arg.textures, "Invalid argument!\n");
 
     textures = new sf::Texture[count];
-    assert(textures);
+    ASSERT(textures, "Failed to allocate buffer!\n");
 
     for (size_t i = 0; i < count; i++)
         textures[i] = arg.textures[i];
@@ -31,16 +29,16 @@ Asset::Asset(const Asset &arg) : textures(nullptr), count(arg.count) {
 
 void Asset::loadTextures(const char *rootpath, const char *files[], size_t files_size) {
     textures = new sf::Texture[files_size];
-    assert(textures);
+    ASSERT(textures, "Failed to allocate buffer!\n");
 
     count = files_size;
 
     char *path = (char *) calloc(strlen(rootpath) + MAX_PATH, 1);
-    assert(path);
+    ASSERT(path, "Failed to allocate buffer!\n");
 
     for (size_t i = 0; i < files_size; i++) {
         sprintf(path, "%s/%s.png", rootpath, files[i]);
-        assert(textures[i].loadFromFile(path));
+        ASSERT(textures[i].loadFromFile(path), "Failed to load texture %s!\n", path);
     }
 
     free(path);
@@ -48,7 +46,7 @@ void Asset::loadTextures(const char *rootpath, const char *files[], size_t files
 
 
 Asset &Asset::operator = (const Asset &arg) {
-    assert(arg.textures);
+    ASSERT(arg.textures, "Invalid argument!\n");
 
     if (this != &arg) {
         if (textures) delete[] textures;
@@ -56,7 +54,7 @@ Asset &Asset::operator = (const Asset &arg) {
         count = arg.count;
 
         textures = new sf::Texture[count];
-        assert(textures);
+        ASSERT(textures, "Failed to allocate buffer!\n");
 
         for (size_t i = 0; i < count; i++)
             textures[i] = arg.textures[i];
@@ -67,15 +65,15 @@ Asset &Asset::operator = (const Asset &arg) {
 
 
 const sf::Texture &Asset::getTexture(int id) const {
-    assert(textures);
-    assert(0 <= id && size_t(id) < count);
+    ASSERT(textures, "Texture buffer is nullptr!\n");
+    ASSERT(0 <= id && size_t(id) < count, "Index is out of range!\n");
 
     return textures[id];
 }
 
 
 Asset::~Asset() {
-    assert(textures);
+    ASSERT(textures, "Texture buffer is nullptr");
     
     delete[] textures;
 }

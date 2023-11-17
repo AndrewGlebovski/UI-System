@@ -8,6 +8,9 @@
 #define _VECTOR_H_
 
 
+#include <SFML/Graphics.hpp>
+
+
 /// Vector component type
 typedef double vec_t;
 

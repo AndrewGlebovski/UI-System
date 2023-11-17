@@ -4,7 +4,6 @@
 */
 
 
-#include <SFML/Graphics.hpp>
 #include <cmath>
 #include "config/configs.hpp"
 #include "widget/layout-box.hpp"

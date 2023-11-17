@@ -4,7 +4,6 @@
 */
 
 
-#include <SFML/Graphics.hpp>
 #include "canvas/canvas.hpp"
 #include "canvas/tool.hpp"
 #include "canvas/filter.hpp"

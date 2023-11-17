@@ -4,7 +4,6 @@
 */
 
 
-#include <SFML/Graphics.hpp>
 #include "canvas/canvas_stuff.hpp"
 
 

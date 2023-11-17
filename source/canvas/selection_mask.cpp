@@ -4,8 +4,7 @@
 */
 
 
-#include <SFML/Graphics.hpp>
-#include "common/list.hpp"
+#include "common/assert.hpp"
 #include "canvas/selection_mask.hpp"
 
 

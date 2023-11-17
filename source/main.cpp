@@ -1,5 +1,3 @@
-#include <SFML/Graphics.hpp>
-#include <cstdio>
 #include "basic/clock.hpp"
 #include "canvas/canvas_stuff.hpp"
 

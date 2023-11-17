@@ -8,12 +8,14 @@
 #define _WIDGET_H_
 
 
+#include <cstdio>
+#include "SFML/Graphics.hpp"
 #include "config/configs.hpp"
 #include "config/key-id.hpp"
 #include "common/list.hpp"
 #include "common/vector.hpp"
-#include "layout-box.hpp"
-#include "transform.hpp"
+#include "widget/layout-box.hpp"
+#include "widget/transform.hpp"
 
 
 /// Base class for all widgets
