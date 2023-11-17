@@ -16,7 +16,7 @@ BUILD_DIR = ./build
 SRC_DIR = ./source
 
 # Имя исполняемого файла
-BIN = run.exe
+BIN = ./run.out
 
 # Пути для директивы #include
 INC_FLAGS = -I$(SRC_DIR)
@@ -34,12 +34,9 @@ OBJ = $(CPP:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 DEP = $(OBJ:%.o=%.d)
 
 # Цель по умолчанию
-all : run
-
 # Собирает и запускает
 # '@' отключает вывод самой команды перед исполнением
-.PHONY : run
-run : build
+all : build
 	@./$(BIN)
 
 # Собирает и запускает под Valgrind (предварительно лучше собрать с оптимизацией -O0 или -O1)
