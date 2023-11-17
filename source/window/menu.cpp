@@ -25,6 +25,8 @@ MenuButton::MenuButton(
 
 
 void MenuButton::addButton(const std::string &text_, ButtonAction *action_) {
+    ASSERT(action_, "Option button action is nullptr!\n");
+
     Widget *prev_btn = (buttons.size()) ? buttons.back() : nullptr;
 
     sf::Text btn_text(text_, style.font, style.font_size);
@@ -163,6 +165,7 @@ void Menu::addMenuButton(const std::string &text) {
 
 void Menu::addButton(size_t menu_id, const std::string &text, ButtonAction *action) {
     ASSERT(menu_id < buttons.size(), "Invalid menu id!\n");
+    ASSERT(action, "Option button action is nullptr!\n");
     buttons[menu_id]->addButton(text, action);
 }
 

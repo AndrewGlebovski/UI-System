@@ -2,8 +2,8 @@
 #include "canvas/canvas_stuff.hpp"
 
 
-/// Creates palette view in new subwindow
-Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset);
+/// Creates tool palette view in new subwindow
+Widget *createToolPaletteView(ToolPalette *tool_palette, WindowStyle &window_style, PaletteViewAsset &palette_asset);
 
 
 int main() {
@@ -67,14 +67,19 @@ int main() {
         sf::Color(0xd4d0c8ff)
     );
 
-    ToolPalette *palette = new ToolPalette();
+    ToolPalette *tool_palette = new ToolPalette();
+    ASSERT(tool_palette, "Failed to allocate tool tool_palette!\n");
+
     CanvasGroup *canvas_group = new CanvasGroup();
+    ASSERT(canvas_group, "Failed to allocate canvas group!\n");
+    
     FilterPalette *filter_palette = new FilterPalette();
+    ASSERT(filter_palette, "Failed to allocate filter palette!\n");
 
     FileDialogStyle dialog_style(window_style);
 
     main_menu->addMenuButton("File");
-    main_menu->addButton(0, "Open", new CreateOpenFileDialog(*main_window, *palette, *canvas_group, dialog_style, scrollbar_style));
+    main_menu->addButton(0, "Open", new CreateOpenFileDialog(*main_window, *tool_palette, *canvas_group, dialog_style, scrollbar_style));
     main_menu->addButton(0, "Save", new SaveFileAction(*canvas_group));
     main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(*main_window, *canvas_group, dialog_style));
     
@@ -98,8 +103,8 @@ int main() {
         *canvas_group
     ));
     
-    main_window->addChild(openPicture(nullptr, *palette, *canvas_group, window_style, scrollbar_style));
-    main_window->addChild(createToolPaletteView(palette, window_style, palette_asset));
+    main_window->addChild(openPicture(nullptr, *tool_palette, *canvas_group, window_style, scrollbar_style));
+    main_window->addChild(createToolPaletteView(tool_palette, window_style, palette_asset));
     
     TransformStack stack;
 
@@ -137,7 +142,7 @@ int main() {
     }
 
     delete main_window;
-    delete palette;
+    delete tool_palette;
     delete canvas_group;
     delete filter_palette;
     
@@ -146,7 +151,7 @@ int main() {
 }
 
 
-Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset) {
+Widget *createToolPaletteView(ToolPalette *tool_palette, WindowStyle &window_style, PaletteViewAsset &palette_asset) {
     WindowStyle subwindow_style(window_style);
     subwindow_style.outline = 0;
 
@@ -163,7 +168,7 @@ Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, P
     subwindow->addChild(new ToolPaletteView(
         Widget::AUTO_ID,
         BoundLayoutBox(Vec2d(), Vec2d(188, 376)),
-        palette,
+        tool_palette,
         palette_asset
     ));
 
