@@ -50,6 +50,7 @@ int main() {
         "Paint",
         window_style
     );
+    ASSERT(main_window, "Failed to allocate tool main window!\n");
     
     Menu *main_menu = new Menu(
         Widget::AUTO_ID,
@@ -66,9 +67,10 @@ int main() {
         ),
         sf::Color(0xd4d0c8ff)
     );
+    ASSERT(main_menu, "Failed to allocate tool main menu!\n");
 
     ToolPalette *tool_palette = new ToolPalette();
-    ASSERT(tool_palette, "Failed to allocate tool tool_palette!\n");
+    ASSERT(tool_palette, "Failed to allocate tool palette!\n");
 
     CanvasGroup *canvas_group = new CanvasGroup();
     ASSERT(canvas_group, "Failed to allocate canvas group!\n");
