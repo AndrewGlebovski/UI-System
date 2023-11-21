@@ -45,7 +45,7 @@ public:
 
     VertexArray& operator=(const VertexArray& other);
 
-    ~VertexArray(void);
+    ~VertexArray();
 
     /**
      * \brief Get rendering primitive
