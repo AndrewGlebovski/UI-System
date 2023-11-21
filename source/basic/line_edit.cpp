@@ -4,7 +4,7 @@
 */
 
 
-#include "basic/line-edit.hpp"
+#include "basic/line_edit.hpp"
 
 
 // ============================================================================

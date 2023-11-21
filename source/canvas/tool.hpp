@@ -9,7 +9,7 @@
 
 
 #include "canvas/canvas.hpp"
-#include "basic/line-edit.hpp"
+#include "basic/line_edit.hpp"
 
 
 /// Standart pencil tool

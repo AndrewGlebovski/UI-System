@@ -11,10 +11,10 @@
 #include <cstdio>
 #include "SFML/Graphics.hpp"
 #include "config/configs.hpp"
-#include "config/key-id.hpp"
+#include "config/key_id.hpp"
 #include "common/list.hpp"
 #include "common/vector.hpp"
-#include "widget/layout-box.hpp"
+#include "widget/layout_box.hpp"
 #include "widget/transform.hpp"
 
 

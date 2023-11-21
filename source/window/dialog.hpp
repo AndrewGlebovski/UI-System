@@ -9,7 +9,7 @@
 
 
 #include "window/window.hpp"
-#include "basic/line-edit.hpp"
+#include "basic/line_edit.hpp"
 
 
 /// Base class for all dialogs
