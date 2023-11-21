@@ -24,16 +24,18 @@ VertexArray::VertexArray(const VertexArray& other) :
 }
 
 
-VertexArray& VertexArray::operator=(const VertexArray& other) {
-    delete data;
+VertexArray& VertexArray::operator = (const VertexArray& other) {
+    if (&other != this) {
+        delete[] data;
 
-    type = other.type;
-    size = other.size;
-    capacity = other.capacity;
+        type = other.type;
+        size = other.size;
+        capacity = other.capacity;
 
-    data = new Vertex[capacity];
-    for (size_t ind = 0; ind < size; ++ind)
-        data[ind] = other.data[ind];
+        data = new Vertex[capacity];
+        for (size_t ind = 0; ind < size; ++ind)
+            data[ind] = other.data[ind];
+    }
 
     return *this;
 }
@@ -41,7 +43,7 @@ VertexArray& VertexArray::operator=(const VertexArray& other) {
 
 VertexArray::~VertexArray() {
     size = capacity = -1;
-    delete data;
+    delete[] data;
 }
 
 
@@ -67,7 +69,7 @@ void VertexArray::resize(size_t new_size) {
     for (size_t ind = 0; ind < size; ++ind)
         new_data[ind] = data[ind];
     
-    delete data;
+    delete[] data;
 
     data = new_data;
     capacity = new_size;

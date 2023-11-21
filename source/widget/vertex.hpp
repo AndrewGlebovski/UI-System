@@ -4,8 +4,8 @@
 */
 
 
-#ifndef _RENDER_TARGET_H_
-#define _RENDER_TARGET_H_
+#ifndef _VERTEX_H_
+#define _VERTEX_H_
 
 
 #include "common/vector.hpp"
@@ -28,8 +28,8 @@ struct Vertex {
     Vertex() :
         position(), tex_coords(), color() {}
 
-    Vertex(const Vec2d &position_, const Color color_) :
-        position(position_), tex_coords(), color(color_) {}
+    Vertex(const Vec2d &position_, const Color color_, const Vec2d &tex_coords_ = Vec2d()) :
+        position(position_), tex_coords(tex_coords_), color(color_) {}
 
     Vec2d position;
     Vec2d tex_coords;
