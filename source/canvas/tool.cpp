@@ -4,14 +4,15 @@
 */
 
 
+#include <cstring>
 #include "canvas/tool.hpp"
 
 
 // ============================================================================
 
 
-const sf::Color PREVIEW_COLOR = sf::Color::Blue;        ///< Standart color for all previews
-const float RECT_PREVIEW_OUTLINE = -1;                  ///< Rect preview outline thickness
+const Color PREVIEW_COLOR = Blue;                       ///< Standart color for all previews
+const float RECT_PREVIEW_OUTLINE = 1;                   ///< Rect preview outline thickness
 const int ERASER_STEP = 100;                            ///< Amount of spheres that drawn between two points
 const float ERASER_RADIUS = 25;                         ///< Eraser sphere radius
 const float POLYGON_EPSILON = 25;                       ///< Maximal distance for points of polygon to form it
@@ -22,36 +23,20 @@ const size_t TEXT_MAX_LENGTH = 256;                     ///< Text tool text max 
 // ============================================================================
 
 
-/// Draws line on the texture
-void drawLine(const Transform &trans, const Vec2d &p1, const Vec2d &p2, const sf::Color &color, sf::RenderTarget &result);
-
-
-/// Draws polygon or polyline based on the primitive type
-void drawPolygon(const Transform &trans, const List<Vec2d> &points, const sf::Color &color, sf::RenderTarget &result, sf::PrimitiveType type);
+/// Creates vertex array for polygon
+VertexArray getPolygonArray(const Transform &trans, const List<Vec2d> &points, Color color, PrimitiveType type);
 
 
 // ============================================================================
 
 
-void drawLine(const Transform &trans, const Vec2d &p1, const Vec2d &p2, const sf::Color &color, sf::RenderTarget &result) {
-    sf::Vertex line[] = {
-        sf::Vertex(trans.apply(p1), color),
-        sf::Vertex(trans.apply(p2), color)
-    };
-
-    result.draw(line, 2, sf::Lines);
-}
-
-
-void drawPolygon(const Transform &trans, const List<Vec2d> &points, const sf::Color &color, sf::RenderTarget &result, sf::PrimitiveType type) {
-    sf::Vertex *polygon = new sf::Vertex[points.size()];
+VertexArray getPolygonArray(const Transform &trans, const List<Vec2d> &points, Color color, PrimitiveType type) {
+    VertexArray array(type, points.size());
 
     for (size_t i = 0; i < points.size(); i++)
-        polygon[i] = sf::Vertex(trans.apply(points[i]), color);
+        array[i] = Vertex(trans.apply(points[i]), color);
 
-    result.draw(polygon, points.size(), type);
-
-    delete polygon;
+    return array;
 }
 
 
@@ -61,13 +46,13 @@ void drawPolygon(const Transform &trans, const List<Vec2d> &points, const sf::Co
 PencilTool::PencilTool() : prev_position() {}
 
 
-void PencilTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) {
-    switch (state) {
-        case PRESSED:
+void PencilTool::onMainButton(ControlState state, const Vec2d &mouse) {
+    switch (state.state) {
+        case State::Pressed:
             is_drawing = true;
             prev_position = mouse;
             break;
-        case REALEASED:
+        case State::Released:
             is_drawing = false;
         default:
             break;
@@ -75,15 +60,15 @@ void PencilTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &can
 }
 
 
-void PencilTool::onMove(const Vec2d &mouse, Canvas &canvas) {
+void PencilTool::onMove(const Vec2d &mouse) {
     if (is_drawing) {
-        sf::Vertex line[] = {
-            sf::Vertex(prev_position, canvas.getPalette()->getCurrentColor()),
-            sf::Vertex(mouse, canvas.getPalette()->getCurrentColor()),
-        };
+        VertexArray array(Lines, 2);
+
+        array[0] = Vertex(prev_position, color_palette->getFGColor());
+        array[1] = Vertex(mouse, color_palette->getFGColor());
 
         prev_position = mouse;
-        canvas.getTexture().draw(line, 2, sf::Lines);
+        canvas->draw(array);
     }
 }
 
@@ -101,16 +86,13 @@ public:
         Widget(1, LazyLayoutBox()), tool(tool_) {}
     
 
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override {
+    virtual void draw(RenderTarget &result, TransformStack &stack) override {
         Vec2d global_position = stack.apply(layout->getPosition());
         Vec2d global_size = stack.apply_size(layout->getSize());
 
-        sf::RectangleShape rect(global_size);
-        rect.setPosition(global_position);
-        rect.setFillColor(sf::Color(0));
-        rect.setOutlineThickness(RECT_PREVIEW_OUTLINE);
-        rect.setOutlineColor(PREVIEW_COLOR);
-        result.draw(rect);
+        RectShape rect(global_position, global_size, Color(0));
+        rect.setBorder(RECT_PREVIEW_OUTLINE, PREVIEW_COLOR);
+        rect.draw(result);
     }
 };
 
@@ -120,7 +102,7 @@ RectTool::RectTool() : draw_start(), rect_preview(nullptr) {
 }
 
 
-sf::RectangleShape RectTool::createRect(const Vec2d &p1, const Vec2d &p2) const {
+RectShape RectTool::createRect(const Vec2d &p1, const Vec2d &p2) const {
     Vec2d position = p1;
     Vec2d size = p2 - p1;
     if (position.x > p2.x) position.x = p2.x;
@@ -128,42 +110,42 @@ sf::RectangleShape RectTool::createRect(const Vec2d &p1, const Vec2d &p2) const 
     if (size.x < 0) size.x *= -1;
     if (size.y < 0) size.y *= -1;
 
-    sf::RectangleShape rect(size);
-    rect.setPosition(position);
-
-    return rect;
+    return RectShape(position, size, Color());
 }
 
 
-void RectTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) {
-    switch (state) {
-        case PRESSED:
+void RectTool::onMainButton(ControlState state, const Vec2d &mouse) {
+    switch (state.state) {
+        case State::Pressed:
             is_drawing = true;
             draw_start = mouse;
             rect_preview->getLayoutBox().setPosition(mouse);
             rect_preview->getLayoutBox().setSize(Vec2d());
             break;
-        case REALEASED:
-            onConfirm(mouse, canvas);
+        case State::Released:
+            onConfirm();
         default:
             break;
     }
 }
 
 
-void RectTool::onMove(const Vec2d &mouse, Canvas &canvas) {
-    sf::RectangleShape rect = createRect(draw_start, mouse);
+void RectTool::onMove(const Vec2d &mouse) {
+    RectShape rect = createRect(draw_start, mouse);
     rect_preview->getLayoutBox().setPosition(rect.getPosition());
     rect_preview->getLayoutBox().setSize(rect.getSize());
 }
 
 
-void RectTool::onConfirm(const Vec2d &mouse, Canvas &canvas) {
+void RectTool::onConfirm() {
     if (is_drawing) {
-        sf::RectangleShape rect = createRect(draw_start, mouse);
-        rect.setFillColor(canvas.getPalette()->getCurrentColor());
-
-        canvas.getTexture().draw(rect);
+        RectShape rect(
+            rect_preview->getLayoutBox().getPosition(),
+            rect_preview->getLayoutBox().getSize(),
+            Color(0)
+        );
+        rect.setBorder(RECT_PREVIEW_OUTLINE, color_palette->getFGColor());
+        rect.draw(*canvas);
 
         is_drawing = false;
     }
@@ -199,42 +181,64 @@ public:
     /**
      * \note Transform offset used as line's first point and size as second
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override {
+    virtual void draw(RenderTarget &result, TransformStack &stack) override {
         // REMAINDER: transform.offset = point1, size = point2
-        drawLine(stack.top(), layout->getPosition(), layout->getSize(), PREVIEW_COLOR, result);
+        Vec2d p1 = stack.apply(layout->getPosition());
+        Vec2d p2 = stack.apply(layout->getSize());
+
+        VertexArray array(Lines, 2);
+
+        array[0] = Vertex(p1, PREVIEW_COLOR);
+        array[1] = Vertex(p2, PREVIEW_COLOR);
+
+        result.draw(array);
     }
 };
 
 
-LineTool::LineTool() : draw_start(), line_preview(nullptr) {
+LineTool::LineTool() : line_preview(nullptr) {
     line_preview = new LinePreview(*this);
 }
 
 
-void LineTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) {
-    switch (state) {
-        case PRESSED:
+void LineTool::onMainButton(ControlState state, const Vec2d &mouse) {
+    ASSERT(line_preview, "Line preview is nullptr!\n");
+
+    switch (state.state) {
+        case State::Pressed:
             is_drawing = true;
-            draw_start = mouse;
             line_preview->getLayoutBox().setPosition(mouse);
             line_preview->getLayoutBox().setSize(mouse);
             break;
-        case REALEASED:
-            onConfirm(mouse, canvas);
+        case State::Released:
+            onConfirm();
         default:
             break;
     }
 }
 
 
-void LineTool::onMove(const Vec2d &mouse, Canvas &canvas) {
+void LineTool::onMove(const Vec2d &mouse) {
+    ASSERT(line_preview, "Line preview is nullptr!\n");
+
     line_preview->getLayoutBox().setSize(mouse);
 }
 
 
-void LineTool::onConfirm(const Vec2d &mouse, Canvas &canvas) {
+void LineTool::onConfirm() {
     if (is_drawing) {
-        drawLine(Transform(), draw_start, mouse, canvas.getPalette()->getCurrentColor(), canvas.getTexture());
+        ASSERT(line_preview, "Line preview is nullptr!\n");
+
+        Vec2d p1 = line_preview->getLayoutBox().getPosition();
+        Vec2d p2 = line_preview->getLayoutBox().getSize();
+
+        VertexArray array(Lines, 2);
+
+        array[0] = Vertex(p1, color_palette->getFGColor());
+        array[1] = Vertex(p2, color_palette->getFGColor());
+
+        canvas->draw(array);
+
         is_drawing = false;
     }
 }
@@ -246,6 +250,8 @@ Widget *LineTool::getWidget() {
 
 
 LineTool::~LineTool() {
+    ASSERT(line_preview, "Line preview is nullptr!\n");
+
     delete line_preview;
 }
 
@@ -256,20 +262,18 @@ LineTool::~LineTool() {
 EraserTool::EraserTool() : prev_position() {}
 
 
-void EraserTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) {
-    switch (state) {
-        case PRESSED: {
+void EraserTool::onMainButton(ControlState state, const Vec2d &mouse) {
+    switch (state.state) {
+        case State::Pressed: {
             is_drawing = true;
             prev_position = mouse;
 
-            sf::CircleShape circle(ERASER_RADIUS);
-            circle.setFillColor(CANVAS_BACKGROUND);
-            circle.setPosition(mouse - Vec2d(ERASER_RADIUS, ERASER_RADIUS));
-            canvas.getTexture().draw(circle);
+            CircleShape circle(mouse, ERASER_RADIUS, CANVAS_BACKGROUND);
+            circle.draw(*canvas);
 
             break;
         }
-        case REALEASED:
+        case State::Released:
             is_drawing = false;
         default:
             break;
@@ -277,19 +281,17 @@ void EraserTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &can
 }
 
 
-void EraserTool::onMove(const Vec2d &mouse, Canvas &canvas) {
+void EraserTool::onMove(const Vec2d &mouse) {
     if (is_drawing) {
         Vec2d step(
             (mouse.x - prev_position.x) / ERASER_STEP, 
             (mouse.y - prev_position.y) / ERASER_STEP
         );
 
-        sf::CircleShape circle(ERASER_RADIUS);
-        circle.setFillColor(CANVAS_BACKGROUND);
-        circle.setPosition(mouse - Vec2d(ERASER_RADIUS, ERASER_RADIUS));
+        CircleShape circle(mouse, ERASER_RADIUS, CANVAS_BACKGROUND);
 
         for (int i = 0; i < ERASER_STEP; i++) {
-            canvas.getTexture().draw(circle);
+            circle.draw(*canvas);
             circle.setPosition(circle.getPosition() + step);
         }
 
@@ -301,57 +303,52 @@ void EraserTool::onMove(const Vec2d &mouse, Canvas &canvas) {
 // ============================================================================
 
 
-void ColorPicker::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) {
-    if (state == PRESSED) {
-        // VERY SLOW (TEXTURE PIXELS COPIES TO AN IMAGE)
-        canvas.getPalette()->setCurrentColor(canvas.getTexture().getTexture().copyToImage().getPixel(mouse.x, mouse.y));
-    }
+void ColorPicker::onMainButton(ControlState state, const Vec2d &mouse) {
+    if (state.state == State::Pressed)
+        color_palette->setFGColor(canvas->getPixel(mouse.x, mouse.y));
 }
 
 
 // ============================================================================
 
 
-void BucketTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) {
-    if (state == PRESSED) {
-        sf::Image image = canvas.getTexture().getTexture().copyToImage();
-        sf::Color color = canvas.getPalette()->getCurrentColor();
-        sf::Color origin = image.getPixel(mouse.x, mouse.y);
+void BucketTool::onMainButton(ControlState state, const Vec2d &mouse) {
+    if (state.state == State::Pressed) {
+        Color color = color_palette->getFGColor();
+        Color origin = canvas->getPixel(mouse.x, mouse.y);
 
+        Texture texture(canvas->getTexture());
+        
         List<sf::Vector2u> dfs;
         dfs.push_back(sf::Vector2u(mouse.x, mouse.y));
-        image.setPixel(dfs.back().x, dfs.back().y, color);
+        texture.setPixel(dfs.back().x, dfs.back().y, color);
         
         while (dfs.size()) {
-            sf::Vector2u pixel = dfs[dfs.size() - 1];
-            dfs.remove(dfs.size() - 1);
+            sf::Vector2u pixel = dfs.back();
+            dfs.pop_back();
 
-            if (pixel.x > 0 && image.getPixel(pixel.x - 1, pixel.y) == origin) {
+            if (pixel.x > 0 && texture.getPixel(pixel.x - 1, pixel.y) == origin) {
                 dfs.push_back(sf::Vector2u(pixel.x - 1, pixel.y));
-                image.setPixel(pixel.x - 1, pixel.y, color);
+                texture.setPixel(pixel.x - 1, pixel.y, color);
             }
 
-            if (pixel.x < image.getSize().x - 1 && image.getPixel(pixel.x + 1, pixel.y) == origin) {
+            if (pixel.x < texture.width - 1 && texture.getPixel(pixel.x + 1, pixel.y) == origin) {
                 dfs.push_back(sf::Vector2u(pixel.x + 1, pixel.y));
-                image.setPixel(pixel.x + 1, pixel.y, color);
+                texture.setPixel(pixel.x + 1, pixel.y, color);
             }
 
-            if (pixel.y > 0 && image.getPixel(pixel.x, pixel.y - 1) == origin) {
+            if (pixel.y > 0 && texture.getPixel(pixel.x, pixel.y - 1) == origin) {
                 dfs.push_back(sf::Vector2u(pixel.x, pixel.y - 1));
-                image.setPixel(pixel.x, pixel.y - 1, color);
+                texture.setPixel(pixel.x, pixel.y - 1, color);
             }
 
-            if (pixel.y < image.getSize().y - 1 && image.getPixel(pixel.x, pixel.y + 1) == origin) {
+            if (pixel.y < texture.height - 1 && texture.getPixel(pixel.x, pixel.y + 1) == origin) {
                 dfs.push_back(sf::Vector2u(pixel.x, pixel.y + 1));
-                image.setPixel(pixel.x, pixel.y + 1, color);
+                texture.setPixel(pixel.x, pixel.y + 1, color);
             }
         }
-
-        sf::Texture tool_texture;
-        tool_texture.loadFromImage(image);
-
-        sf::Sprite tool_sprite(tool_texture);
-        canvas.getTexture().draw(tool_sprite);
+        
+        TextureShape(texture).draw(*canvas, Vec2d(), canvas->getSize());
     }
 }
 
@@ -369,8 +366,8 @@ public:
         Widget(1, LazyLayoutBox()), tool(tool_) {}
     
 
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override {
-        drawPolygon(stack.top(), tool.getPoints(), PREVIEW_COLOR, result, sf::PrimitiveType::LineStrip);
+    virtual void draw(RenderTarget &result, TransformStack &stack) override {
+        result.draw(getPolygonArray(stack.top(), tool.getPoints(), PREVIEW_COLOR, LineStrip));
     }
 };
 
@@ -385,20 +382,32 @@ List<Vec2d> &PolygonTool::getPoints() {
 }
 
 
-void PolygonTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) {
-    if (state == PRESSED) {
+void PolygonTool::onMainButton(ControlState state, const Vec2d &mouse) {
+    if (state.state == State::Pressed) {
         is_drawing = true;
         if (points.size() && (points[0] - mouse).length() < POLYGON_EPSILON)
-            onConfirm(mouse, canvas);
-        else
-            points.push_back(mouse);
+            onConfirm();
+        else {
+            if (!points.size()) {
+                points.push_back(mouse);
+                points.push_back(mouse);
+            }
+            points.insert(points.size() - 1, mouse);
+        }
     }
 }
 
 
-void PolygonTool::onConfirm(const Vec2d &mouse, Canvas &canvas) {
+void PolygonTool::onMove(const Vec2d &mouse) {
     if (is_drawing) {
-        drawPolygon(Vec2d(), points, canvas.getPalette()->getCurrentColor(), canvas.getTexture(), sf::PrimitiveType::TriangleFan);
+        points[points.size() - 2] = mouse;
+    }
+}
+
+
+void PolygonTool::onConfirm() {
+    if (is_drawing) {
+        canvas->draw(getPolygonArray(Vec2d(), points, color_palette->getFGColor(), TriangleFan));
         is_drawing = false;
     }
 
@@ -432,9 +441,9 @@ TextTool::TextTool() : text_font(), text_preview(nullptr) {
         text_font,
         TEXT_SIZE,
         PREVIEW_COLOR,
-        sf::Color(0),
+        Color(0),
         PREVIEW_COLOR,
-        sf::Color(0),
+        Color(0),
         0
     );
 
@@ -447,8 +456,8 @@ TextTool::TextTool() : text_font(), text_preview(nullptr) {
 }
 
 
-void TextTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canvas) {
-    if (state == PRESSED) {
+void TextTool::onMainButton(ControlState state, const Vec2d &mouse) {
+    if (state.state == State::Pressed) {
         is_drawing = true;
         text_preview->getLayoutBox().setPosition(mouse);
         text_preview->setKeyboardFocus(true);
@@ -456,12 +465,19 @@ void TextTool::onMainButton(ButtonState state, const Vec2d &mouse, Canvas &canva
 }
 
 
-void TextTool::onConfirm(const Vec2d &mouse, Canvas &canvas) {
+void TextTool::onConfirm() {
+    TextShape text_shape(sf::Text("", text_font, TEXT_SIZE), text_preview->getLayoutBox().getSize());
+
     if (is_drawing) {
-        sf::Text text(text_preview->getString(), text_font, TEXT_SIZE);
-        text.setPosition(text_preview->getLayoutBox().getPosition() + Vec2d(TEXT_OFFSET, TEXT_OFFSET));
-        text.setFillColor(canvas.getPalette()->getCurrentColor());
-        canvas.getTexture().draw(text);
+        text_shape.setColor(color_palette->getFGColor());
+        text_shape.setText(text_preview->getString());
+
+        text_shape.draw(
+            *canvas,
+            text_preview->getLayoutBox().getPosition() + Vec2d(TEXT_OFFSET, TEXT_OFFSET),
+            text_preview->getLayoutBox().getSize()
+        );
+
         is_drawing = false;
     }
 

@@ -99,23 +99,23 @@ SelectFileDialog::SelectFileDialog(
     cancel_action_->setDialog(*this);
 
     RectButtonStyle button_style(
-        sf::Color(BUTTON_NORMAL_COLOR),
-        sf::Color(BUTTON_HOVER_COLOR),
-        sf::Color(BUTTON_PRESSED_COLOR),
+        Color(BUTTON_NORMAL_COLOR),
+        Color(BUTTON_HOVER_COLOR),
+        Color(BUTTON_PRESSED_COLOR),
         style_.window.font,
         BUTTON_FONT_SIZE,
-        sf::Color(BUTTON_FONT_NORMAL_COLOR),
-        sf::Color(BUTTON_FONT_HOVER_COLOR),
-        sf::Color(BUTTON_FONT_PRESSED_COLOR)
+        Color(BUTTON_FONT_NORMAL_COLOR),
+        Color(BUTTON_FONT_HOVER_COLOR),
+        Color(BUTTON_FONT_PRESSED_COLOR)
     );
 
     LineEditStyle line_edit_style(
         style_.window.font,
         LINE_EDIT_FONT_SIZE,
-        sf::Color(LINE_EDIT_FONT_COLOR),
-        sf::Color(LINE_EDIT_BACKGROUND_COLOR),
-        sf::Color(LINE_EDIT_CURSOR_COLOR),
-        sf::Color(LINE_EDIT_BORDER_COLOR),
+        Color(LINE_EDIT_FONT_COLOR),
+        Color(LINE_EDIT_BACKGROUND_COLOR),
+        Color(LINE_EDIT_CURSOR_COLOR),
+        Color(LINE_EDIT_BORDER_COLOR),
         LINE_EDIT_BORDER_THICKNESS
     );
 

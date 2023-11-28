@@ -12,28 +12,25 @@ ScrollBar::ScrollBar(
     ScrollAction *action_, const ScrollBarStyle &style_
 ) :
     Widget(id_, layout_),
-    action(action_), style(style_), scroller(Vec2d()), 
-    is_moving(false), mouse_prev(Vec2d()) 
+    action(action_), style(style_), scroller(Vec2d(), Vec2d(), Color()), 
+    is_moving(false), mouse_prev(Vec2d())
 {
     ASSERT(action, "Action is nullptr!\n");
 }
 
 
-void ScrollBar::draw(sf::RenderTarget &result, TransformStack &stack) {
+void ScrollBar::draw(RenderTarget &result, TransformStack &stack) {
     Vec2d global_position = stack.apply(layout->getPosition());
     Vec2d global_size = stack.apply_size(layout->getSize());
     
-    sf::RectangleShape frame(global_size);
-    frame.setFillColor(style.background_color);
-    frame.setOutlineColor(style.frame_color);
-    frame.setOutlineThickness(style.frame_outline);
-    frame.setPosition(global_position);
-    result.draw(frame);
+    RectShape frame(global_position, global_size, style.background_color);
+    frame.setBorder(style.frame_outline, style.frame_color);
+    frame.draw(result);
     
     Vec2d scroller_offset = scroller.getPosition();
 
     scroller.setPosition(global_position + scroller_offset);
-    result.draw(scroller);
+    scroller.draw(result);
 
     scroller.setPosition(scroller_offset);
 }
@@ -85,8 +82,8 @@ VScrollBar::VScrollBar(
 {
     Vec2d size = layout->getSize();
 
-    scroller.setPosition(0, 0);
-    scroller.setFillColor(style.scroller_color);
+    scroller.setPosition(Vec2d(0, 0));
+    scroller.setColor(style.scroller_color);
     scroller.setSize(Vec2d(size.x, style.scroller_factor * size.y));
 }
 
@@ -122,8 +119,8 @@ HScrollBar::HScrollBar(
 {
     Vec2d size = layout->getSize();
 
-    scroller.setPosition(0, 0);
-    scroller.setFillColor(style.scroller_color);
+    scroller.setPosition(Vec2d(0, 0));
+    scroller.setColor(style.scroller_color);
     scroller.setSize(Vec2d(style.scroller_factor * size.x, size.y));
 }
 

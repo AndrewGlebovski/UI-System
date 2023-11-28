@@ -33,7 +33,7 @@ public:
     /**
      * \brief Draws menu button and list option buttons if it's open
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(RenderTarget &result, TransformStack &stack) override;
 
     /**
      * \brief Broadcast events to option buttons
@@ -56,7 +56,7 @@ class Menu : public Widget {
 protected:
     List<MenuButton*> buttons;      ///< Menu buttons
     RectButtonStyle style;          ///< Button style
-    sf::Color background;           ///< Menu background color
+    Color background;           ///< Menu background color
     size_t opened;                  ///< Index of opened menu button
 
     /**
@@ -72,7 +72,7 @@ protected:
 public:
     Menu(
         size_t id_, const LayoutBox &layout_,
-        const RectButtonStyle &style_, sf::Color background_
+        const RectButtonStyle &style_, Color background_
     );
 
     /**
@@ -88,7 +88,7 @@ public:
     /**
      * \brief Draws menu rect and menu buttons
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(RenderTarget &result, TransformStack &stack) override;
 
     /**
      * \brief Broadcast events to menu buttons

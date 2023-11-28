@@ -15,20 +15,20 @@
 struct LineEditStyle {
     const sf::Font *font;       ///< Font
     unsigned font_size;         ///< Font size
-    sf::Color font_color;       ///< Font color
-    sf::Color background_color; ///< Background color
-    sf::Color cursor_color;     ///< Cursor color
-    sf::Color border_color;     ///< Border color
+    Color font_color;           ///< Font color
+    Color background_color;     ///< Background color
+    Color cursor_color;         ///< Cursor color
+    Color border_color;         ///< Border color
     float border_thickness;     ///< Border thickness
 
 
     LineEditStyle(
         const sf::Font &font_,
         unsigned font_size_,
-        const sf::Color &font_color_,
-        const sf::Color &background_color_,
-        const sf::Color &cursor_color_,
-        const sf::Color &border_color_,
+        Color font_color_,
+        Color background_color_,
+        Color cursor_color_,
+        Color border_color_,
         float border_thickness_
     ) :
         font(&font_), font_size(font_size_), font_color(font_color_),
@@ -101,25 +101,9 @@ public:
     /**
      * \brief Draws buffer content and cursor
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
-
-    /**
-     * \brief Delete visible rect
-    */
-    virtual ~LineEdit() override;
+    virtual void draw(RenderTarget &result, TransformStack &stack) override;
 
 protected:
-    std::string str;            ///< Char buffer
-    LineEditStyle style;        ///< Style
-    bool is_typing;             ///< This widget is in user focus
-    size_t max_length;          ///< Max amount characters in string
-    bool shift_pressed;         ///< Shift key is pressed
-    bool is_cursor_hidden;      ///< Cursor is hidden at this moment
-    float blink_time;           ///< Time passed since last switch between cursor blink states
-    size_t cursor_pos;          ///< Cursor position
-    sf::RenderTexture *visible_rect;     ///< Visible part of the text
-    float visible_rect_x;                ///< Visible rect offset from text begin
-
     /**
      * \brief Resets blink time to zero and sets cursor visible
     */
@@ -128,6 +112,17 @@ protected:
     virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
     virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
     virtual void onTick(const TickEvent &event, EHC &ehc) override;
+
+
+    std::string str;            ///< Char buffer
+    LineEditStyle style;        ///< Style
+    bool is_typing;             ///< This widget is in user focus
+    size_t max_length;          ///< Max amount characters in string
+    bool shift_pressed;         ///< Shift key is pressed
+    bool is_cursor_hidden;      ///< Cursor is hidden at this moment
+    float blink_time;           ///< Time passed since last switch between cursor blink states
+    size_t cursor_pos;          ///< Cursor position
+    TextShape text;             ///< Text shape
 };
 
 

@@ -11,23 +11,24 @@
 #include "basic/container.hpp"
 #include "basic/button.hpp"
 #include "window/menu.hpp"
+#include "widget/shape.hpp"
 
 
 /// Controls how window looks
 class WindowStyle {
 public:
-    sf::Color title_color;      ///< Title color
-    Vec2d title_offset;      ///< Title offset from top-left corner
+    Color title_color;          ///< Title color
+    Vec2d title_offset;         ///< Title offset from top-left corner
     unsigned font_size;         ///< Title font size
     const sf::Font &font;       ///< Title font
     const WindowAsset &asset;   ///< Textures used in window
     float outline;              ///< Describes size of window resizing buttons
-    Vec2d tl_offset;         ///< Window inner area offset from top-left corner
-    Vec2d br_offset;         ///< Window inner area offset from bottom-right corner
+    Vec2d tl_offset;            ///< Window inner area offset from top-left corner
+    Vec2d br_offset;            ///< Window inner area offset from bottom-right corner
 
 
     WindowStyle(
-        const sf::Color &title_color_, const Vec2d &title_offset_,
+        Color title_color_, const Vec2d &title_offset_,
         unsigned font_size_, const sf::Font &font_,
         const WindowAsset &asset_, float outline_, 
         const Vec2d &tl_offset_, const Vec2d &br_offset_
@@ -114,7 +115,7 @@ public:
     /**
      * \brief Draws window frame, title bar and its content
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(RenderTarget &result, TransformStack &stack) override;
     
     /**
      * \brief Broadcast events to window children
@@ -137,14 +138,14 @@ public:
     virtual ~Window() override;
 
 protected:
-    std::string title;          ///< Window title
+    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
+    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+
     WindowStyle style;          ///< Window style
     Container buttons;          ///< Window title bar and resize buttons
     Container container;        ///< Window content manager
     Menu *menu;                 ///< Window menu
-
-    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
-    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    TextShape title;            ///< Window title
 
 private:
     /**

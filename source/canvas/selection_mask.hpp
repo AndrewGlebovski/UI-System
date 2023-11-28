@@ -15,35 +15,24 @@ private:
     size_t height;
 
 public:
-    SelectionMask();
-
+    SelectionMask(size_t width_, size_t height_);
 
     SelectionMask(const SelectionMask &mask) = delete;
     SelectionMask &operator = (const SelectionMask &mask) = delete;
 
+    virtual bool getPixelMask(size_t x, size_t y) const;
 
-    void initMask(size_t width_, size_t height_);
+    virtual size_t getWidth() const;
 
+    virtual size_t getHeight() const;
 
-    bool getPixelMask(size_t x, size_t y) const;
-
-
-    size_t getWidth() const;
-
-
-    size_t getHeight() const;
-
-
-    void setPixelMask(size_t x, size_t y, bool flag);
+    virtual void setPixelMask(size_t x, size_t y, bool flag);
     
+    virtual void fill(bool value);
     
-    void fill(bool value);
-    
-    
-    void invert();
+    virtual void invert();
 
-
-    ~SelectionMask();
+    virtual ~SelectionMask();
 };
 
 

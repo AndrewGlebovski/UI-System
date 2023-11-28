@@ -32,7 +32,7 @@ public:
     /**
      * \brief Draws cyan rectangle for debug purposes
     */
-    void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    void draw(RenderTarget &result, TransformStack &stack) override;
 
 protected:
     Window &window;         ///< Window to move
@@ -88,7 +88,7 @@ public:
     /**
      * \brief Draws red rectangle for debug purposes
     */
-    void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    void draw(RenderTarget &result, TransformStack &stack) override;
 
 protected:
     Window &window;         ///< Window to move
@@ -207,7 +207,7 @@ Window::Window(
     bool can_close
 ) :
     Widget(id_, layout_),
-    title(title_), style(style_),
+    style(style_),
     buttons(
         BUTTONS_ID,
         AnchorLayoutBox(
@@ -217,10 +217,13 @@ Window::Window(
             Vec2d(SCREEN_W, SCREEN_H)
         ),
         false
-    ), 
+    ),
     container(CONTAINER_ID, ContainerLayoutBox(*this)),
-    menu(nullptr)
+    menu(nullptr),
+    title(sf::Text(title_, style.font, style.font_size))
 {
+    title.setColor(style.title_color);
+
     buttons.setParent(this);
     container.setParent(this);
 
@@ -313,26 +316,18 @@ Vec2d Window::getAreaSize() const {
 }
 
 
-#define DRAW_TEXTURE(TEXTURE_ID, POSITION, TEXTURE_RECT_SIZE)               \
-do {                                                                        \
-    tool_sprite.setTexture(style.asset[TEXTURE_ID]);                        \
-    tool_sprite.setTextureRect(sf::IntRect(Vec2d(), TEXTURE_RECT_SIZE));    \
-    tool_sprite.setPosition(POSITION + global_position);                    \
-    result.draw(tool_sprite);                                               \
-} while(0)
+#define DRAW_TEXTURE(TEXTURE_ID, POSITION, TEXTURE_RECT_SIZE) \
+    TextureShape(style.asset[TEXTURE_ID]).draw(result, POSITION + global_position, stack.apply_size(TEXTURE_RECT_SIZE))
 
 
-void Window::draw(sf::RenderTarget &result, TransformStack &stack) {
+void Window::draw(RenderTarget &result, TransformStack &stack) {
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
 
-    Vec2d tl_size = style.asset[WindowAsset::FRAME_TL].getSize();
-    Vec2d br_size = style.asset[WindowAsset::FRAME_BR].getSize();
+    Vec2d tl_size = Vec2d(style.asset[WindowAsset::FRAME_TL].width, style.asset[WindowAsset::FRAME_TL].height);
+    Vec2d br_size = Vec2d(style.asset[WindowAsset::FRAME_BL].width, style.asset[WindowAsset::FRAME_BL].height);
 
-    vec_t center_h = global_size.y - tl_size.y - br_size.y;
-    vec_t center_w = global_size.x - tl_size.x - br_size.x;
-
-    sf::Sprite tool_sprite;
+    vec_t center_h = layout->getSize().y - tl_size.y - br_size.y;
+    vec_t center_w = layout->getSize().x - tl_size.x - br_size.x;
 
     DRAW_TEXTURE(WindowAsset::FRAME_TL,     Vec2d(),                                            tl_size);
     DRAW_TEXTURE(WindowAsset::FRAME_L,      Vec2d(0, tl_size.y),                                Vec2d(tl_size.x, center_h));
@@ -344,11 +339,7 @@ void Window::draw(sf::RenderTarget &result, TransformStack &stack) {
     DRAW_TEXTURE(WindowAsset::TITLE,        Vec2d(tl_size.x, 0),                                Vec2d(center_w, tl_size.y));
     DRAW_TEXTURE(WindowAsset::FRAME_CENTER, tl_size,                                            Vec2d(center_w, center_h));
 
-    sf::Text text(title, style.font, style.font_size);
-    text.setPosition(global_position + style.title_offset);
-    text.setFillColor(style.title_color);
-
-    result.draw(text);
+    title.draw(result, global_position + style.title_offset - title.getTextOffset(), stack.apply_size(title.getTextureSize()));
 
     TransformApplier add_transform(stack, getTransform());
 
@@ -581,15 +572,13 @@ MoveButton::MoveButton(
 {}
 
 
-void MoveButton::draw(sf::RenderTarget &result, TransformStack &stack) {
+void MoveButton::draw(RenderTarget &result, TransformStack &stack) {
 # ifdef DEBUG_DRAW
     Vec2d global_position = stack.apply(layout->getPosition());
     Vec2d global_size = stack.apply_size(layout->getSize());
 
-    sf::RectangleShape rect(global_size);
-    rect.setPosition(global_position);
-    rect.setFillColor(sf::Color::Cyan);
-    result.draw(rect);
+    RectShape rect(global_position, global_size, Cyan);
+    rect.draw(result);
 #endif
 }
 
@@ -658,15 +647,13 @@ ResizeButton::ResizeButton(
 {}
 
 
-void ResizeButton::draw(sf::RenderTarget &result, TransformStack &stack) {
+void ResizeButton::draw(RenderTarget &result, TransformStack &stack) {
 # ifdef DEBUG_DRAW
     Vec2d global_position = stack.apply(layout->getPosition());
     Vec2d global_size = stack.apply_size(layout->getSize());
 
-    sf::RectangleShape rect(global_size);
-    rect.setPosition(global_position);
-    rect.setFillColor(sf::Color::Red);
-    result.draw(rect);
+    RectShape rect(global_position, global_size, Red);
+    rect.draw(result);
 #endif
 }
 

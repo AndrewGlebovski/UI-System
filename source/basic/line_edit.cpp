@@ -17,12 +17,9 @@ LineEdit::LineEdit(
     Widget(id_, layout_),
     str(""), style(style_), is_typing(false), max_length(max_length_),
     shift_pressed(false), is_cursor_hidden(false), blink_time(0), cursor_pos(0),
-    visible_rect(nullptr), visible_rect_x(0)
+    text(sf::Text(str.data(), style.getFont(), style.font_size), layout->getSize())
 {
-    ASSERT((visible_rect = new sf::RenderTexture()), "Failed to allocate texture");
-
-    Vec2d size = layout->getSize();
-    ASSERT(visible_rect->create(size.x - TEXT_OFFSET, size.y - TEXT_OFFSET), "Failed to create texture!\n");
+    text.setColor(style.font_color);
 }
 
 
@@ -59,6 +56,7 @@ const char *LineEdit::getString() const {
 
 void LineEdit::setString(const char *new_str) {
     str.assign(new_str);
+    text.setText(new_str);
     cursor_pos = 0;
 }
 
@@ -84,24 +82,19 @@ void LineEdit::setKeyboardFocus(bool is_focused) {
 }
 
 
-void LineEdit::draw(sf::RenderTarget &result, TransformStack &stack) {
+void LineEdit::draw(RenderTarget &result, TransformStack &stack) {
     Vec2d global_position = stack.apply(layout->getPosition());
     Vec2d global_size = stack.apply_size(layout->getSize());
 
-    sf::RectangleShape rect(global_size);
-    rect.setFillColor(style.background_color);
-    rect.setPosition(global_position);
-    rect.setOutlineThickness(style.border_thickness);
-    rect.setOutlineColor(style.border_color);
-    result.draw(rect);
+    RectShape rect(global_position, global_size, style.background_color);
+    rect.setBorder(style.border_thickness, style.border_color);
+    rect.draw(result);
 
-    sf::Text text(str.data(), style.getFont(), style.font_size);
-    text.setPosition(0, 0);
-    text.setFillColor(style.font_color);
+    double visible_rect_x = text.getTextOffset().x;
+    double cursor_x = 0;
 
-    Vec2d char_rel_pos = text.findCharacterPos(cursor_pos);
-
-    float cursor_x = 0;
+    Vec2d char_rel_pos = text.getText().findCharacterPos(cursor_pos);
+    char_rel_pos.x -= visible_rect_x;
 
     // Move visible rect to left
     if (char_rel_pos.x < visible_rect_x) {
@@ -118,21 +111,16 @@ void LineEdit::draw(sf::RenderTarget &result, TransformStack &stack) {
         cursor_x = char_rel_pos.x - visible_rect_x + TEXT_OFFSET;
     }
     
-    text.setPosition(-visible_rect_x, 0);
-
-    visible_rect->clear(sf::Color(0));
-    visible_rect->draw(text);
-    visible_rect->display();
-
-    sf::Sprite tool_sprite(visible_rect->getTexture());
-    tool_sprite.setPosition(global_position + Vec2d(TEXT_OFFSET, TEXT_OFFSET));
-    result.draw(tool_sprite);
+    text.setTextOffset(Vec2d(-visible_rect_x, 0));
+    text.draw(result, global_position + Vec2d(TEXT_OFFSET, TEXT_OFFSET), global_size);
 
     if (is_typing && !is_cursor_hidden) {
-        sf::RectangleShape cursor(Vec2d(CURSOR_WIDTH, global_size.y + CURSOR_OFFSET * 2));
-        cursor.setFillColor(style.cursor_color);
-        cursor.setPosition(global_position + Vec2d(cursor_x, -CURSOR_OFFSET));
-        result.draw(cursor);
+        RectShape cursor(
+            global_position + Vec2d(cursor_x, -CURSOR_OFFSET),
+            Vec2d(CURSOR_WIDTH, global_size.y + CURSOR_OFFSET * 2),
+            style.cursor_color
+        );
+        cursor.draw(result);
     }
 }
 
@@ -173,6 +161,8 @@ void LineEdit::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
                 str.erase(str.begin() + cursor_pos - 1);
                 cursor_pos--;
                 setCursorVisible();
+
+                text.setText(str.data());
             }
             ehc.stopped = is_typing;
             break;
@@ -180,6 +170,8 @@ void LineEdit::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
             if (is_typing && str.length() > 0 && cursor_pos < str.length()) {
                 str.erase(str.begin() + cursor_pos);
                 setCursorVisible();
+
+                text.setText(str.data());
             }
             ehc.stopped = is_typing;
             break;
@@ -192,6 +184,8 @@ void LineEdit::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
                 
                 cursor_pos++;
                 setCursorVisible();
+                
+                text.setText(str.data());
             }
             ehc.stopped = is_typing;
             break;
@@ -206,9 +200,4 @@ void LineEdit::onTick(const TickEvent &event, EHC &ehc) {
         is_cursor_hidden = !is_cursor_hidden;
         blink_time = 0;
     }
-}
-
-
-LineEdit::~LineEdit() {
-    delete visible_rect;
 }

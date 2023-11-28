@@ -11,14 +11,9 @@
 // ============================================================================
 
 
-SelectionMask::SelectionMask() : mask(nullptr), width(0), height(0) {}
-
-
-void SelectionMask::initMask(size_t width_, size_t height_) {
-    if (mask) delete[] mask;
-
-    width = width_;
-    height = height_;
+SelectionMask::SelectionMask(size_t width_, size_t height_) :
+    mask(nullptr), width(width_), height(height_) 
+{
     mask = new bool[width * height];
     ASSERT(mask, "Failed to allocate mask!\n");
 }

@@ -10,9 +10,16 @@
 // ============================================================================
 
 
-Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style) {
+Widget *openPicture(
+    const char *filename,
+    ToolPalette &tool_palette,
+    ColorPalette &color_palette,
+    CanvasGroup &group,
+    WindowStyle &window_style,
+    ScrollBarStyle &scrollbar_style
+) {
     // First we create to check if file is correct image
-    Canvas *canvas = new Canvas(
+    CanvasView *canvas = new CanvasView(
         Widget::AUTO_ID,
         AnchorLayoutBox(
             Vec2d(),
@@ -20,7 +27,8 @@ Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &gro
             Vec2d(0, 0),
             Vec2d(SCREEN_W - 30, SCREEN_H - 30)
         ),
-        palette,
+        tool_palette,
+        color_palette,
         group
     );
 
@@ -77,7 +85,7 @@ Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &gro
 // ============================================================================
 
 
-VScrollCanvas::VScrollCanvas(Canvas &canvas_) : canvas(canvas_) {}
+VScrollCanvas::VScrollCanvas(CanvasView &canvas_) : canvas(canvas_) {}
 
 
 void VScrollCanvas::operator () (vec_t param) {
@@ -96,7 +104,7 @@ void VScrollCanvas::operator () (vec_t param) {
 // ============================================================================
 
 
-HScrollCanvas::HScrollCanvas(Canvas &canvas_) : canvas(canvas_) {}
+HScrollCanvas::HScrollCanvas(CanvasView &canvas_) : canvas(canvas_) {}
 
 void HScrollCanvas::operator () (vec_t param) {
     Vec2d canvas_size = canvas.getLayoutBox().getSize();
@@ -124,7 +132,7 @@ void FilterHotkey::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc
     switch (event.key_id) {
         case F: 
             if (event.ctrl) {
-                palette.getLastFilter()->applyFilter(*group.getActive());
+                palette.getLastFilter()->applyFilter(group.getActive()->getCanvas());
                 break;
             }
             return;
@@ -144,7 +152,7 @@ FilterAction::FilterAction(FilterPalette::FILTERS filter_id_, FilterPalette &pal
 
 void FilterAction::operator () () {
     if (group.getActive()) {
-        palette.getFilter(filter_id)->applyFilter(*group.getActive());
+        palette.getFilter(filter_id)->applyFilter(group.getActive()->getCanvas());
         palette.setLastFilter(filter_id);
     }
 }
@@ -158,13 +166,15 @@ FilterAction *FilterAction::clone() { return new FilterAction(filter_id, palette
 
 OpenFileAction::OpenFileAction(
     Window &window_,
-    ToolPalette &palette_,
+    ToolPalette &tool_palette_,
+    ColorPalette &color_palette_,
     CanvasGroup &group_,
     WindowStyle &window_style_,
     ScrollBarStyle &scrollbar_style_
 ) :
     window(window_),
-    palette(palette_),
+    tool_palette(tool_palette_),
+    color_palette(color_palette_),
     group(group_),
     window_style(window_style_),
     scrollbar_style(scrollbar_style_)
@@ -175,7 +185,7 @@ void OpenFileAction::operator () () {
     ASSERT(dialog, "Dialog is nullptr!\n");
     const char *filename = ((SelectFileDialog*)(dialog))->getFilename();
 
-    Widget *subwindow = openPicture(filename, palette, group, window_style, scrollbar_style);
+    Widget *subwindow = openPicture(filename, tool_palette, color_palette, group, window_style, scrollbar_style);
     
     if (subwindow) {
         window.addChild(subwindow);
@@ -185,7 +195,7 @@ void OpenFileAction::operator () () {
 
 
 OpenFileAction *OpenFileAction::clone() {
-    return new OpenFileAction(window, palette, group, window_style, scrollbar_style);
+    return new OpenFileAction(window, tool_palette, color_palette, group, window_style, scrollbar_style);
 }
 
 
@@ -231,13 +241,15 @@ CancelAction *CancelAction::clone() {
 
 CreateOpenFileDialog::CreateOpenFileDialog(
     Window &window_,
-    ToolPalette &palette_,
+    ToolPalette &tool_palette_,
+    ColorPalette &color_palette_,
     CanvasGroup &group_,
     FileDialogStyle &dialog_style_,
     ScrollBarStyle &scrollbar_style_
 ) :
     window(window_),
-    palette(palette_),
+    tool_palette(tool_palette_),
+    color_palette(color_palette_),
     group(group_),
     dialog_style(dialog_style_),
     scrollbar_style(scrollbar_style_)
@@ -251,7 +263,8 @@ void CreateOpenFileDialog::operator () () {
         "Open File",
         new OpenFileAction(
             window,
-            palette,
+            tool_palette,
+            color_palette,
             group,
             dialog_style.window,
             scrollbar_style
@@ -265,7 +278,8 @@ void CreateOpenFileDialog::operator () () {
 CreateOpenFileDialog *CreateOpenFileDialog::clone() {
     return new CreateOpenFileDialog(
         window,
-        palette,
+        tool_palette,
+        color_palette,
         group,
         dialog_style,
         scrollbar_style
@@ -317,7 +331,7 @@ SaveFileAction::SaveFileAction(CanvasGroup &group_) :
     group(group_) {}
 
 void SaveFileAction::operator () () {
-    Canvas *canvas = group.getActive();
+    CanvasView *canvas = group.getActive();
     
     if (canvas && canvas->isImageOpen())
         canvas->saveImage();

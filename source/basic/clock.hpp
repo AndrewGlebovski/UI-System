@@ -13,12 +13,12 @@
 
 /// Controls how clock looks
 struct ClockStyle {
-    sf::Color text_color;       ///< Text color
-    unsigned font_size;         ///< Font size
-    const sf::Font &font;       ///< Font
+    Color text_color;       ///< Text color
+    unsigned font_size;     ///< Font size
+    const sf::Font &font;   ///< Font
 
     ClockStyle(
-        const sf::Color &text_color_, 
+        Color text_color_, 
         unsigned font_size_, sf::Font &font_
     ) :
         text_color(text_color_), 
@@ -35,7 +35,7 @@ public:
         const ClockStyle &style_
     );
 
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(RenderTarget &result, TransformStack &stack) override;
 
 protected:
     virtual void onTick(const TickEvent &event, EHC &ehc) override;
@@ -43,6 +43,7 @@ protected:
     size_t daytime;
     ClockStyle style;
     double time_passed;
+    TextShape text;
 };
 
 

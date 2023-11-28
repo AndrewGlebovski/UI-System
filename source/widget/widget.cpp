@@ -100,12 +100,14 @@ int Widget::getStatus() const { return status; }
 void Widget::setStatus(WIDGET_STATUS new_status) { status = new_status; }
 
 
-void Widget::draw(sf::RenderTarget &result, TransformStack &stack) {
+void Widget::draw(RenderTarget &result, TransformStack &stack) {
 #ifdef DEBUG_DRAW
-    sf::RectangleShape rect(Vec2d(25, 25));
-    rect.setFillColor(sf::Color::Red);
-    rect.setPosition(stack.apply(layout->getPosition()));
-    result.draw(rect);
+    RectShape rect(
+        stack.apply(layout->getPosition()),
+        stack.apply_size(layout->getSize()),
+        Color(255, 0, 0)
+    );
+    rect.draw(result);
 #endif
 }
 

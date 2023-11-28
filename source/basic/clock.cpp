@@ -16,15 +16,18 @@ Clock::Clock(
     const ClockStyle &style_
 ) :
     Widget(id_, layout_),
-    daytime(0), style(style_), time_passed(0)
+    daytime(0), style(style_), time_passed(0),
+    text(sf::Text("00:00:00", style.font, style.font_size))
 {
     time_t raw_time = time(NULL);
     struct tm *time_info = localtime(&raw_time);
     daytime = time_info->tm_hour * 3600 + time_info->tm_min * 60 + time_info->tm_sec;
+
+    text.setColor(style.text_color);
 }
 
 
-void Clock::draw(sf::RenderTarget &result, TransformStack &stack) {
+void Clock::draw(RenderTarget &result, TransformStack &stack) {
     Vec2d global_position = stack.apply(layout->getPosition());
     Vec2d global_size = stack.apply_size(layout->getSize());
 
@@ -35,15 +38,15 @@ void Clock::draw(sf::RenderTarget &result, TransformStack &stack) {
     char str[] = "00:00:00";
     sprintf(str, "%02lu:%02lu:%02lu", hours, minutes, seconds);
 
-    sf::Text text(str, style.font, style.font_size);
-    text.setFillColor(style.text_color);
+    text.setText(str);
 
-    sf::FloatRect text_rect = text.getLocalBounds();
-    Vec2d text_offset((global_size.x - text_rect.width) / 2, (global_size.y - text_rect.height) / 2);
+    Vec2d text_size = stack.apply_size(text.getTextureSize());
 
-    text.setPosition(global_position + text_offset);
-
-    result.draw(text);
+    text.draw(
+        result,
+        global_position + (global_size - text_size) / 2,
+        text_size
+    );
 }
 
 

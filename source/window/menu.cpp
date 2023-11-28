@@ -63,7 +63,7 @@ void MenuButton::setOpened(bool is_opened_) {
 }
 
 
-void MenuButton::draw(sf::RenderTarget &result, TransformStack &stack) {
+void MenuButton::draw(RenderTarget &result, TransformStack &stack) {
     RectButton::draw(result, stack);
 
     TransformApplier add_transform(stack, getTransform());
@@ -103,7 +103,7 @@ MenuButton::~MenuButton() {
 
 Menu::Menu(
     size_t id_, const LayoutBox &layout_,
-    const RectButtonStyle &style_, sf::Color background_
+    const RectButtonStyle &style_, Color background_
 ) :
     Widget(id_, layout_),
     buttons(), style(style_), background(background_) ,opened(INVALID_OPENED)
@@ -170,18 +170,15 @@ void Menu::addButton(size_t menu_id, const std::string &text, ButtonAction *acti
 }
 
 
-void Menu::draw(sf::RenderTarget &result, TransformStack &stack) {
+void Menu::draw(RenderTarget &result, TransformStack &stack) {
     Vec2d global_position = stack.apply(layout->getPosition());
     Vec2d global_size = stack.apply_size(layout->getSize());
 
-    sf::RectangleShape rect(global_size);
-    rect.setPosition(global_position);
-    rect.setFillColor(background);
+    RectShape rect(global_position, global_size, background);
 #ifdef DEBUG_DRAW
-    rect.setOutlineColor(sf::Color::Cyan);
-    rect.setOutlineThickness(1);
+    rect.setBorder(1, Cyan);
 #endif
-    result.draw(rect);
+    rect.draw(result);
 
     TransformApplier add_transform(stack, getTransform());
 

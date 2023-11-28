@@ -16,6 +16,8 @@
 #include "common/vector.hpp"
 #include "widget/layout_box.hpp"
 #include "widget/transform.hpp"
+#include "render_target.hpp"
+#include "shape.hpp"
 
 
 /// Base class for all widgets
@@ -206,7 +208,7 @@ public:
      * \brief Draws widget on render target
      * \note By default draws red rectangle for debug purposes
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack);
+    virtual void draw(RenderTarget &result, TransformStack &stack);
 
     /**
      * \brief Handle all sorts of events event

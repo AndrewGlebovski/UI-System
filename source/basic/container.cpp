@@ -16,17 +16,14 @@ Container::Container(
 {}
 
 
-void Container::draw(sf::RenderTarget &result, TransformStack &stack) {
+void Container::draw(RenderTarget &result, TransformStack &stack) {
 # ifdef DEBUG_DRAW
     Vec2d global_position = stack.apply(layout->getPosition());
     Vec2d global_size = stack.apply_size(layout->getSize());
 
-    sf::RectangleShape rect(global_size);
-    rect.setPosition(global_position);
-    rect.setFillColor(sf::Color(0));
-    rect.setOutlineColor(sf::Color::Magenta);
-    rect.setOutlineThickness(1);
-    result.draw(rect);
+    RectShape rect(global_position, global_size, Color(0));
+    rect.setBorder(1, Magenta);
+    rect.draw(result);
 #endif
 
     size_t count = widgets.size();

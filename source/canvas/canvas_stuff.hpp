@@ -8,7 +8,7 @@
 #define _CANVAS_STUFF_H_
 
 
-#include "canvas/canvas.hpp"
+#include "canvas/canvas_view.hpp"
 #include "window/dialog.hpp"
 #include "basic/scrollbar.hpp"
 
@@ -17,16 +17,23 @@
  * \brief Opens picture on canvas in new subwindow with scrollbars
  * \note If image fails to open, then nullptr will be returned
 */
-Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
+Widget *openPicture(
+    const char *filename,
+    ToolPalette &tool_palette,
+    ColorPalette &color_palette,
+    CanvasGroup &group,
+    WindowStyle &window_style,
+    ScrollBarStyle &scrollbar_style
+);
 
 
 /// Moves canvas texture in vertical direction
 class VScrollCanvas : public ScrollAction {
 protected:
-    Canvas &canvas;
+    CanvasView &canvas;
 
 public:
-    VScrollCanvas(Canvas &canvas_);
+    VScrollCanvas(CanvasView &canvas_);
 
     virtual void operator () (vec_t param) override;
 };
@@ -35,10 +42,10 @@ public:
 /// Moves canvas texture in horizontal direction
 class HScrollCanvas : public ScrollAction {
 protected:
-    Canvas &canvas;
+    CanvasView &canvas;
 
 public:
-    HScrollCanvas(Canvas &canvas_);
+    HScrollCanvas(CanvasView &canvas_);
 
     virtual void operator () (vec_t param) override;
 };
@@ -81,7 +88,8 @@ class OpenFileAction : public DialogAction {
 public:
     OpenFileAction(
         Window &window_,
-        ToolPalette &palette_,
+        ToolPalette &tool_palette_,
+        ColorPalette &color_palette_,
         CanvasGroup &group_,
         WindowStyle &window_style_,
         ScrollBarStyle &scrollbar_style_
@@ -93,7 +101,8 @@ public:
 
 private:
     Window &window;
-    ToolPalette &palette;
+    ToolPalette &tool_palette;
+    ColorPalette &color_palette;
     CanvasGroup &group;
     WindowStyle &window_style;
     ScrollBarStyle &scrollbar_style;
@@ -128,7 +137,8 @@ class CreateOpenFileDialog : public ButtonAction {
 public:
     CreateOpenFileDialog(
         Window &window_,
-        ToolPalette &palette_,
+        ToolPalette &tool_palette_,
+        ColorPalette &color_palette,
         CanvasGroup &group_,
         FileDialogStyle &dialog_style_,
         ScrollBarStyle &scrollbar_style_
@@ -140,7 +150,8 @@ public:
 
 private:
     Window &window;
-    ToolPalette &palette;
+    ToolPalette &tool_palette;
+    ColorPalette &color_palette;
     CanvasGroup &group;
     FileDialogStyle &dialog_style;
     ScrollBarStyle &scrollbar_style;

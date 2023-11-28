@@ -24,7 +24,7 @@ public:
     /**
      * \brief Draws button
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override = 0;
+    virtual void draw(RenderTarget &result, TransformStack &stack) override = 0;
 };
 
 
@@ -103,7 +103,7 @@ public:
     /**
      * \brief Draws button
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override = 0;
+    virtual void draw(RenderTarget &result, TransformStack &stack) override = 0;
 
     /**
      * \brief Delete action if button has one
@@ -178,24 +178,24 @@ public:
 
 /// Contains rect button style
 struct RectButtonStyle {
-    sf::Color normal;           ///< Button pressed color
-    sf::Color hover;            ///< Button hover color
-    sf::Color pressed;          ///< Button pressed color
+    Color normal;           ///< Button pressed color
+    Color hover;            ///< Button hover color
+    Color pressed;          ///< Button pressed color
     const sf::Font &font;       ///< Font
     unsigned font_size;         ///< Font size
-    sf::Color font_normal;      ///< Font color normal
-    sf::Color font_hover;       ///< Font color hover
-    sf::Color font_pressed;     ///< Font color pressed
+    Color font_normal;      ///< Font color normal
+    Color font_hover;       ///< Font color hover
+    Color font_pressed;     ///< Font color pressed
 
     /**
      * \brief Constructs style
     */
     RectButtonStyle(
-        sf::Color normal_, sf::Color hover_, sf::Color pressed_,
+        Color normal_, Color hover_, Color pressed_,
         const sf::Font &font_, unsigned font_size_,
-        sf::Color font_normal_,
-        sf::Color font_hover_,
-        sf::Color font_pressed_
+        Color font_normal_,
+        Color font_hover_,
+        Color font_pressed_
     ) :
         normal(normal_), hover(hover_), pressed(pressed_),
         font(font_), font_size(font_size_),
@@ -208,8 +208,8 @@ struct RectButtonStyle {
      * \brief Constructs style but font doesn't change color
     */
     RectButtonStyle(
-        sf::Color normal_, sf::Color hover_, sf::Color pressed_,
-        const sf::Font &font_, unsigned font_size_, sf::Color font_color_
+        Color normal_, Color hover_, Color pressed_,
+        const sf::Font &font_, unsigned font_size_, Color font_color_
     ) :
         normal(normal_), hover(hover_), pressed(pressed_),
         font(font_), font_size(font_size_),
@@ -223,8 +223,8 @@ struct RectButtonStyle {
 /// Rectangle button with some text
 class RectButton : public ActionButton {
 protected:
-    std::string text;
     RectButtonStyle style;
+    TextShape text_shape;
 
 public:
     RectButton(
@@ -238,36 +238,34 @@ public:
     virtual bool isInsideButton(const Vec2d &point, const Vec2d &global_size) const override;
 
 
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(RenderTarget &result, TransformStack &stack) override;
 };
 
 
 /// Texture button
 class TextureButton : public ActionButton {
 protected:
-    const sf::Texture &normal;
-    const sf::Texture &hover;
-    const sf::Texture &pressed;
+    const Texture &normal;
+    const Texture &hover;
+    const Texture &pressed;
 
 public:
     TextureButton(
         size_t id_, const LayoutBox &layout_,
         ButtonAction *action_,
-        const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_
+        const Texture &normal_, const Texture &hover_, const Texture &pressed_
     );
-
 
     virtual bool isInsideButton(const Vec2d &point, const Vec2d &global_size) const override;
 
-
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(RenderTarget &result, TransformStack &stack) override;
 };
 
 
 /// Draws TextureButton with icon in front of it
 class TextureIconButton : public TextureButton {
 protected:
-    const sf::Texture &icon;
+    const Texture &icon;
 
 public:
     /**
@@ -276,12 +274,14 @@ public:
     TextureIconButton(
         size_t id_, const LayoutBox &layout_,
         ButtonAction *action_,
-        const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_,
-        const sf::Texture &icon_
+        const Texture &normal_, const Texture &hover_, const Texture &pressed_,
+        const Texture &icon_
     );
 
-
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    /**
+     * \brief Draws texture button and icon over it
+    */
+    virtual void draw(RenderTarget &result, TransformStack &stack) override;
 };
 
 

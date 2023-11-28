@@ -12,22 +12,38 @@
 #include "widget/vertex.hpp"
 
 
+// Stores texture as width, height and color buffer
 struct Texture {
-    Texture(size_t width, size_t height, const Color* data);
+    Texture(size_t width_, size_t height_, const Color* data_);
 
-    Texture(size_t width, size_t height);
+    Texture(size_t width_, size_t height_);
 
-    Texture(const Texture &texture_) = delete;
+    Texture(const Texture &texture_);
+
     Texture &operator = (const Texture &texture_) = delete;
+
+    void setPixel(size_t x, size_t y, Color color);
+
+    Color getPixel(size_t x, size_t y) const;
 
     ~Texture();
 
-    const Color *data;
-    const size_t width;
-    const size_t height;
+    Color *const data;      ///< Color buffer
+    const size_t width;     ///< Texture width in pixels
+    const size_t height;    ///< Texture height in pixels
 };
 
 
+/**
+ * \brief Loads texture from file
+ * \param [out] texture_ptr     Points to allocated texture
+ * \param [in]  filename        Path to image
+ * \warning Texture is allocated using new, do not forget to delete it
+*/
+void loadTexture(Texture **texture_ptr, const char *filename);
+
+
+/// Base class for drawing
 class RenderTarget {
 public:
     virtual void draw(const VertexArray& array) = 0;
@@ -36,19 +52,22 @@ public:
 
     virtual void clear(Color color) = 0;
 
-    virtual unsigned getNativeHandle() const = 0;
-
     virtual ~RenderTarget() = default;
 };
 
 
+/// Texture for drawing on
 class RenderTexture : public RenderTarget {
 public:
     RenderTexture();
 
+    RenderTexture(const RenderTexture&) = delete;
+    
+    RenderTexture &operator = (const RenderTexture&) = delete;
+
     void create(size_t width, size_t height);
 
-    const sf::Texture &getTexture();
+    const Texture &getTexture() const;
 
     virtual void draw(const VertexArray& array) override;
 
@@ -56,10 +75,18 @@ public:
 
     virtual void clear(Color color) override;
 
-    virtual unsigned getNativeHandle() const override;
+    /**
+     * \brief Returns texture size
+    */
+    Vec2d getSize() const;
+
+    const sf::Texture &getSFMLTexture() const;
+
+    virtual ~RenderTexture() override;
 
 private:
-    sf::RenderTexture sf_texture;
+    sf::RenderTexture render_texture;
+    Texture *inner_texture;
 };
 
 
