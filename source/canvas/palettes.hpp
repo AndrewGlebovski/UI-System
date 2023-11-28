@@ -33,7 +33,7 @@ public:
 
     size_t getCurrentIndex() const { return current_tool; };
 
-    CanvasTool *getCurrentTool();
+    Tool *getCurrentTool();
 
     void setCurrentTool(size_t index);
 
@@ -44,7 +44,7 @@ public:
     virtual ~ToolPalette();
 
 private:
-    List<CanvasTool*> tools;
+    List<Tool*> tools;
     size_t current_tool;
 };
 
@@ -94,7 +94,7 @@ protected:
 /// Contains filters and remembers last used one 
 class FilterPalette {
 private:
-    List<CanvasFilter*> filters;        ///< Filter instances
+    List<Filter*> filters;        ///< Filter instances
     size_t last_filter;                 ///< Last used filter index
 
 public:
@@ -115,7 +115,7 @@ public:
     /**
      * \brief Returns last used filter instance
     */
-    CanvasFilter *getLastFilter();
+    Filter *getLastFilter();
 
     /**
      * \brief Sets last used filter
@@ -125,7 +125,7 @@ public:
     /**
      * \brief Returns filter instance by ID
     */
-    CanvasFilter *getFilter(FILTERS filter_id);
+    Filter *getFilter(FILTERS filter_id);
 
     /**
      * \brief Returns amount of supported filters

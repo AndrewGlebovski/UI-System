@@ -13,7 +13,7 @@
 
 
 /// Standart pencil tool
-class PencilTool : public CanvasTool {
+class PencilTool : public BasicTool {
 protected:
     Vec2d prev_position;        ///< Previous mouse click position
 
@@ -27,7 +27,7 @@ public:
 
 
 /// Tool for drawing rectangle
-class RectTool : public CanvasTool {
+class RectTool : public BasicTool {
 protected:
     Vec2d draw_start;           ///< Previous mouse click position
     Widget *rect_preview;       ///< Widget that draws preview of the rectangle
@@ -57,7 +57,7 @@ public:
 
 
 /// Tool for drawing line
-class LineTool : public CanvasTool {
+class LineTool : public BasicTool {
 protected:
     Widget *line_preview;       ///< Widget that draws preview of the line
 
@@ -80,7 +80,7 @@ public:
 
 
 /// Eraser tool
-class EraserTool : public CanvasTool {
+class EraserTool : public BasicTool {
 protected:
     Vec2d prev_position;        ///< Previous mouse click position
 
@@ -94,21 +94,21 @@ public:
 
 
 /// Changes palette color to color of pixel under mouse
-class ColorPicker : public CanvasTool {
+class ColorPicker : public BasicTool {
 public:
     virtual void onMainButton(ControlState state, const Vec2d &mouse) override;
 };
 
 
 /// Fill all pixels with the same color to palette color
-class BucketTool : public CanvasTool {
+class BucketTool : public BasicTool {
 public:
     virtual void onMainButton(ControlState state, const Vec2d &mouse) override;
 };
 
 
 /// Tool for drawing polygon
-class PolygonTool : public CanvasTool {
+class PolygonTool : public BasicTool {
 protected:
     List<Vec2d> points;         ///< Points that form polygon
     Widget *polygon_preview;    ///< Widget that draws preview of the polygon
@@ -132,7 +132,7 @@ public:
 
 
 /// Draws text on the canvas
-class TextTool : public CanvasTool {
+class TextTool : public BasicTool {
 protected:
     sf::Font text_font;             ///< Text font
     LineEdit *text_preview;         ///< Widget that draws preview of the polygon

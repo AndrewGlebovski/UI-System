@@ -26,7 +26,7 @@ ToolPalette::ToolPalette(ColorPalette &color_palette) :
 }
 
 
-CanvasTool *ToolPalette::getCurrentTool() {
+Tool *ToolPalette::getCurrentTool() {
     return tools[current_tool];
 }
 
@@ -189,13 +189,13 @@ FilterPalette::FilterPalette() : filters(FILTERS_SIZE, nullptr), last_filter(0) 
 }
 
 
-CanvasFilter *FilterPalette::getLastFilter() { return filters[last_filter]; }
+Filter *FilterPalette::getLastFilter() { return filters[last_filter]; }
 
 
 void FilterPalette::setLastFilter(FILTERS filter_id) { last_filter = filter_id; }
 
 
-CanvasFilter *FilterPalette::getFilter(FILTERS filter_id) { return filters[filter_id]; }
+Filter *FilterPalette::getFilter(FILTERS filter_id) { return filters[filter_id]; }
 
 
 size_t FilterPalette::getFilterCount() const { return FILTERS_SIZE; }

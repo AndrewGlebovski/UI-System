@@ -12,7 +12,7 @@
 
 
 /// Changes image colors intensity
-class IntensityFilter : public CanvasFilter {
+class IntensityFilter : public BasicFilter {
 private:
     int intensity;
 
@@ -26,7 +26,7 @@ public:
 
 
 /// Change image colors to black and white style
-class MonochromeFilter : public CanvasFilter {
+class MonochromeFilter : public BasicFilter {
 public:
     MonochromeFilter();
 
@@ -35,7 +35,7 @@ public:
 
 
 /// Change image colors negative
-class NegativeFilter : public CanvasFilter {
+class NegativeFilter : public BasicFilter {
 public:
     NegativeFilter();
 
