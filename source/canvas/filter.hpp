@@ -8,7 +8,7 @@
 #define _FILTER_H_
 
 
-#include "canvas/palette.hpp"
+#include "canvas/palettes.hpp"
 
 
 /// Changes image colors intensity

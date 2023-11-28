@@ -1,10 +1,10 @@
 /**
  * \file
- * \brief Contains sources of canvas and palettes functions
+ * \brief Contains ToolPalette and FilterPalette implementation
 */
 
 
-#include "canvas/palette.hpp"
+#include "canvas/palettes.hpp"
 #include "canvas/tool.hpp"
 #include "canvas/filter.hpp"
 
@@ -55,25 +55,6 @@ void ToolPalette::setColorPalette(ColorPalette &color_palette) {
     for (size_t i = 0; i < tools.size(); i++)
         tools[i]->setColorPalette(color_palette);
 }
-
-
-// ============================================================================
-
-
-ColorPalette::ColorPalette(Color fg_color, Color bg_color) :
-    foreground(fg_color), background(bg_color) {}
-
-
-Color ColorPalette::getFGColor() const { return foreground; }
-
-
-Color ColorPalette::getBGColor() const { return background; }
-
-
-void ColorPalette::setFGColor(Color new_fg_color) { foreground = new_fg_color; }
-
-
-void ColorPalette::setBGColor(Color new_bg_color) { background = new_bg_color; }
 
 
 // ============================================================================

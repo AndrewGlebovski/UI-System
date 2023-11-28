@@ -8,7 +8,7 @@
 #define _CANVAS_VIEW_H_
 
 
-#include "canvas/palette.hpp"
+#include "canvas/palettes.hpp"
 
 
 class CanvasView;

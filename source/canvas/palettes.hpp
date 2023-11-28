@@ -1,90 +1,16 @@
 /**
  * \file
- * \brief Contains canvas, palettes and protypes of their functions 
+ * \brief Contains ToolPalette and FilterPalette interface
 */
 
 
-#ifndef _PALETTE_H_
-#define _PALETTE_H_
+#ifndef _PALETTES_H_
+#define _PALETTES_H_
 
 
-#include "common/asset.hpp"
 #include "basic/container.hpp"
 #include "basic/button.hpp"
-#include "canvas/canvas.hpp"
-
-
-class ColorPalette {
-public:
-    ColorPalette(Color fg_color, Color bg_color);
-
-    Color getFGColor() const;
-
-    Color getBGColor() const;
-
-    void setFGColor(Color new_fg_color);
-
-    void setBGColor(Color new_bg_color);
-
-private:
-    Color foreground;
-    Color background;
-};
-
-
-enum class State {
-    Pressed,
-    Released,
-};
-
-
-struct ControlState {
-    ControlState(State state_) : state(state_) {}
-
-    State state;
-};
-
-
-/// Base class for canvas tool
-class CanvasTool {
-protected:
-    bool is_drawing;                ///< Tool is in drawing mode
-    Canvas *canvas;                 ///< Canvas to draw on
-    ColorPalette *color_palette;    ///< Color palette
-
-public:
-    CanvasTool() : is_drawing(false), canvas(nullptr), color_palette(nullptr) {}
-
-    CanvasTool(const CanvasTool&) = default;
-    
-    CanvasTool &operator = (const CanvasTool&) = default;
-
-    virtual void setColorPalette(ColorPalette &color_palette_) { color_palette = &color_palette_; };
-    
-    virtual void setActiveCanvas(Canvas &canvas_) { onCancel(); canvas = &canvas_; };
-
-    virtual void onMainButton(ControlState state, const Vec2d &mouse) = 0;
-    virtual void onSecondaryButton(ControlState state, const Vec2d &mouse) {}
-    virtual void onModifier1(ControlState state) {}
-    virtual void onModifier2(ControlState state) {}
-    virtual void onModifier3(ControlState state) {}
-    virtual void onMove(const Vec2d &mouse) {}
-    virtual void onConfirm() { is_drawing = false; }
-    virtual void onCancel() { is_drawing = false; }
-    virtual Widget *getWidget() { return nullptr; };
-
-    virtual ~CanvasTool() = default;
-};
-
-
-class CanvasFilter {
-public:
-    virtual void applyFilter(Canvas &canvas) const = 0;
-
-    virtual Widget *getWidget() { return nullptr; };
-
-    virtual ~CanvasFilter() = default;
-};
+#include "canvas/plugin.hpp"
 
 
 /// Handles tools and colors for canvas
