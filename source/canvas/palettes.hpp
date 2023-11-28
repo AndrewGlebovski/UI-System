@@ -26,7 +26,7 @@ public:
         BUCKET_TOOL,        ///< Bucket tool
         POLYGON_TOOL,       ///< Polygon tool
         TEXT_TOOL,          ///< Text tool
-        TOOLS_SIZE          ///< Tools size (this field must always be last!)
+        TOOLS_SIZE          ///< Count of predefined tools (this field must always be last!)
     };
 
     ToolPalette(ColorPalette &color_palette);
@@ -40,6 +40,10 @@ public:
     void setActiveCanvas(Canvas &canvas);
 
     void setColorPalette(ColorPalette &color_palette);
+
+    void addTool(Tool &new_tool);
+
+    size_t getToolCount();
 
     virtual ~ToolPalette();
 
@@ -57,9 +61,15 @@ public:
         ToolPalette *palette_, const PaletteViewAsset &asset_
     );
 
-
     ToolPaletteView(const ToolPaletteView &palette_view) = default;
+
     ToolPaletteView &operator = (const ToolPaletteView &palette_view) = default;
+
+    /**
+     * \brief Adds new tool to view palette
+     * \note Also adds tool to tool palette
+    */
+    void addTool(Tool &new_tool);
 
     /**
      * \brief Draws tool buttons
@@ -74,20 +84,22 @@ public:
     /**
      * \brief Deletes tool buttons
     */
-    virtual ~ToolPaletteView();
+    virtual ~ToolPaletteView() override;
 
 protected:
-    Container buttons;                  ///< ToolPalette buttons for tool selection
-    ToolPalette *palette;               ///< ToolPalette which this ToolPaletteView affects
-    const PaletteViewAsset &asset;      ///< Assets for buttons
-    ButtonGroup *group;                 ///< Tool buttons group
+    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
 
+private:
     /**
      * \brief Checks which tool is active and sets corresponding button as pressed in group
     */
     void updateToolButtons();
 
-    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
+    Container buttons;                  ///< ToolPalette buttons for tool selection
+    ToolPalette *palette;               ///< ToolPalette which this ToolPaletteView affects
+    const PaletteViewAsset &asset;      ///< Assets for buttons
+    ButtonGroup *group;                 ///< Tool buttons group
+    List<Texture*> icons;               ///< Additional tools icons
 };
 
 
@@ -104,7 +116,7 @@ public:
         DARKEN_FILTER,      ///< Decrease intensity
         MONOCHROME_FILTER,  ///< Black and white style
         NEGATIVE_FILTER,    ///< Negative colors
-        FILTERS_SIZE        ///< Filters size (this field must always be last!)
+        FILTERS_SIZE        ///< Count of predefined filters (this field must always be last!)
     };
 
     /**
@@ -131,6 +143,11 @@ public:
      * \brief Returns amount of supported filters
     */
     size_t getFilterCount() const;
+
+    /**
+     * \brief Adds filter to palette
+    */
+    void addFilter(Filter &new_filter);
 
     /**
      * \brief Delete filters
