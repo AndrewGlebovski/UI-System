@@ -45,6 +45,11 @@ public:
     virtual void removeChild(size_t child_id) override;
 
     /**
+     * \brief Returns number of children
+    */
+    size_t getChildCount() const;
+
+    /**
      * \brief Broadcast events to container children
     */
     virtual void onEvent(const Event &event, EHC &ehc) override;

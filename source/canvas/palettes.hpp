@@ -31,7 +31,9 @@ public:
 
     ToolPalette(ColorPalette &color_palette);
 
-    size_t getCurrentIndex() const { return current_tool; };
+    Tool *getTool(size_t index);
+
+    size_t getCurrentIndex() const;
 
     Tool *getCurrentTool();
 
@@ -43,7 +45,7 @@ public:
 
     void addTool(Tool &new_tool);
 
-    size_t getToolCount();
+    size_t getToolCount() const;
 
     virtual ~ToolPalette();
 
@@ -66,12 +68,6 @@ public:
     ToolPaletteView &operator = (const ToolPaletteView &palette_view) = default;
 
     /**
-     * \brief Adds new tool to view palette
-     * \note Also adds tool to tool palette
-    */
-    void addTool(Tool &new_tool);
-
-    /**
      * \brief Draws tool buttons
     */
     virtual void draw(RenderTarget &result, TransformStack &stack) override;
@@ -87,13 +83,31 @@ public:
     virtual ~ToolPaletteView() override;
 
 protected:
+    /**
+     * \brief Checks hot keys for tools
+    */
     virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
+
+    /**
+     * \brief Resizes self and internal container
+    */
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
 
 private:
     /**
      * \brief Checks which tool is active and sets corresponding button as pressed in group
     */
-    void updateToolButtons();
+    void updateCurrentButton();
+
+    /**
+     * \brief Checks for new tools in ToolPalette and adds them to PaletteView
+    */
+    void updateButtons();
+
+    /**
+     * \brief Adds new tool from ToolPalette to PaletteView
+    */
+    void addTool(size_t tool_id);
 
     Container buttons;                  ///< ToolPalette buttons for tool selection
     ToolPalette *palette;               ///< ToolPalette which this ToolPaletteView affects
@@ -132,12 +146,12 @@ public:
     /**
      * \brief Sets last used filter
     */
-    void setLastFilter(FILTERS filter_id);
+    void setLastFilter(size_t filter_id);
 
     /**
      * \brief Returns filter instance by ID
     */
-    Filter *getFilter(FILTERS filter_id);
+    Filter *getFilter(size_t filter_id);
 
     /**
      * \brief Returns amount of supported filters

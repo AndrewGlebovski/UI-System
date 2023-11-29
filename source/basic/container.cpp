@@ -103,6 +103,9 @@ void Container::removeChild(size_t child_id) {
 }
 
 
+size_t Container::getChildCount() const { return widgets.size(); }
+
+
 #define CHECK_EHC(CALL_FUNC)                    \
 do {                                            \
     CALL_FUNC;                                  \

@@ -7,6 +7,8 @@
 #include "canvas/palettes.hpp"
 #include "canvas/tool.hpp"
 #include "canvas/filter.hpp"
+#include "window/window.hpp"
+
 
 // ============================================================================
 
@@ -31,14 +33,26 @@ ToolPalette::ToolPalette(ColorPalette &color_palette) :
 }
 
 
+Tool *ToolPalette::getTool(size_t index) {
+    ASSERT(index < tools.size(), "Index is out of range!\n");
+
+    return tools[index];
+}
+
+
+size_t ToolPalette::getCurrentIndex() const {
+    return current_tool;
+}
+
+
 Tool *ToolPalette::getCurrentTool() {
-    return tools[current_tool];
+    return getTool(getCurrentIndex());
 }
 
 
 void ToolPalette::setCurrentTool(size_t index) {
     if (index < tools.size()) {
-        tools[current_tool]->onCancel();
+        getCurrentTool()->onCancel();
         current_tool = index;
     }
 }
@@ -61,7 +75,7 @@ void ToolPalette::addTool(Tool &tool) {
 }
 
 
-size_t ToolPalette::getToolCount() {
+size_t ToolPalette::getToolCount() const {
     return tools.size();
 }
 
@@ -82,7 +96,7 @@ ToolPalette::~ToolPalette() {
 
 class PaletteAction : public ButtonAction {
 public:
-    PaletteAction(ToolPalette &palette_, int tool_id_) :
+    PaletteAction(ToolPalette &palette_, size_t tool_id_) :
         palette(palette_), tool_id(tool_id_) {}
 
     void operator () () override {
@@ -95,19 +109,11 @@ public:
 
 protected:
     ToolPalette &palette;
-    int tool_id;
+    size_t tool_id;
 };
 
 
 // ============================================================================
-
-
-void ToolPaletteView::updateToolButtons() {
-    size_t current_tool = palette->getCurrentIndex();
-    ActionButton *current_button = (ActionButton*) buttons.findWidget(current_tool + Widget::AUTO_ID + 1);
-
-    if (group->getPressed() != current_button) group->setPressed(current_button);
-}
 
 
 #define ADD_TOOL_BUTTON(TOOL_ID, TOOL_TEXTURE_ID, POSITION)     \
@@ -131,7 +137,7 @@ ToolPaletteView::ToolPaletteView(
     ToolPalette *palette_, const PaletteViewAsset &asset_
 ) :
     Widget(id_, layout_), 
-    buttons(1, LazyLayoutBox(Vec2d(), layout->getSize()), false),
+    buttons(1, AnchorLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H), Vec2d(), Vec2d(SCREEN_W, SCREEN_H)), false),
     palette(palette_), asset(asset_), group(nullptr),
     icons()
 {
@@ -148,50 +154,19 @@ ToolPaletteView::ToolPaletteView(
     ADD_TOOL_BUTTON(ToolPalette::POLYGON_TOOL,  PaletteViewAsset::POLYGON_TEXTURE,  Vec2d(0, 282));
     ADD_TOOL_BUTTON(ToolPalette::TEXT_TOOL,     PaletteViewAsset::TEXT_TEXTURE,     Vec2d(94, 282));
 
-    updateToolButtons();
+    updateCurrentButton();
 }
 
 
 #undef ADD_TOOL_BUTTON
 
 
-void ToolPaletteView::addTool(Tool &new_tool) {
-    const char *texture_path = new_tool.getPluginData()->getTexturePath();
-
-    icons.push_back(nullptr);
-    loadTexture(&icons.back(), texture_path);
-
-    size_t tool_id = palette->getToolCount();
-
-    Widget *prev_button = buttons.findWidget(Widget::AUTO_ID + tool_id);
-
-    Vec2d position = prev_button->getLayoutBox().getPosition();
-
-    if (isEqual(position.x, 0)) position.x = TOOL_ICON_SIZE.x;
-    else position = Vec2d(0, position.y + TOOL_ICON_SIZE.y);
-
-    palette->addTool(new_tool);
-
-    TextureIconButton *btn = new TextureIconButton(
-        Widget::AUTO_ID + tool_id + 1,
-        LazyLayoutBox(position, Vec2d()),
-        new PaletteAction(*palette, tool_id),
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::NORMAL_TEXTURE],
-        asset[PaletteViewAsset::SELECTED_TEXTURE],
-        *icons.back()
-    );
-
-    btn->setButtonGroup(group);
-
-    buttons.addChild(btn);
-}
-
-
 void ToolPaletteView::draw(RenderTarget &result, TransformStack &stack) {
     TransformApplier add_transform(stack, getTransform());
 
-    updateToolButtons();
+    updateButtons();
+
+    updateCurrentButton();
 
     buttons.draw(result, stack);
 }
@@ -226,8 +201,78 @@ void ToolPaletteView::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &
 }
 
 
+void ToolPaletteView::onParentUpdate(const LayoutBox &parent_layout) {
+    getLayoutBox().onParentUpdate(parent_layout);
+    buttons.onParentUpdate(getLayoutBox());
+}
+
+
+void ToolPaletteView::updateCurrentButton() {
+    size_t curr_tool = palette->getCurrentIndex();
+
+    ActionButton *curr_btn = static_cast<ActionButton*>(
+        buttons.findWidget(curr_tool + Widget::AUTO_ID + 1)
+    );
+
+    if (group->getPressed() != curr_btn) group->setPressed(curr_btn);
+}
+
+
+void ToolPaletteView::updateButtons() {
+    if (buttons.getChildCount() == palette->getToolCount()) return;
+
+    for (size_t i = buttons.getChildCount(); i < palette->getToolCount(); i++)
+        addTool(i);
+}
+
+
+void ToolPaletteView::addTool(size_t tool_id) {
+    Tool &new_tool = *palette->getTool(tool_id);
+
+    const char *texture_path = new_tool.getPluginData()->getTexturePath();
+
+    icons.push_back(nullptr);
+    loadTexture(&icons.back(), texture_path);
+
+    Widget *prev_button = buttons.findWidget(Widget::AUTO_ID + tool_id);
+
+    Vec2d position = prev_button->getLayoutBox().getPosition();
+
+    if (isEqual(position.x, 0)) position.x = TOOL_ICON_SIZE.x;
+    else {
+        position = Vec2d(0, position.y + TOOL_ICON_SIZE.y);
+
+        // Change parent window size to fit new tools
+        Window *parent_window = static_cast<Window*>(getParent()->getParent());
+        Vec2d parent_size = parent_window->getLayoutBox().getSize();
+        parent_window->setSize(parent_size + Vec2d(0, TOOL_ICON_SIZE.y));
+    }
+
+    TextureIconButton *btn = new TextureIconButton(
+        Widget::AUTO_ID + tool_id + 1,
+        LazyLayoutBox(position, Vec2d()),
+        new PaletteAction(*palette, tool_id),
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::NORMAL_TEXTURE],
+        asset[PaletteViewAsset::SELECTED_TEXTURE],
+        *icons.back()
+    );
+
+    btn->setButtonGroup(group);
+
+    buttons.addChild(btn);
+}
+
+
 ToolPaletteView::~ToolPaletteView() {
-    if (group) delete group;
+    ASSERT(group, "Group is nullptr!\n");
+    delete group;
+
+    // Delete icons for additional tools
+    for (size_t i = 0; i < icons.size(); i++) {
+        ASSERT(icons[i], "Icon is nullptr!\n");
+        delete icons[i];
+    }
 }
 
 
@@ -245,13 +290,21 @@ FilterPalette::FilterPalette() : filters(FILTERS_SIZE, nullptr), last_filter(0) 
 Filter *FilterPalette::getLastFilter() { return filters[last_filter]; }
 
 
-void FilterPalette::setLastFilter(FILTERS filter_id) { last_filter = filter_id; }
+void FilterPalette::setLastFilter(size_t filter_id) {
+    ASSERT(filter_id < getFilterCount(), "Index is out of range!\n");
+
+    last_filter = filter_id;
+}
 
 
-Filter *FilterPalette::getFilter(FILTERS filter_id) { return filters[filter_id]; }
+Filter *FilterPalette::getFilter(size_t filter_id) {
+    ASSERT(filter_id < getFilterCount(), "Index is out of range!\n");
+
+    return filters[filter_id];
+}
 
 
-size_t FilterPalette::getFilterCount() const { return FILTERS_SIZE; }
+size_t FilterPalette::getFilterCount() const { return filters.size(); }
 
 
 void FilterPalette::addFilter(Filter &new_filter) {

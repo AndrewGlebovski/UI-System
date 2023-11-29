@@ -1,6 +1,7 @@
 #include "basic/clock.hpp"
 #include "canvas/canvas_stuff.hpp"
 #include "widget/shape.hpp"
+#include "canvas/plugin_loader.hpp"
 
 
 /// Creates tool palette view in new subwindow
@@ -108,10 +109,12 @@ int main() {
         *filter_palette,
         *canvas_group
     ));
-    
+
     main_window->addChild(openPicture(nullptr, *tool_palette, *color_palette, *canvas_group, window_style, scrollbar_style));
     main_window->addChild(createToolPaletteView(tool_palette, window_style, palette_asset));
     
+    PluginLoader plugin_loader("plugins", *tool_palette, *filter_palette, *main_menu, 1, *canvas_group);
+
     TransformStack stack;
 
     sf::Clock timer;
@@ -179,7 +182,7 @@ Widget *createToolPaletteView(ToolPalette *tool_palette, WindowStyle &window_sty
 
     subwindow->addChild(new ToolPaletteView(
         Widget::AUTO_ID,
-        BoundLayoutBox(Vec2d(), Vec2d(188, 376)),
+        AnchorLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H), Vec2d(), Vec2d(SCREEN_W, SCREEN_H)),
         tool_palette,
         palette_asset
     ));

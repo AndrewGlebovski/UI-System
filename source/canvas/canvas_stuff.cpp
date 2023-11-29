@@ -24,7 +24,7 @@ Widget *openPicture(
         AnchorLayoutBox(
             Vec2d(),
             Vec2d(SCREEN_W - 30, SCREEN_H - 30),
-            Vec2d(0, 0),
+            Vec2d(),
             Vec2d(SCREEN_W - 30, SCREEN_H - 30)
         ),
         tool_palette,
@@ -146,7 +146,7 @@ void FilterHotkey::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc
 // ============================================================================
 
 
-FilterAction::FilterAction(FilterPalette::FILTERS filter_id_, FilterPalette &palette_, CanvasGroup &group_) : 
+FilterAction::FilterAction(size_t filter_id_, FilterPalette &palette_, CanvasGroup &group_) : 
     filter_id(filter_id_), palette(palette_), group(group_) {}
 
 

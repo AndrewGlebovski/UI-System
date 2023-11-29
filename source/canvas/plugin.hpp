@@ -48,7 +48,7 @@ public:
 
 
 /// Plugin loader function type
-typedef Plugin *(*load_plugin_t)(PluginGuid);
+typedef Plugin *(*load_plugin_t)();
 
 
 /// Key state

@@ -77,12 +77,8 @@ public:
     );
 
     CanvasView(const CanvasView &canvas) = default;
-    CanvasView &operator = (const CanvasView &canvas) = default;
 
-    /**
-     * \brief Clears canvas with background color
-    */
-    void clearCanvas();
+    CanvasView &operator = (const CanvasView &canvas) = default;
 
     /**
      * \brief Creates image with the given size filled with background color
@@ -127,6 +123,11 @@ public:
      * \brief Returns reference to canvas
     */
     Canvas &getCanvas();
+
+    /**
+     * \brief Returns reference to color palette
+    */
+    ColorPalette &getColorPalette();
 
     /**
      * \brief Returns true if canvas is active in his group

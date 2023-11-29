@@ -15,6 +15,9 @@ BUILD_DIR = ./build
 # Папка с исходниками и заголовками
 SRC_DIR = ./source
 
+# Название папки с исходниками плагинов
+PLUGIN_DIR = plugins
+
 # Директория для логов
 LOG_DIR = ./log
 
@@ -27,11 +30,21 @@ INC_FLAGS = -I$(SRC_DIR)
 # Флаги для директивы #define
 D_FLAGS = -D_DEBUG -D_EJUDGE_CLIENT_
 
-# Все исходники
-CPP = $(shell find $(SRC_DIR) -type f -name "*.cpp")
+# Все исходники плагинов
+DLL = $(shell find $(SRC_DIR)/$(PLUGIN_DIR) -type f -name "*.cpp")
 
-# Все объекты
+# Все исходники кроме плагинов
+CPP := $(shell find $(SRC_DIR) -type f -name "*.cpp")
+CPP := $(filter-out $(DLL), $(CPP))
+
+# Все объекты кроме плагинов
 OBJ = $(CPP:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+
+# Объекты плагинов
+DLL_OBJ = $(DLL:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+
+# Файлы динамических библиотек плагинов
+DLL_SO = $(DLL:$(SRC_DIR)/%.cpp=%.so)
 
 # Файлы зависимостей
 DEP = $(OBJ:%.o=%.d)
@@ -39,7 +52,7 @@ DEP = $(OBJ:%.o=%.d)
 # Цель по умолчанию
 # Собирает и запускает
 # '@' отключает вывод самой команды перед исполнением
-all : build
+all : build plugins
 	@./$(BIN)
 
 # Собирает и запускает под Valgrind (предварительно лучше собрать с оптимизацией -O0 или -O1)
@@ -53,10 +66,16 @@ build : $(BIN)
 
 # Завершает сборку
 # Также создает папку для логов
-$(BIN) : $(OBJ)
+# Также собирает объекты подключаемых плагины
+# Указывать файлы нужно в порядке зависимостей друг от друга
+$(BIN) : $(OBJ) $(DLL_OBJ)
 	@mkdir -p $(LOG_DIR)
 	@mkdir -p $(@D)
-	@$(COMPILER) $^ -o $(BIN) -lsfml-graphics -lsfml-window -lsfml-system
+	@$(COMPILER) $(OBJ) -o $(BIN) -lsfml-graphics -lsfml-window -lsfml-system
+
+# Cобирает все подключаемые плагины
+.PHONY : plugins
+plugins : $(DLL_SO)
 
 # Подключает зависимости
 # '-include' подключает файл, только если он существует
@@ -67,9 +86,15 @@ $(BIN) : $(OBJ)
 # флаг -MMD генерирует файл с зависимостями
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 	@mkdir -p $(@D)
-	@$(COMPILER) $(FLAGS) $(INC_FLAGS) $(D_FLAGS) -MMD -c $< -o $@
+	@$(COMPILER) $(FLAGS) $(INC_FLAGS) $(D_FLAGS) -MMD -fPIC -c $< -o $@
+
+# Собирает каждый плагин в динамическую библиотеку
+# Указывать файлы нужно в порядке зависимостей друг от друга
+$(PLUGIN_DIR)/%.so : $(BUILD_DIR)/$(PLUGIN_DIR)/%.o $(OBJ)
+	@mkdir -p $(@D)
+	@$(COMPILER) -shared -z defs -o $@ $^ -lsfml-graphics -lsfml-window -lsfml-system
 
 # Удаляет результаты компиляции
 .PHONY : clean
 clean :
-	@rm -rf $(BIN) $(BUILD_DIR) $(LOG_DIR)
+	@rm -rf $(BIN) $(BUILD_DIR) $(LOG_DIR) $(PLUGIN_DIR)

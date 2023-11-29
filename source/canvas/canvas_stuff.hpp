@@ -68,12 +68,12 @@ private:
 /// Applies specified filter to the active canvas
 class FilterAction : public ButtonAction {
 private:
-    FilterPalette::FILTERS filter_id;
+    size_t filter_id;
     FilterPalette &palette;
     CanvasGroup &group;
 
 public:
-    FilterAction(FilterPalette::FILTERS filter_id_, FilterPalette &palette_, CanvasGroup &group_);
+    FilterAction(size_t filter_id_, FilterPalette &palette_, CanvasGroup &group_);
 
 
     virtual void operator () () override;

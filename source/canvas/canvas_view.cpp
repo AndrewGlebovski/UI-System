@@ -162,6 +162,11 @@ Canvas &CanvasView::getCanvas() {
 }
 
 
+ColorPalette &CanvasView::getColorPalette() {
+    return *color_palette;
+}
+
+
 bool CanvasView::isActive() const {
     ASSERT(group, "CanvasView must be assigned to group!\n");
     return (this == group->getActive());
