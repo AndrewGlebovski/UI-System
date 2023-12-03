@@ -17,6 +17,8 @@ const Color CANVAS_BACKGROUND = White;   ///< Canvas background color
 
 class Canvas {
 public:
+    virtual ~Canvas() = default;
+
     /**
      * \brief Draw on canvas using vertex array mapping
      */
@@ -24,40 +26,38 @@ public:
 
     /**
      * \brief Draw texture on canvas using vertex array mapping
-     */
+    */
     virtual void draw(const VertexArray& vertex_array, const Texture& texture) = 0;
 
     /**
-     * \brief Return sise of canvas
-     */
+     * \brief Return size of canvas
+    */
     virtual Vec2d getSize(void) const = 0;
 
     /**
      * \brief Set size of canvas
-     */
+    */
     virtual void setSize(const Vec2d& size) = 0;
 
     /**
      * \brief Get selection mask of canvas
-     */
+    */
     virtual SelectionMask& getSelectionMask(void) = 0;
 
     /**
      * \brief Get color of pixel on canvas by coordinates
-     */
+    */
     virtual Color getPixel(size_t x, size_t y) const = 0;
 
     /**
      * \brief Set color of pixel on canvas by coordinates
-     */
+    */
     virtual void setPixel(size_t x, size_t y, const Color& color) = 0;
 
     /**
      * \brief Returns reference of canvas texture
-     */
+    */
     virtual const Texture &getTexture() const = 0;
-
-    virtual ~Canvas() = default;
 };
 
 

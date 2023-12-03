@@ -19,7 +19,7 @@ SelectionMask::SelectionMask(size_t width_, size_t height_) :
 }
 
 
-bool SelectionMask::getPixelMask(size_t x, size_t y) const {
+bool SelectionMask::getPixel(size_t x, size_t y) const {
     ASSERT(mask, "Mask is nullptr!\n");
     ASSERT(x < width, "X is out of range!\n");
     ASSERT(y < height, "Y is out of range!\n");

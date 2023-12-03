@@ -34,12 +34,12 @@ void TestFilter::applyFilter(Canvas &canvas) const {
     
     for (size_t y = 0; y < mask.getHeight(); y++) {
         for (size_t x = 0; x < mask.getWidth(); x++) {
-            if (mask.getPixelMask(x, y)) {
+            if (mask.getPixel(x, y)) {
                 Color origin(texture.getPixel(x, y));
                 texture.setPixel(x, y, Color(255 - origin.r, 255 - origin.g, 255 - origin.b));
             }
         }
     }
     
-    TextureShape(texture).draw(canvas, Vec2d(), canvas.getSize());
+    TextureShape(texture).draw(canvas, Vec2d(), Vec2d(texture.width, texture.height));
 }

@@ -97,4 +97,4 @@ $(PLUGIN_DIR)/%.so : $(BUILD_DIR)/$(PLUGIN_DIR)/%.o $(OBJ)
 # Удаляет результаты компиляции
 .PHONY : clean
 clean :
-	@rm -rf $(BIN) $(BUILD_DIR) $(LOG_DIR) $(PLUGIN_DIR)
+	@rm -rf $(BIN) $(BUILD_DIR)

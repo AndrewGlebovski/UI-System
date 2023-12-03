@@ -18,21 +18,22 @@ public:
     SelectionMask(size_t width_, size_t height_);
 
     SelectionMask(const SelectionMask &mask) = delete;
+
     SelectionMask &operator = (const SelectionMask &mask) = delete;
 
-    virtual bool getPixelMask(size_t x, size_t y) const;
+    virtual ~SelectionMask();
 
     virtual size_t getWidth() const;
 
     virtual size_t getHeight() const;
+
+    virtual bool getPixel(size_t x, size_t y) const;
 
     virtual void setPixelMask(size_t x, size_t y, bool flag);
     
     virtual void fill(bool value);
     
     virtual void invert();
-
-    virtual ~SelectionMask();
 };
 
 

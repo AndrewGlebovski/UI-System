@@ -26,7 +26,7 @@ void IntensityFilter::applyFilter(Canvas &canvas) const {
 
     for (size_t y = 0; y < mask.getHeight(); y++) {
         for (size_t x = 0; x < mask.getWidth(); x++) {
-            if (mask.getPixelMask(x, y)) {
+            if (mask.getPixel(x, y)) {
                 Color origin(texture.getPixel(x, y));
                 texture.setPixel(x, y, Color(clip(origin.r), clip(origin.g), clip(origin.b)));
             }
@@ -49,7 +49,7 @@ void MonochromeFilter::applyFilter(Canvas &canvas) const {
     
     for (size_t y = 0; y < mask.getHeight(); y++) {
         for (size_t x = 0; x < mask.getWidth(); x++) {
-            if (mask.getPixelMask(x, y)) {
+            if (mask.getPixel(x, y)) {
                 Color origin(texture.getPixel(x, y));
                 unsigned aver = (unsigned(origin.r) + unsigned(origin.g) + unsigned(origin.b)) / 3U;
                 texture.setPixel(x, y, Color(aver, aver, aver));
@@ -73,7 +73,7 @@ void NegativeFilter::applyFilter(Canvas &canvas) const {
     
     for (size_t y = 0; y < mask.getHeight(); y++) {
         for (size_t x = 0; x < mask.getWidth(); x++) {
-            if (mask.getPixelMask(x, y)) {
+            if (mask.getPixel(x, y)) {
                 Color origin(texture.getPixel(x, y));
                 texture.setPixel(x, y, Color(255 - origin.r, 255 - origin.g, 255 - origin.b));
             }
