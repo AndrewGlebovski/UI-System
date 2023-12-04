@@ -176,7 +176,7 @@ void OpenFileAction::operator () () {
     
     if (subwindow) {
         window.addChild(subwindow);
-        dialog->setStatus(Widget::DELETE);
+        dialog->setStatus(Widget::Status::Delete);
     }
 }
 
@@ -199,7 +199,7 @@ void SaveAsFileAction::operator () () {
     ASSERT(CANVAS_GROUP.getActive(), "No active canvas!\n");
     CANVAS_GROUP.getActive()->saveImageAs(filename);
 
-    dialog->setStatus(Widget::DELETE);
+    dialog->setStatus(Widget::Status::Delete);
 }
 
 
@@ -213,7 +213,7 @@ SaveAsFileAction *SaveAsFileAction::clone() {
 
 void CancelAction::operator () () {
     ASSERT(dialog, "Dialog is nullptr!\n");
-    dialog->setStatus(Widget::DELETE);
+    dialog->setStatus(Widget::Status::Delete);
 }
 
 

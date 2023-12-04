@@ -62,9 +62,12 @@ public:
     static const size_t AUTO_ID = 0;
 
     /// Shows parent if some actions requiered for this widget
-    enum WIDGET_STATUS {
-        PASS        = 0,    ///< Nothing to be done for this widget
-        DELETE      = 1     ///< This widget should be deleted
+    enum class Status {
+        Normal      = 0,    ///< Widget accepts events and draws
+        Disabled    = 1,    ///< Widget draws but doesn't accept events
+        Hidden      = 2,    ///< Widget accepts events but doesn't draw
+        Pass        = 3,    ///< Widget doesn't accept events and doesn't draw
+        Delete      = 4     ///< Widget will be deleted
     };
 
     /**
@@ -133,23 +136,23 @@ public:
     /**
      * \brief Returns widget status
     */
-    int getStatus() const;
+    Status getStatus() const;
 
     /**
      * \brief Sets widget status
     */
-    void setStatus(WIDGET_STATUS new_status);
+    void setStatus(Status new_status);
 
     /**
      * \brief Draws widget on render target
      * \note By default draws red rectangle for debug purposes
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack);
+    virtual void draw(RenderTarget &result, TransformStack &stack) override;
 
     /**
      * \brief Handle all sorts of events event
     */
-    virtual void onEvent(const Event &event, EHC &ehc);
+    virtual void onEvent(const Event &event, EHC &ehc) override;
 
     /**
      * \brief Allows widget to change its position and size according to parent
@@ -178,7 +181,7 @@ protected:
     const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
     LayoutBox *layout;      ///< Widget position and size encapsulated
     Widget *parent;         ///< Parent that holds this widget
-    int status;             ///< Shows parent if some actions requiered
+    Status status;          ///< Shows parent if some actions requiered
 };
 
 

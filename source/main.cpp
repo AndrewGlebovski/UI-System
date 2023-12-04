@@ -97,7 +97,7 @@ int main() {
     render_texture.create(SCREEN_W, SCREEN_H);
 
     while (render_window.isOpen()) {
-        if (main_window->getStatus() == Widget::DELETE) {
+        if (main_window->getStatus() == Widget::Status::Delete) {
             render_window.close();
             break;
         }

@@ -15,7 +15,7 @@ Widget::Widget(size_t id_, const LayoutBox &layout_) :
     id(generateId(id_)),
     layout(layout_.clone()),
     parent(nullptr),
-    status(PASS)
+    status(Status::Normal)
 {}
 
 
@@ -23,7 +23,7 @@ Widget::Widget(const Widget &widget) :
     id(AUTO_ID),
     layout(widget.getLayoutBox().clone()),
     parent(nullptr),
-    status(PASS)
+    status(Status::Normal)
 {}
 
 
@@ -74,10 +74,10 @@ Widget *Widget::findWidget(size_t widget_id) {
 }
 
 
-int Widget::getStatus() const { return status; }
+Widget::Status Widget::getStatus() const { return status; }
 
 
-void Widget::setStatus(WIDGET_STATUS new_status) { status = new_status; }
+void Widget::setStatus(Status new_status) { status = new_status; }
 
 
 void Widget::draw(RenderTarget &result, TransformStack &stack) {

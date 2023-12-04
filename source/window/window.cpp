@@ -145,11 +145,9 @@ private:
 public:
     CloseAction(Widget &widget_) : widget(widget_) {}
 
-
     void operator () () override {
-        widget.setStatus(Widget::DELETE);
+        widget.setStatus(Widget::Status::Delete);
     }
-
 
     ButtonAction *clone() override {
         return new CloseAction(widget);

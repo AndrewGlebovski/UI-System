@@ -28,8 +28,16 @@ void Container::draw(RenderTarget &result, TransformStack &stack) {
 
     TransformApplier add_transform(stack, getTransform());
 
-    for (size_t i = 0; i < widgets.size(); i++)
-        widgets[i]->draw(result, stack);
+    for (size_t i = 0; i < widgets.size(); i++) {
+        switch (widgets[i]->getStatus()) {
+            case Status::Normal:
+            case Status::Disabled:
+                widgets[i]->draw(result, stack);
+                break;
+            
+            default: break;
+        };
+    }
 }
 
 
@@ -92,12 +100,19 @@ void Container::onEvent(const Event &event, EHC &ehc) {
     TransformApplier add_transform(ehc.stack, getTransform());
 
     for (size_t i = widgets.size() - 1; i < widgets.size(); i--) {
-        widgets[i]->onEvent(event, ehc);
+        switch (widgets[i]->getStatus()) {
+            case Status::Normal:
+            case Status::Hidden:
+                widgets[i]->onEvent(event, ehc);
 
-        if (ehc.stopped) {
-            if (event.getType() == MousePressed) setFocused(i);
-            return;
-        }
+                if (ehc.stopped) {
+                    if (event.getType() == MousePressed) setFocused(i);
+                    return;
+                }
+                break;
+
+            default: break;
+        };
     }
 }
 
@@ -116,17 +131,10 @@ void Container::checkChildren() {
     // ELEMENT OF THE LIST CAN BE DELETED IN ITERATION
 
     while(curr < widgets.size()) {
-        switch(widgets[curr]->getStatus()) {
-            case PASS: 
-                widgets[curr]->checkChildren();
-                curr++;
-                break;
-            case DELETE:
-                removeWidget(curr);
-                break;
-            default:
-                ASSERT(0, "Unknown status!\n");
-        }
+        if (widgets[curr]->getStatus() == Status::Delete)
+            removeWidget(curr);
+        else
+            curr++;
     }
 }
 
