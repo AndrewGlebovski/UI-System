@@ -44,6 +44,9 @@ const float CURSOR_OFFSET = 2;              ///< Cursor position offset from Lin
 /// Path to palette view textures root directory
 #define PALETTE_ASSET_DIR "assets/textures/tools"
 
+/// Path to root directory for plugins
+#define PLUGIN_DIR "Plugins"
+
 /// Path to font file
 #define FONT_FILE "assets/MainFont.ttf"
 

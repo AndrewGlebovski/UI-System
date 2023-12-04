@@ -87,7 +87,7 @@ int main() {
     main_window->addChild(openPicture(nullptr, window_style, scrollbar_style));
     main_window->addChild(createToolPaletteView(window_style, palette_asset));
     
-    PluginLoader plugin_loader("plugins", *main_window->getMenu(), 1);
+    PluginLoader plugin_loader(PLUGIN_DIR, *main_window->getMenu(), 1);
 
     TransformStack stack;
 

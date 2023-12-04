@@ -16,7 +16,10 @@ BUILD_DIR = ./build
 SRC_DIR = ./source
 
 # Название папки с исходниками плагинов
-PLUGIN_DIR = plugins
+PLUGIN_SRC_DIR = plugins
+
+# Название папки, где лежат скомпилированные плагины
+PLUGIN_BIN_DIR = Plugins
 
 # Директория для логов
 LOG_DIR = ./log
@@ -31,20 +34,20 @@ INC_FLAGS = -I$(SRC_DIR)
 D_FLAGS = -D_DEBUG -D_EJUDGE_CLIENT_
 
 # Все исходники плагинов
-DLL = $(shell find $(SRC_DIR)/$(PLUGIN_DIR) -type f -name "*.cpp")
+DLL_CPP = $(shell find $(SRC_DIR)/$(PLUGIN_SRC_DIR) -type f -name "*.cpp")
 
 # Все исходники кроме плагинов
 CPP := $(shell find $(SRC_DIR) -type f -name "*.cpp")
-CPP := $(filter-out $(DLL), $(CPP))
+CPP := $(filter-out $(DLL_CPP), $(CPP))
 
 # Все объекты кроме плагинов
 OBJ = $(CPP:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
 # Объекты плагинов
-DLL_OBJ = $(DLL:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+DLL_OBJ = $(DLL_CPP:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
 # Файлы динамических библиотек плагинов
-DLL_SO = $(DLL:$(SRC_DIR)/%.cpp=%.so)
+DLL_SO = $(DLL_CPP:$(SRC_DIR)/$(PLUGIN_SRC_DIR)/%.cpp=$(PLUGIN_BIN_DIR)/%.so)
 
 # Файлы зависимостей
 DEP = $(OBJ:%.o=%.d)
@@ -90,7 +93,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 
 # Собирает каждый плагин в динамическую библиотеку
 # Указывать файлы нужно в порядке зависимостей друг от друга
-$(PLUGIN_DIR)/%.so : $(BUILD_DIR)/$(PLUGIN_DIR)/%.o $(OBJ)
+$(PLUGIN_BIN_DIR)/%.so : $(BUILD_DIR)/$(PLUGIN_SRC_DIR)/%.o $(OBJ)
 	@mkdir -p $(@D)
 	@$(COMPILER) -shared -z defs -o $@ $^ -lsfml-graphics -lsfml-window -lsfml-system
 
