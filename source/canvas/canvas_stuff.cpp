@@ -139,19 +139,30 @@ void FilterHotkey::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc
 // ============================================================================
 
 
-FilterAction::FilterAction(size_t filter_id_) : 
-    filter_id(filter_id_) {}
+FilterAction::FilterAction(Window &window_, size_t filter_id_) : 
+    window(window_), filter_id(filter_id_) {}
 
 
 void FilterAction::operator () () {
     if (CANVAS_GROUP.getActive()) {
-        FILTER_PALETTE.getFilter(filter_id)->applyFilter(CANVAS_GROUP.getActive()->getCanvas());
-        FILTER_PALETTE.setLastFilter(filter_id);
+        Filter *filter = FILTER_PALETTE.getFilter(filter_id);
+
+        Widget *filter_widget = static_cast<Widget*>(filter->getWidget());
+
+        if (filter_widget) {
+            window.addChild(filter_widget);
+        }
+        else {
+            filter->applyFilter(CANVAS_GROUP.getActive()->getCanvas());
+            FILTER_PALETTE.setLastFilter(filter_id);
+        }
     }
 }
 
 
-FilterAction *FilterAction::clone() { return new FilterAction(filter_id); }
+FilterAction *FilterAction::clone() {
+    return new FilterAction(window, filter_id);
+}
 
 
 // ============================================================================

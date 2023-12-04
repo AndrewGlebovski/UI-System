@@ -6,16 +6,20 @@
 
 #include "canvas/palettes/filter_palette.hpp"
 #include "canvas/filters/filters.hpp"
+#include "canvas/filters/intensity_curve.hpp"
 
 
 // ============================================================================
 
 
-FilterPalette::FilterPalette() : filters(FILTERS_SIZE, nullptr), last_filter(0) {
+FilterPalette::FilterPalette(WindowStyle &window_style) :
+    filters(FILTERS_SIZE, nullptr), last_filter(0)
+{
     filters[LIGHTEN_FILTER] = new IntensityFilter(20);
     filters[DARKEN_FILTER] = new IntensityFilter(-20);
     filters[MONOCHROME_FILTER] = new MonochromeFilter();
     filters[NEGATIVE_FILTER] = new NegativeFilter();
+    filters[INTENSITY_CURVE] = new IntensityCurveFilter(window_style);
 }
 
 

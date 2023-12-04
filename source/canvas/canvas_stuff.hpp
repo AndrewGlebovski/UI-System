@@ -60,15 +60,16 @@ protected:
 
 /// Applies specified filter to the active canvas
 class FilterAction : public ButtonAction {
-private:
-    size_t filter_id;
-
 public:
-    FilterAction(size_t filter_id_);
+    FilterAction(Window &window_, size_t filter_id_);
 
     virtual void operator () () override;
 
     virtual FilterAction *clone() override;
+
+private:
+    Window &window;
+    size_t filter_id;
 };
 
 

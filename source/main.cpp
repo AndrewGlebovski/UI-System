@@ -12,7 +12,7 @@ Widget *createToolPaletteView(
 
 
 /// Creates palettes for palette manager
-void setupPaletteManager();
+void setupPaletteManager(WindowStyle &window_style);
 
 
 /// Creates menu for main window
@@ -28,9 +28,6 @@ int main() {
 
     // ENABLED VSYNC TO AVOID VISUAL ARTIFACTS WHEN WINDOWS ARE MOVING
     render_window.setVerticalSyncEnabled(true);
-
-    // Init palettes
-    setupPaletteManager();
 
     sf::Font font;
     ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
@@ -50,6 +47,9 @@ int main() {
         WINDOW_BR_OFFSET
     );
     
+    // Init palettes
+    setupPaletteManager(window_style);
+
     ScrollBarStyle scrollbar_style(
         Color(SCROLLBAR_FRAME_COLOR),
         SCROLLBAR_FRAME_OUTLINE,
@@ -87,7 +87,7 @@ int main() {
     main_window->addChild(openPicture(nullptr, window_style, scrollbar_style));
     main_window->addChild(createToolPaletteView(window_style, palette_asset));
     
-    PluginLoader plugin_loader(PLUGIN_DIR, *main_window->getMenu(), 1);
+    PluginLoader plugin_loader(PLUGIN_DIR, *main_window->getMenu(), 1, *main_window);
 
     TransformStack stack;
 
@@ -161,12 +161,12 @@ Widget *createToolPaletteView(WindowStyle &window_style, PaletteViewAsset &palet
 }
 
 
-void setupPaletteManager() {
+void setupPaletteManager(WindowStyle &window_style) {
     PaletteManager::getInstance().setColorPalette(new ColorPalette(Red, White));
 
     PaletteManager::getInstance().setToolPalette(new ToolPalette(COLOR_PALETTE));
 
-    PaletteManager::getInstance().setFilterPalette(new FilterPalette());
+    PaletteManager::getInstance().setFilterPalette(new FilterPalette(window_style));
 }
 
 
@@ -199,10 +199,11 @@ Menu *createMainMenu(
     main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(dialog_parent, dialog_style));
     
     main_menu->addMenuButton("Filter");
-    main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER));
-    main_menu->addButton(1, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER));
-    main_menu->addButton(1, "Monochrome", new FilterAction(FilterPalette::MONOCHROME_FILTER));
-    main_menu->addButton(1, "Negative", new FilterAction(FilterPalette::NEGATIVE_FILTER));
+    main_menu->addButton(1, "Lighten", new FilterAction(dialog_parent, FilterPalette::LIGHTEN_FILTER));
+    main_menu->addButton(1, "Darken", new FilterAction(dialog_parent, FilterPalette::DARKEN_FILTER));
+    main_menu->addButton(1, "Monochrome", new FilterAction(dialog_parent, FilterPalette::MONOCHROME_FILTER));
+    main_menu->addButton(1, "Negative", new FilterAction(dialog_parent, FilterPalette::NEGATIVE_FILTER));
+    main_menu->addButton(1, "Intensity Curve", new FilterAction(dialog_parent, FilterPalette::INTENSITY_CURVE));
 
     return main_menu;
 }

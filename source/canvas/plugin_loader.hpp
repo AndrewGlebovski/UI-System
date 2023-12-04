@@ -18,7 +18,8 @@ public:
     PluginLoader(
         const char *root_dir_,
         Menu &menu_,
-        size_t menu_button_id_
+        size_t menu_button_id_,
+        Window &window_
     );
 
 private:
@@ -47,6 +48,7 @@ private:
     const char *root_dir;           ///< Path to root folder
     Menu &menu;                     ///< Menu to add new filter button
     size_t menu_button_id;          ///< Submenu id to add new filter
+    Window &window;                 ///< Window to add dialog to
 };
 
 

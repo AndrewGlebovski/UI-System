@@ -28,11 +28,13 @@ const size_t MAX_PATH = 256;            ///< Max length of path to root dir and 
 PluginLoader::PluginLoader(
     const char *root_dir_,
     Menu &menu_,
-    size_t menu_button_id_
+    size_t menu_button_id_,
+    Window &window_
 ) :
     root_dir(root_dir_),
     menu(menu_),
-    menu_button_id(menu_button_id_)
+    menu_button_id(menu_button_id_),
+    window(window_)
 {
     scan();
 }
@@ -127,7 +129,7 @@ bool PluginLoader::loadFilter(Plugin *plugin) {
         menu.addButton(
             menu_button_id,
             filter->getPluginData()->getName(),
-            new FilterAction(FILTER_PALETTE.getFilterCount() - 1)
+            new FilterAction(window, FILTER_PALETTE.getFilterCount() - 1)
         );
 
         return true;

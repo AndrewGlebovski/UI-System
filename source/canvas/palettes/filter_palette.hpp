@@ -9,6 +9,7 @@
 
 
 #include "canvas/plugin.hpp"
+#include "window/window.hpp"
 
 
 /// Contains filters and remembers last used one 
@@ -24,13 +25,14 @@ public:
         DARKEN_FILTER,      ///< Decrease intensity
         MONOCHROME_FILTER,  ///< Black and white style
         NEGATIVE_FILTER,    ///< Negative colors
+        INTENSITY_CURVE,    ///< Intensity curve
         FILTERS_SIZE        ///< Count of predefined filters (this field must always be last!)
     };
 
     /**
      * \brief Constructs all filters
     */
-    FilterPalette();
+    FilterPalette(WindowStyle &window_style);
 
     /**
      * \brief Returns last used filter instance
