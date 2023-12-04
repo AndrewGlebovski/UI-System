@@ -115,9 +115,9 @@ int main() {
             main_window->parseEvent(event, stack);
         }
         
-        Widget::EHC ehc(stack, false, false);
+        EHC ehc(stack, false, false);
 
-        main_window->onEvent(Widget::TickEvent(timer.getElapsedTime().asSeconds()), ehc);
+        main_window->onEvent(TickEvent(timer.getElapsedTime().asSeconds()), ehc);
         timer.restart();
         
         render_texture.clear(Black);
