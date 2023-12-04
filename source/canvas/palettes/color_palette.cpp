@@ -4,7 +4,7 @@
 */
 
 
-#include "canvas/color_palette.hpp"
+#include "canvas/palettes/color_palette.hpp"
 
 
 // ============================================================================

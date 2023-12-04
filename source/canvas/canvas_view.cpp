@@ -4,8 +4,8 @@
 */
 
 
-#include <cstring>
 #include "canvas/canvas_view.hpp"
+#include "canvas/palettes/palette_manager.hpp"
 
 
 // ============================================================================
@@ -72,22 +72,17 @@ bool CanvasGroup::isInGroup(CanvasView *canvas) const {
 
 CanvasView::CanvasView(
     size_t id_, const LayoutBox &layout_,
-    ToolPalette &tool_palette_,
-    ColorPalette &color_palette_,
     CanvasGroup &group_
 ) :
     Widget(id_, layout_),
     canvas(),
     texture_offset(Vec2d(0, 0)),
-    tool_palette(&tool_palette_),
-    color_palette(&color_palette_),
     group(&group_),
     filename("")
 {
+    TOOL_PALETTE.setActiveCanvas(canvas);
+    
     group->addCanvas(this);
-
-    tool_palette->setColorPalette(*color_palette);
-    tool_palette->setActiveCanvas(canvas);
 }
 
 
@@ -162,11 +157,6 @@ Canvas &CanvasView::getCanvas() {
 }
 
 
-ColorPalette &CanvasView::getColorPalette() {
-    return *color_palette;
-}
-
-
 bool CanvasView::isActive() const {
     ASSERT(group, "CanvasView must be assigned to group!\n");
     return (this == group->getActive());
@@ -198,10 +188,10 @@ void CanvasView::draw(RenderTarget &result, TransformStack &stack) {
 
     result.draw(array, canvas.getTexture());
 
-    if (isActive() && tool_palette->getCurrentTool()->getWidget()) {
+    if (isActive() && TOOL_PALETTE.getCurrentTool()->getWidget()) {
         TransformApplier canvas_transform(stack, getTransform());
         TransformApplier texture_transform(stack, Transform(-texture_offset));
-        tool_palette->getCurrentTool()->getWidget()->draw(result, stack);
+        TOOL_PALETTE.getCurrentTool()->getWidget()->draw(result, stack);
     }
 }
 
@@ -211,10 +201,10 @@ void CanvasView::onEvent(const Event &event, EHC &ehc) {
 
     Widget::onEvent(event, ehc);
 
-    if (isActive() && tool_palette->getCurrentTool()->getWidget()) {
+    if (isActive() && TOOL_PALETTE.getCurrentTool()->getWidget()) {
         TransformApplier canvas_transform(ehc.stack, getTransform());
         TransformApplier texture_transform(ehc.stack, Transform(-texture_offset));
-        tool_palette->getCurrentTool()->getWidget()->onEvent(event, ehc);
+        TOOL_PALETTE.getCurrentTool()->getWidget()->onEvent(event, ehc);
     }
 }
 
@@ -222,7 +212,7 @@ void CanvasView::onEvent(const Event &event, EHC &ehc) {
 void CanvasView::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
 
-    tool_palette->getCurrentTool()->onMove(event.pos - global_position + texture_offset);
+    TOOL_PALETTE.getCurrentTool()->onMove(event.pos - global_position + texture_offset);
 
     ehc.overlapped = true;
 }
@@ -239,10 +229,10 @@ void CanvasView::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
             ASSERT(group, "CanvasView must be assigned to group!\n");
             group->setActive(this);
             
-            tool_palette->setActiveCanvas(canvas);
+            TOOL_PALETTE.setActiveCanvas(canvas);
         }
 
-        tool_palette->getCurrentTool()->onMainButton(
+        TOOL_PALETTE.getCurrentTool()->onMainButton(
             State::Pressed, 
             event.pos - global_position + texture_offset
         );
@@ -257,7 +247,7 @@ void CanvasView::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
 
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
 
-    tool_palette->getCurrentTool()->onMainButton(
+    TOOL_PALETTE.getCurrentTool()->onMainButton(
         State::Released, 
         event.pos - global_position + texture_offset
     );
@@ -269,18 +259,18 @@ void CanvasView::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
 void CanvasView::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
     switch (event.key_id) {
         case Escape: 
-            tool_palette->getCurrentTool()->onCancel(); break;
+            TOOL_PALETTE.getCurrentTool()->onCancel(); break;
         case Enter: 
-            tool_palette->getCurrentTool()->onConfirm(); break;
+            TOOL_PALETTE.getCurrentTool()->onConfirm(); break;
         case LShift:
         case RShift:
-            tool_palette->getCurrentTool()->onModifier1(State::Pressed); break;
+            TOOL_PALETTE.getCurrentTool()->onModifier1(State::Pressed); break;
         case LControl:
         case RControl:
-            tool_palette->getCurrentTool()->onModifier2(State::Pressed); break;
+            TOOL_PALETTE.getCurrentTool()->onModifier2(State::Pressed); break;
         case LAlt:
         case RAlt:
-            tool_palette->getCurrentTool()->onModifier3(State::Pressed); break;
+            TOOL_PALETTE.getCurrentTool()->onModifier3(State::Pressed); break;
         default:
             break;
     }
@@ -291,13 +281,13 @@ void CanvasView::onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc
     switch (event.key_id) {
         case LShift:
         case RShift:
-            tool_palette->getCurrentTool()->onModifier1(State::Released); break;
+            TOOL_PALETTE.getCurrentTool()->onModifier1(State::Released); break;
         case LControl:
         case RControl:
-            tool_palette->getCurrentTool()->onModifier2(State::Released); break;
+            TOOL_PALETTE.getCurrentTool()->onModifier2(State::Released); break;
         case LAlt:
         case RAlt:
-            tool_palette->getCurrentTool()->onModifier3(State::Released); break;
+            TOOL_PALETTE.getCurrentTool()->onModifier3(State::Released); break;
         default:
             break;
     }

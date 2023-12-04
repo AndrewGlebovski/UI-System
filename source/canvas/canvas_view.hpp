@@ -8,7 +8,8 @@
 #define _CANVAS_VIEW_H_
 
 
-#include "canvas/palettes.hpp"
+#include "canvas/canvas.hpp"
+#include "widget/widget.hpp"
 
 
 class CanvasView;
@@ -71,8 +72,6 @@ public:
     */
     CanvasView(
         size_t id_, const LayoutBox &layout_,
-        ToolPalette &tool_palette_,
-        ColorPalette &color_palette_,
         CanvasGroup &group_
     );
 
@@ -125,11 +124,6 @@ public:
     Canvas &getCanvas();
 
     /**
-     * \brief Returns reference to color palette
-    */
-    ColorPalette &getColorPalette();
-
-    /**
      * \brief Returns true if canvas is active in his group
     */
     bool isActive() const;
@@ -161,15 +155,17 @@ public:
 
 protected:
     virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
+    
     virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    
     virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
+    
     virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
+    
     virtual void onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc) override;
 
     SFMLCanvas canvas;
     Vec2d texture_offset;
-    ToolPalette *tool_palette;
-    ColorPalette *color_palette;
     CanvasGroup *group;
     std::string filename;
 };

@@ -8,7 +8,7 @@
 #define _TOOL_H_
 
 
-#include "canvas/palettes.hpp"
+#include "canvas/palettes/tool_palette.hpp"
 #include "basic/line_edit.hpp"
 
 

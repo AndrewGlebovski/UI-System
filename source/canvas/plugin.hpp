@@ -10,7 +10,7 @@
 
 #include "widget/widget.hpp"
 #include "canvas/canvas.hpp"
-#include "canvas/color_palette.hpp"
+#include "canvas/palettes/color_palette.hpp"
 
 
 /// Inteface id

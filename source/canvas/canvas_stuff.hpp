@@ -19,8 +19,6 @@
 */
 Widget *openPicture(
     const char *filename,
-    ToolPalette &tool_palette,
-    ColorPalette &color_palette,
     CanvasGroup &group,
     WindowStyle &window_style,
     ScrollBarStyle &scrollbar_style
@@ -54,13 +52,12 @@ public:
 /// Supports hot keys for applying filters
 class FilterHotkey : public Widget {
 public:
-    FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_);
+    FilterHotkey(Widget *parent_, CanvasGroup &group_);
 
 protected:
     virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
 
 private:
-    FilterPalette &palette;
     CanvasGroup &group;
 };
 
@@ -69,11 +66,10 @@ private:
 class FilterAction : public ButtonAction {
 private:
     size_t filter_id;
-    FilterPalette &palette;
     CanvasGroup &group;
 
 public:
-    FilterAction(size_t filter_id_, FilterPalette &palette_, CanvasGroup &group_);
+    FilterAction(size_t filter_id_, CanvasGroup &group_);
 
 
     virtual void operator () () override;
@@ -88,8 +84,6 @@ class OpenFileAction : public DialogAction {
 public:
     OpenFileAction(
         Window &window_,
-        ToolPalette &tool_palette_,
-        ColorPalette &color_palette_,
         CanvasGroup &group_,
         WindowStyle &window_style_,
         ScrollBarStyle &scrollbar_style_
@@ -101,8 +95,6 @@ public:
 
 private:
     Window &window;
-    ToolPalette &tool_palette;
-    ColorPalette &color_palette;
     CanvasGroup &group;
     WindowStyle &window_style;
     ScrollBarStyle &scrollbar_style;
@@ -137,8 +129,6 @@ class CreateOpenFileDialog : public ButtonAction {
 public:
     CreateOpenFileDialog(
         Window &window_,
-        ToolPalette &tool_palette_,
-        ColorPalette &color_palette,
         CanvasGroup &group_,
         FileDialogStyle &dialog_style_,
         ScrollBarStyle &scrollbar_style_
@@ -150,8 +140,6 @@ public:
 
 private:
     Window &window;
-    ToolPalette &tool_palette;
-    ColorPalette &color_palette;
     CanvasGroup &group;
     FileDialogStyle &dialog_style;
     ScrollBarStyle &scrollbar_style;

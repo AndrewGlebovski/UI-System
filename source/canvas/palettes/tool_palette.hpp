@@ -1,16 +1,16 @@
 /**
  * \file
- * \brief Contains ToolPalette and FilterPalette interface
+ * \brief Contains interface of ToolPalette and ToolPaletteView
 */
 
 
-#ifndef _PALETTES_H_
-#define _PALETTES_H_
+#ifndef _TOOL_PALETTE_H_
+#define _TOOL_PALETTE_H_
 
 
+#include "canvas/plugin.hpp"
 #include "basic/container.hpp"
 #include "basic/button.hpp"
-#include "canvas/plugin.hpp"
 
 
 /// Handles tools and colors for canvas
@@ -60,7 +60,7 @@ class ToolPaletteView : public Widget {
 public:
     ToolPaletteView(
         size_t id_, const LayoutBox &layout_,
-        ToolPalette *palette_, const PaletteViewAsset &asset_
+        const PaletteViewAsset &asset_
     );
 
     ToolPaletteView(const ToolPaletteView &palette_view) = default;
@@ -110,63 +110,9 @@ private:
     void addTool(size_t tool_id);
 
     Container buttons;                  ///< ToolPalette buttons for tool selection
-    ToolPalette *palette;               ///< ToolPalette which this ToolPaletteView affects
     const PaletteViewAsset &asset;      ///< Assets for buttons
     ButtonGroup *group;                 ///< Tool buttons group
     List<Texture*> icons;               ///< Additional tools icons
-};
-
-
-/// Contains filters and remembers last used one 
-class FilterPalette {
-private:
-    List<Filter*> filters;        ///< Filter instances
-    size_t last_filter;                 ///< Last used filter index
-
-public:
-    /// Filters avalaible for the palette
-    enum FILTERS {
-        LIGHTEN_FILTER,     ///< Increase intensity
-        DARKEN_FILTER,      ///< Decrease intensity
-        MONOCHROME_FILTER,  ///< Black and white style
-        NEGATIVE_FILTER,    ///< Negative colors
-        FILTERS_SIZE        ///< Count of predefined filters (this field must always be last!)
-    };
-
-    /**
-     * \brief Constructs all filters
-    */
-    FilterPalette();
-
-    /**
-     * \brief Returns last used filter instance
-    */
-    Filter *getLastFilter();
-
-    /**
-     * \brief Sets last used filter
-    */
-    void setLastFilter(size_t filter_id);
-
-    /**
-     * \brief Returns filter instance by ID
-    */
-    Filter *getFilter(size_t filter_id);
-
-    /**
-     * \brief Returns amount of supported filters
-    */
-    size_t getFilterCount() const;
-
-    /**
-     * \brief Adds filter to palette
-    */
-    void addFilter(Filter &new_filter);
-
-    /**
-     * \brief Delete filters
-    */
-    ~FilterPalette();
 };
 
 

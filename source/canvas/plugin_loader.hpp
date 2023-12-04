@@ -8,8 +8,8 @@
 #define _PLUGIN_LOADER_H_
 
 
-#include "canvas/palettes.hpp"
 #include "canvas/canvas_stuff.hpp"
+#include "canvas/plugin.hpp"
 
 
 /// Loads plugins from root folder to ToolPalette and FilterPalette
@@ -17,8 +17,6 @@ class PluginLoader {
 public:
     PluginLoader(
         const char *root_dir_,
-        ToolPalette &tool_palette_,
-        FilterPalette &filter_palette_,
         Menu &menu_,
         size_t menu_button_id_,
         CanvasGroup &group_
@@ -48,8 +46,6 @@ private:
     bool loadFilter(Plugin *plugin);
 
     const char *root_dir;           ///< Path to root folder
-    ToolPalette &tool_palette;      ///< Palette to add tools into
-    FilterPalette &filter_palette;  ///< Palette to add filters into
     Menu &menu;                     ///< Menu to add new filter button
     size_t menu_button_id;          ///< Submenu id to add new filter
     CanvasGroup &group;             ///< Canvas group

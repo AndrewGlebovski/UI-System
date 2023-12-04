@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include "common/assert.hpp"
 #include "canvas/plugin_loader.hpp"
+#include "canvas/palettes/palette_manager.hpp"
 
 
 // ============================================================================
@@ -26,15 +27,11 @@ const size_t MAX_PATH = 256;            ///< Max length of path to root dir and 
 
 PluginLoader::PluginLoader(
     const char *root_dir_,
-    ToolPalette &tool_palette_,
-    FilterPalette &filter_palette_,
     Menu &menu_,
     size_t menu_button_id_,
     CanvasGroup &group_
 ) :
     root_dir(root_dir_),
-    tool_palette(tool_palette_),
-    filter_palette(filter_palette_),
     menu(menu_),
     menu_button_id(menu_button_id_),
     group(group_)
@@ -115,10 +112,10 @@ bool PluginLoader::loadTool(Plugin *plugin) {
     if (tool) {
         // Set tool color palette and active canvas
         tool->setActiveCanvas(group.getActive()->getCanvas());
-        tool->setColorPalette(group.getActive()->getColorPalette());
+        tool->setColorPalette(COLOR_PALETTE);
 
         // Add tool to palette view
-        tool_palette.addTool(*tool);
+        TOOL_PALETTE.addTool(*tool);
 
         return true;
     }
@@ -131,14 +128,13 @@ bool PluginLoader::loadFilter(Plugin *plugin) {
     Filter *filter = static_cast<Filter*>(plugin->tryGetInterface(PluginGuid::Filter));
 
     if (filter) {
-        filter_palette.addFilter(*filter);
+        FILTER_PALETTE.addFilter(*filter);
 
         menu.addButton(
             menu_button_id,
             filter->getPluginData()->getName(),
             new FilterAction(
-                filter_palette.getFilterCount() - 1,
-                filter_palette,
+                FILTER_PALETTE.getFilterCount() - 1,
                 group
             )
         );

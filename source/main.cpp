@@ -1,11 +1,15 @@
 #include "basic/clock.hpp"
 #include "canvas/canvas_stuff.hpp"
-#include "widget/shape.hpp"
 #include "canvas/plugin_loader.hpp"
+#include "canvas/palettes/palette_manager.hpp"
 
 
 /// Creates tool palette view in new subwindow
-Widget *createToolPaletteView(ToolPalette *tool_palette, WindowStyle &window_style, PaletteViewAsset &palette_asset);
+Widget *createToolPaletteView(WindowStyle &window_style, PaletteViewAsset &palette_asset);
+
+
+/// Creates palettes for palette manager
+void setupPaletteManager();
 
 
 int main() {
@@ -13,6 +17,9 @@ int main() {
 
     // ENABLED VSYNC TO AVOID VISUAL ARTIFACTS WHEN WINDOWS ARE MOVING
     render_window.setVerticalSyncEnabled(true);
+
+    // Init palettes
+    setupPaletteManager();
 
     sf::Font font;
     ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
@@ -71,30 +78,21 @@ int main() {
     );
     ASSERT(main_menu, "Failed to allocate tool main menu!\n");
 
-    ColorPalette *color_palette = new ColorPalette(Red, Red);
-    ASSERT(color_palette, "Failed to allocate color palette!\n");
-
-    ToolPalette *tool_palette = new ToolPalette(*color_palette);
-    ASSERT(tool_palette, "Failed to allocate tool palette!\n");
-
     CanvasGroup *canvas_group = new CanvasGroup();
     ASSERT(canvas_group, "Failed to allocate canvas group!\n");
-    
-    FilterPalette *filter_palette = new FilterPalette();
-    ASSERT(filter_palette, "Failed to allocate filter palette!\n");
 
     FileDialogStyle dialog_style(window_style);
 
     main_menu->addMenuButton("File");
-    main_menu->addButton(0, "Open", new CreateOpenFileDialog(*main_window, *tool_palette, *color_palette, *canvas_group, dialog_style, scrollbar_style));
+    main_menu->addButton(0, "Open", new CreateOpenFileDialog(*main_window, *canvas_group, dialog_style, scrollbar_style));
     main_menu->addButton(0, "Save", new SaveFileAction(*canvas_group));
     main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(*main_window, *canvas_group, dialog_style));
     
     main_menu->addMenuButton("Filter");
-    main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER, *filter_palette, *canvas_group));
-    main_menu->addButton(1, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER, *filter_palette, *canvas_group));
-    main_menu->addButton(1, "Monochrome", new FilterAction(FilterPalette::MONOCHROME_FILTER, *filter_palette, *canvas_group));
-    main_menu->addButton(1, "Negative", new FilterAction(FilterPalette::NEGATIVE_FILTER, *filter_palette, *canvas_group));
+    main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER, *canvas_group));
+    main_menu->addButton(1, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER, *canvas_group));
+    main_menu->addButton(1, "Monochrome", new FilterAction(FilterPalette::MONOCHROME_FILTER, *canvas_group));
+    main_menu->addButton(1, "Negative", new FilterAction(FilterPalette::NEGATIVE_FILTER, *canvas_group));
 
     main_window->setMenu(main_menu);
 
@@ -106,14 +104,13 @@ int main() {
     
     main_window->addChild(new FilterHotkey(
         main_window,
-        *filter_palette,
         *canvas_group
     ));
 
-    main_window->addChild(openPicture(nullptr, *tool_palette, *color_palette, *canvas_group, window_style, scrollbar_style));
-    main_window->addChild(createToolPaletteView(tool_palette, window_style, palette_asset));
+    main_window->addChild(openPicture(nullptr, *canvas_group, window_style, scrollbar_style));
+    main_window->addChild(createToolPaletteView(window_style, palette_asset));
     
-    PluginLoader plugin_loader("plugins", *tool_palette, *filter_palette, *main_menu, 1, *canvas_group);
+    PluginLoader plugin_loader("plugins", *main_menu, 1, *canvas_group);
 
     TransformStack stack;
 
@@ -156,17 +153,14 @@ int main() {
     }
     
     delete main_window;
-    delete tool_palette;
-    delete color_palette;
     delete canvas_group;
-    delete filter_palette;
     
     printf("UI System!\n");
     return 0;
 }
 
 
-Widget *createToolPaletteView(ToolPalette *tool_palette, WindowStyle &window_style, PaletteViewAsset &palette_asset) {
+Widget *createToolPaletteView(WindowStyle &window_style, PaletteViewAsset &palette_asset) {
     WindowStyle subwindow_style(window_style);
     subwindow_style.outline = 0;
 
@@ -183,9 +177,17 @@ Widget *createToolPaletteView(ToolPalette *tool_palette, WindowStyle &window_sty
     subwindow->addChild(new ToolPaletteView(
         Widget::AUTO_ID,
         AnchorLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H), Vec2d(), Vec2d(SCREEN_W, SCREEN_H)),
-        tool_palette,
         palette_asset
     ));
 
     return subwindow;
+}
+
+
+void setupPaletteManager() {
+    PaletteManager::getInstance().setColorPalette(new ColorPalette(Red, Red));
+
+    PaletteManager::getInstance().setToolPalette(new ToolPalette(COLOR_PALETTE));
+
+    PaletteManager::getInstance().setFilterPalette(new FilterPalette());
 }

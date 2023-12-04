@@ -1,13 +1,13 @@
 /**
  * \file
- * \brief Contains ToolPalette and FilterPalette implementation
+ * \brief Contains implementation of ToolPalette and ToolPaletteView
 */
 
 
-#include "canvas/palettes.hpp"
+#include "canvas/palettes/tool_palette.hpp"
 #include "canvas/tool.hpp"
-#include "canvas/filter.hpp"
 #include "window/window.hpp"
+#include "canvas/palettes/palette_manager.hpp"
 
 
 // ============================================================================
@@ -96,19 +96,18 @@ ToolPalette::~ToolPalette() {
 
 class PaletteAction : public ButtonAction {
 public:
-    PaletteAction(ToolPalette &palette_, size_t tool_id_) :
-        palette(palette_), tool_id(tool_id_) {}
+    PaletteAction(size_t tool_id_) :
+        tool_id(tool_id_) {}
 
     void operator () () override {
-        palette.setCurrentTool(tool_id);
+        TOOL_PALETTE.setCurrentTool(tool_id);
     }
 
     ButtonAction *clone() override {
-        return new PaletteAction(palette, tool_id);
+        return new PaletteAction(tool_id);
     }
 
 protected:
-    ToolPalette &palette;
     size_t tool_id;
 };
 
@@ -121,7 +120,7 @@ do {                                                            \
     TextureIconButton *btn =  new TextureIconButton(            \
         Widget::AUTO_ID + TOOL_ID + 1,                          \
         LazyLayoutBox(POSITION, Vec2d()),                       \
-        new PaletteAction(*palette, TOOL_ID),                   \
+        new PaletteAction(TOOL_ID),                             \
         asset[PaletteViewAsset::NORMAL_TEXTURE],                \
         asset[PaletteViewAsset::NORMAL_TEXTURE],                \
         asset[PaletteViewAsset::SELECTED_TEXTURE],              \
@@ -134,11 +133,11 @@ do {                                                            \
 
 ToolPaletteView::ToolPaletteView(
     size_t id_, const LayoutBox &layout_,
-    ToolPalette *palette_, const PaletteViewAsset &asset_
+    const PaletteViewAsset &asset_
 ) :
     Widget(id_, layout_), 
     buttons(1, AnchorLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H), Vec2d(), Vec2d(SCREEN_W, SCREEN_H)), false),
-    palette(palette_), asset(asset_), group(nullptr),
+    asset(asset_), group(nullptr),
     icons()
 {
     buttons.setParent(this);
@@ -186,14 +185,14 @@ void ToolPaletteView::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &
     if (event.alt || event.ctrl || event.shift) return;
 
     switch(event.key_id) {
-        case P: palette->setCurrentTool(ToolPalette::PENCIL_TOOL); break;
-        case R: palette->setCurrentTool(ToolPalette::RECT_TOOL); break;
-        case L: palette->setCurrentTool(ToolPalette::LINE_TOOL); break;
-        case E: palette->setCurrentTool(ToolPalette::ERASER_TOOL); break;
-        case C: palette->setCurrentTool(ToolPalette::COLOR_PICKER); break;
-        case F: palette->setCurrentTool(ToolPalette::BUCKET_TOOL); break;
-        case O: palette->setCurrentTool(ToolPalette::POLYGON_TOOL); break;
-        case T: palette->setCurrentTool(ToolPalette::TEXT_TOOL); break;
+        case P: TOOL_PALETTE.setCurrentTool(ToolPalette::PENCIL_TOOL); break;
+        case R: TOOL_PALETTE.setCurrentTool(ToolPalette::RECT_TOOL); break;
+        case L: TOOL_PALETTE.setCurrentTool(ToolPalette::LINE_TOOL); break;
+        case E: TOOL_PALETTE.setCurrentTool(ToolPalette::ERASER_TOOL); break;
+        case C: TOOL_PALETTE.setCurrentTool(ToolPalette::COLOR_PICKER); break;
+        case F: TOOL_PALETTE.setCurrentTool(ToolPalette::BUCKET_TOOL); break;
+        case O: TOOL_PALETTE.setCurrentTool(ToolPalette::POLYGON_TOOL); break;
+        case T: TOOL_PALETTE.setCurrentTool(ToolPalette::TEXT_TOOL); break;
         default: return;
     }
 
@@ -208,7 +207,7 @@ void ToolPaletteView::onParentUpdate(const LayoutBox &parent_layout) {
 
 
 void ToolPaletteView::updateCurrentButton() {
-    size_t curr_tool = palette->getCurrentIndex();
+    size_t curr_tool = TOOL_PALETTE.getCurrentIndex();
 
     ActionButton *curr_btn = static_cast<ActionButton*>(
         buttons.findWidget(curr_tool + Widget::AUTO_ID + 1)
@@ -219,15 +218,15 @@ void ToolPaletteView::updateCurrentButton() {
 
 
 void ToolPaletteView::updateButtons() {
-    if (buttons.getChildCount() == palette->getToolCount()) return;
+    if (buttons.getChildCount() == TOOL_PALETTE.getToolCount()) return;
 
-    for (size_t i = buttons.getChildCount(); i < palette->getToolCount(); i++)
+    for (size_t i = buttons.getChildCount(); i < TOOL_PALETTE.getToolCount(); i++)
         addTool(i);
 }
 
 
 void ToolPaletteView::addTool(size_t tool_id) {
-    Tool &new_tool = *palette->getTool(tool_id);
+    Tool &new_tool = *TOOL_PALETTE.getTool(tool_id);
 
     const char *texture_path = new_tool.getPluginData()->getTexturePath();
 
@@ -251,7 +250,7 @@ void ToolPaletteView::addTool(size_t tool_id) {
     TextureIconButton *btn = new TextureIconButton(
         Widget::AUTO_ID + tool_id + 1,
         LazyLayoutBox(position, Vec2d()),
-        new PaletteAction(*palette, tool_id),
+        new PaletteAction(tool_id),
         asset[PaletteViewAsset::NORMAL_TEXTURE],
         asset[PaletteViewAsset::NORMAL_TEXTURE],
         asset[PaletteViewAsset::SELECTED_TEXTURE],
@@ -273,51 +272,4 @@ ToolPaletteView::~ToolPaletteView() {
         ASSERT(icons[i], "Icon is nullptr!\n");
         delete icons[i];
     }
-}
-
-
-// ============================================================================
-
-
-FilterPalette::FilterPalette() : filters(FILTERS_SIZE, nullptr), last_filter(0) {
-    filters[LIGHTEN_FILTER] = new IntensityFilter(20);
-    filters[DARKEN_FILTER] = new IntensityFilter(-20);
-    filters[MONOCHROME_FILTER] = new MonochromeFilter();
-    filters[NEGATIVE_FILTER] = new NegativeFilter();
-}
-
-
-Filter *FilterPalette::getLastFilter() { return filters[last_filter]; }
-
-
-void FilterPalette::setLastFilter(size_t filter_id) {
-    ASSERT(filter_id < getFilterCount(), "Index is out of range!\n");
-
-    last_filter = filter_id;
-}
-
-
-Filter *FilterPalette::getFilter(size_t filter_id) {
-    ASSERT(filter_id < getFilterCount(), "Index is out of range!\n");
-
-    return filters[filter_id];
-}
-
-
-size_t FilterPalette::getFilterCount() const { return filters.size(); }
-
-
-void FilterPalette::addFilter(Filter &new_filter) {
-    filters.push_back(&new_filter);
-}
-
-
-FilterPalette::~FilterPalette() {
-    // Delete predefined filters
-    for (size_t i = 0; i < FILTERS_SIZE; i++)
-        delete filters[i];
-    
-    // Release additional filters
-    for (size_t i = FILTERS_SIZE; i < filters.size(); i++)
-        filters[i]->release();
 }
