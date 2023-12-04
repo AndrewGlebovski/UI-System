@@ -153,16 +153,6 @@ public:
     Transform getTransform() const;
 
     /**
-     * \brief Returns z-index
-    */
-    int getZIndex() const;
-
-    /**
-     * \brief Sets z-index
-    */
-    void setZIndex(int z_index_);
-
-    /**
      * \brief Returns parent
     */
     Widget *getParent();

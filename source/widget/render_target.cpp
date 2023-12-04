@@ -77,7 +77,10 @@ void loadTexture(Texture **texture_ptr, const char *filename) {
 
 
 RenderTexture::RenderTexture() :
-    render_texture(), inner_texture(nullptr), is_changed(new bool[1]) {}
+    render_texture(), inner_texture(nullptr), is_changed(new bool(false))
+{
+    ASSERT(is_changed, "Failed to allocate is_changed!\n");
+}
 
 
 void RenderTexture::create(size_t width, size_t height) {
@@ -163,6 +166,9 @@ const sf::Texture &RenderTexture::getSFMLTexture() const {
 RenderTexture::~RenderTexture() {
     if (inner_texture)
         delete inner_texture;
+    
+    ASSERT(is_changed, "Is changed is nullptr!\n");
+    delete is_changed;
 }
 
 

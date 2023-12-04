@@ -232,12 +232,15 @@ Window::Window(
 
 
 void Window::addButtons(bool can_resize, bool can_move, bool can_close) {
+    // ORDER IS IMPORTANT
+    // IN BUTTON CONTAINER EXPAND AND MOVE BUTTONS MUST STAY ON TOP
+
     if (can_move) addMoveButton();
-    if (can_close) addCloseButton();
     if (can_resize) {
-        addExpandButton();
         addResizeButtons();
+        addExpandButton();
     }
+    if (can_close) addCloseButton();
 }
 
 
@@ -256,8 +259,6 @@ void Window::addCloseButton() {
         style.asset[WindowAsset::BUTTON_PRESSED],
         style.asset[WindowAsset::CLOSE_ICON]
     );
-
-    close_btn->setZIndex(1);
 
     buttons.addChild(close_btn);
 }
@@ -278,8 +279,6 @@ void Window::addExpandButton() {
         style.asset[WindowAsset::BUTTON_PRESSED],
         style.asset[WindowAsset::EXPAND_ICON]
     );
-
-    expand_btn->setZIndex(1);
 
     buttons.addChild(expand_btn);
 }

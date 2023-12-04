@@ -12,7 +12,7 @@ Container::Container(
     bool focus_enabled_
 ) :
     Widget(id_, layout_),
-    widgets(), focused(0), focus_enabled(focus_enabled_)
+    widgets(), focus_enabled(focus_enabled_)
 {}
 
 
@@ -26,18 +26,10 @@ void Container::draw(RenderTarget &result, TransformStack &stack) {
     rect.draw(result);
 #endif
 
-    size_t count = widgets.size();
-    if (count == 0) return;
-
     TransformApplier add_transform(stack, getTransform());
 
-    for (size_t i = count - 1; i > focused; i--)
+    for (size_t i = 0; i < widgets.size(); i++)
         widgets[i]->draw(result, stack);
-    
-    for (size_t i = focused - 1; i < count; i--)
-        widgets[i]->draw(result, stack);
-    
-    widgets[focused]->draw(result, stack);
 }
 
 
@@ -56,23 +48,9 @@ size_t Container::addChild(Widget *child) {
 
     // Set this container as child's parent
     child->setParent(this);
-    // Container is empty
-    if (widgets.size() == 0) {
-        widgets.push_back(child);
-        focused = 0;
-        return child->getId();
-    }
-    // Find place for widget according to z-index
-    for (size_t i = 0; i < widgets.size(); i++) {
-        if (child->getZIndex() > widgets[i]->getZIndex()) {
-            widgets.insert(i, child);
-            focused = i;
-            return child->getId();
-        }
-    }
-    // Widget has the biggest z-index
+
     widgets.push_back(child);
-    focused = widgets.size() - 1;
+
     return child->getId();
 }
 
@@ -80,16 +58,20 @@ size_t Container::addChild(Widget *child) {
 void Container::removeWidget(size_t index) {
     ASSERT(index < widgets.size(), "Index is out of range!\n");
 
-    if (widgets.size()) {
-        if (index < focused)
-            focused--;
-        else if (index == focused)
-            focused = 0;
-    }
-    else focused = 0;
-
     delete widgets[index];
     widgets.remove(index);
+}
+
+
+void Container::setFocused(size_t index) {
+    if (!focus_enabled) return;
+
+    ASSERT(index < widgets.size(), "Index is out of range!\n");
+
+    Widget *widget = widgets[index];
+    widgets.remove(index);
+    
+    widgets.push_back(widget);
 }
 
 
@@ -106,40 +88,18 @@ void Container::removeChild(size_t child_id) {
 size_t Container::getChildCount() const { return widgets.size(); }
 
 
-#define CHECK_EHC(CALL_FUNC)                    \
-do {                                            \
-    CALL_FUNC;                                  \
-    if (ehc.stopped) {                          \
-        if (event.getType() == MousePressed)    \
-            focused = i;                        \
-        return;                                 \
-    }                                           \
-} while(0)
-
-
 void Container::onEvent(const Event &event, EHC &ehc) {
-    if (widgets.size() == 0) return;
-
     TransformApplier add_transform(ehc.stack, getTransform());
 
-    if (focus_enabled) {
-        widgets[focused]->onEvent(event, ehc);
-        if (ehc.stopped) return;
+    for (size_t i = widgets.size() - 1; i < widgets.size(); i--) {
+        widgets[i]->onEvent(event, ehc);
 
-        for (size_t i = 0; i < focused; i++)
-            CHECK_EHC(widgets[i]->onEvent(event, ehc));
-
-        for (size_t i = focused + 1; i < widgets.size(); i++)
-            CHECK_EHC(widgets[i]->onEvent(event, ehc));
-    }
-    else {
-        for (size_t i = 0; i < widgets.size(); i++)
-            CHECK_EHC(widgets[i]->onEvent(event, ehc));
+        if (ehc.stopped) {
+            if (event.getType() == MousePressed) setFocused(i);
+            return;
+        }
     }
 }
-
-
-#undef CHECK_EHC
 
 
 void Container::onParentUpdate(const LayoutBox &parent_layout) {

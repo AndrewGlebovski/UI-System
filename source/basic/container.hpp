@@ -70,14 +70,19 @@ public:
     ~Container();
 
 protected:
-    List<Widget*> widgets;          ///< List of widgets sorted by z-index
-    size_t focused;                 ///< Focused widget draws on top and gets events first
-    bool focus_enabled;             ///< Container set focus between widgets
-
     /**
-     * \brief Remvoes widget by its index in widgets array
+     * \brief Removes widget by its index in widgets array
     */
     void removeWidget(size_t index);
+
+    /**
+     * \brief Pushes element to the end of the widgets array
+     * \note If focus is not enabled, does nothing
+    */
+    void setFocused(size_t index);
+
+    List<Widget*> widgets;          ///< List of widgets sorted by z-index
+    bool focus_enabled;             ///< Container set focus between widgets
 };
 
 

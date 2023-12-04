@@ -130,6 +130,7 @@ int main() {
     }
     
     delete main_window;
+    main_window = nullptr;
     
     printf("UI System!\n");
     return 0;
@@ -161,7 +162,7 @@ Widget *createToolPaletteView(WindowStyle &window_style, PaletteViewAsset &palet
 
 
 void setupPaletteManager() {
-    PaletteManager::getInstance().setColorPalette(new ColorPalette(Red, Red));
+    PaletteManager::getInstance().setColorPalette(new ColorPalette(Red, White));
 
     PaletteManager::getInstance().setToolPalette(new ToolPalette(COLOR_PALETTE));
 

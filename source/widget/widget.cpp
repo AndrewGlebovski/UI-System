@@ -57,12 +57,6 @@ void Widget::setLayoutBox(const LayoutBox &layout_) { layout = layout_.clone(); 
 Transform Widget::getTransform() const { return Transform(layout->getPosition()); }
 
 
-int Widget::getZIndex() const { return z_index; }
-
-
-void Widget::setZIndex(int z_index_) { z_index = z_index_; }
-
-
 Widget *Widget::getParent() { return parent; }
 
 
