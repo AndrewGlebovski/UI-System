@@ -6,7 +6,6 @@
 
 #include <cmath>
 #include <cstring>
-#include "canvas/canvas.hpp"
 #include "common/assert.hpp"
 #include "widget/shape.hpp"
 

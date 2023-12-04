@@ -4,8 +4,8 @@
 */
 
 
-#ifndef _FILTER_H_
-#define _FILTER_H_
+#ifndef _FILTERS_H_
+#define _FILTERS_H_
 
 
 #include "canvas/palettes/filter_palette.hpp"

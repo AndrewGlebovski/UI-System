@@ -5,7 +5,7 @@
 
 
 #include "canvas/palettes/tool_palette.hpp"
-#include "canvas/tool.hpp"
+#include "canvas/tools/tools.hpp"
 #include "window/window.hpp"
 #include "canvas/palettes/palette_manager.hpp"
 #include "canvas/canvas_view.hpp"

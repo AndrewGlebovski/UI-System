@@ -10,7 +10,7 @@
 
 #include "widget/vertex.hpp"
 #include "widget/render_target.hpp"
-#include "canvas/canvas.hpp"
+#include "canvas/canvas/canvas.hpp"
 
 
 class RectShape {

@@ -5,7 +5,7 @@
 
 
 #include <cstring>
-#include "canvas/tool.hpp"
+#include "canvas/tools/tools.hpp"
 
 
 // ============================================================================

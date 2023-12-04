@@ -5,7 +5,7 @@
 
 
 #include "common/assert.hpp"
-#include "canvas/selection_mask.hpp"
+#include "canvas/canvas/selection_mask.hpp"
 
 
 // ============================================================================

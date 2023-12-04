@@ -9,7 +9,7 @@
 
 
 #include <widget/render_target.hpp>
-#include <canvas/selection_mask.hpp>
+#include <canvas/canvas/selection_mask.hpp>
 
 
 const Color CANVAS_BACKGROUND = White;   ///< Canvas background color

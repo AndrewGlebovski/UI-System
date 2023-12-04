@@ -4,7 +4,7 @@
 */
 
 
-#include "canvas/filter.hpp"
+#include "canvas/filters/filters.hpp"
 
 
 // ============================================================================

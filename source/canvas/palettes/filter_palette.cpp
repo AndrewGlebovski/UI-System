@@ -5,7 +5,7 @@
 
 
 #include "canvas/palettes/filter_palette.hpp"
-#include "canvas/filter.hpp"
+#include "canvas/filters/filters.hpp"
 
 
 // ============================================================================

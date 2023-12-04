@@ -5,7 +5,7 @@
 
 
 #include "common/assert.hpp"
-#include "canvas/canvas.hpp"
+#include "canvas/canvas/canvas.hpp"
 
 
 // ============================================================================
