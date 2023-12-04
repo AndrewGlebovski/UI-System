@@ -43,7 +43,7 @@ public:
      * \warning Nullptr argument is prohibited
      * \warning Palette must be allocated using 'new' and got delete automatically
     */
-    void setColorPalette(ColorPalette *color_palette);
+    void setColorPalette(ColorPalette *color_palette_);
 
     /**
      * \brief Sets tool palette
@@ -51,14 +51,14 @@ public:
      * \warning Nullptr argument is prohibited
      * \warning Palette must be allocated using 'new' and got delete automatically
     */
-    void setToolPalette(ToolPalette *tool_palette);
+    void setToolPalette(ToolPalette *tool_palette_);
 
     /**
      * \brief Sets filter palette
      * \warning Nullptr argument is prohibited
      * \warning Palette must be allocated using 'new' and got delete automatically
     */
-    void setFilterPalette(FilterPalette *filter_palette);
+    void setFilterPalette(FilterPalette *filter_palette_);
 
     /**
      * \brief Returns single instance of PaletteManager

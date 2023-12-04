@@ -13,7 +13,6 @@
 
 Widget *openPicture(
     const char *filename,
-    CanvasGroup &group,
     WindowStyle &window_style,
     ScrollBarStyle &scrollbar_style
 ) {
@@ -25,8 +24,7 @@ Widget *openPicture(
             Vec2d(SCREEN_W - 30, SCREEN_H - 30),
             Vec2d(),
             Vec2d(SCREEN_W - 30, SCREEN_H - 30)
-        ),
-        group
+        )
     );
 
     if (filename) {
@@ -119,15 +117,15 @@ void HScrollCanvas::operator () (vec_t param) {
 // ============================================================================
 
 
-FilterHotkey::FilterHotkey(Widget *parent_, CanvasGroup &group_) :
-    Widget(AUTO_ID, BoundLayoutBox()), group(group_) {}
+FilterHotkey::FilterHotkey() :
+    Widget(AUTO_ID, BoundLayoutBox()) {}
 
 
 void FilterHotkey::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
     switch (event.key_id) {
         case F: 
             if (event.ctrl) {
-                FILTER_PALETTE.getLastFilter()->applyFilter(group.getActive()->getCanvas());
+                FILTER_PALETTE.getLastFilter()->applyFilter(CANVAS_GROUP.getActive()->getCanvas());
                 break;
             }
             return;
@@ -141,19 +139,19 @@ void FilterHotkey::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc
 // ============================================================================
 
 
-FilterAction::FilterAction(size_t filter_id_, CanvasGroup &group_) : 
-    filter_id(filter_id_), group(group_) {}
+FilterAction::FilterAction(size_t filter_id_) : 
+    filter_id(filter_id_) {}
 
 
 void FilterAction::operator () () {
-    if (group.getActive()) {
-        FILTER_PALETTE.getFilter(filter_id)->applyFilter(group.getActive()->getCanvas());
+    if (CANVAS_GROUP.getActive()) {
+        FILTER_PALETTE.getFilter(filter_id)->applyFilter(CANVAS_GROUP.getActive()->getCanvas());
         FILTER_PALETTE.setLastFilter(filter_id);
     }
 }
 
 
-FilterAction *FilterAction::clone() { return new FilterAction(filter_id, group); }
+FilterAction *FilterAction::clone() { return new FilterAction(filter_id); }
 
 
 // ============================================================================
@@ -161,12 +159,10 @@ FilterAction *FilterAction::clone() { return new FilterAction(filter_id, group);
 
 OpenFileAction::OpenFileAction(
     Window &window_,
-    CanvasGroup &group_,
     WindowStyle &window_style_,
     ScrollBarStyle &scrollbar_style_
 ) :
     window(window_),
-    group(group_),
     window_style(window_style_),
     scrollbar_style(scrollbar_style_)
 {}
@@ -176,7 +172,7 @@ void OpenFileAction::operator () () {
     ASSERT(dialog, "Dialog is nullptr!\n");
     const char *filename = ((SelectFileDialog*)(dialog))->getFilename();
 
-    Widget *subwindow = openPicture(filename, group, window_style, scrollbar_style);
+    Widget *subwindow = openPicture(filename, window_style, scrollbar_style);
     
     if (subwindow) {
         window.addChild(subwindow);
@@ -186,30 +182,29 @@ void OpenFileAction::operator () () {
 
 
 OpenFileAction *OpenFileAction::clone() {
-    return new OpenFileAction(window, group, window_style, scrollbar_style);
+    return new OpenFileAction(window, window_style, scrollbar_style);
 }
 
 
 // ============================================================================
 
 
-SaveAsFileAction::SaveAsFileAction(CanvasGroup &group_) :
-    group(group_) {}
+SaveAsFileAction::SaveAsFileAction() {}
 
 
 void SaveAsFileAction::operator () () {
     ASSERT(dialog, "Dialog is nullptr!\n");
     const char *filename = ((SelectFileDialog*)(dialog))->getFilename();
 
-    ASSERT(group.getActive(), "No active canvas!\n");
-    group.getActive()->saveImageAs(filename);
+    ASSERT(CANVAS_GROUP.getActive(), "No active canvas!\n");
+    CANVAS_GROUP.getActive()->saveImageAs(filename);
 
     dialog->setStatus(Widget::DELETE);
 }
 
 
 SaveAsFileAction *SaveAsFileAction::clone() {
-    return new SaveAsFileAction(group);
+    return new SaveAsFileAction();
 }
 
 
@@ -232,12 +227,10 @@ CancelAction *CancelAction::clone() {
 
 CreateOpenFileDialog::CreateOpenFileDialog(
     Window &window_,
-    CanvasGroup &group_,
     FileDialogStyle &dialog_style_,
     ScrollBarStyle &scrollbar_style_
 ) :
     window(window_),
-    group(group_),
     dialog_style(dialog_style_),
     scrollbar_style(scrollbar_style_)
 {}
@@ -248,12 +241,7 @@ void CreateOpenFileDialog::operator () () {
         Widget::AUTO_ID,
         BoundLayoutBox(),
         "Open File",
-        new OpenFileAction(
-            window,
-            group,
-            dialog_style.window,
-            scrollbar_style
-        ),
+        new OpenFileAction(window, dialog_style.window, scrollbar_style),
         new CancelAction(),
         dialog_style
     ));
@@ -261,12 +249,7 @@ void CreateOpenFileDialog::operator () () {
 
 
 CreateOpenFileDialog *CreateOpenFileDialog::clone() {
-    return new CreateOpenFileDialog(
-        window,
-        group,
-        dialog_style,
-        scrollbar_style
-    );
+    return new CreateOpenFileDialog(window, dialog_style, scrollbar_style);
 }
 
 
@@ -275,23 +258,21 @@ CreateOpenFileDialog *CreateOpenFileDialog::clone() {
 
 CreateSaveAsFileDialog::CreateSaveAsFileDialog(
     Window &window_,
-    CanvasGroup &group_,
     FileDialogStyle &dialog_style_
 ) :
     window(window_),
-    group(group_),
     dialog_style(dialog_style_)
 {}
 
 
 void CreateSaveAsFileDialog::operator () () {
-    if (!group.getActive()) return;
+    if (!CANVAS_GROUP.getActive()) return;
 
     window.addChild(new SelectFileDialog(
         Widget::AUTO_ID,
         BoundLayoutBox(),
         "Save As",
-        new SaveAsFileAction(group),
+        new SaveAsFileAction(),
         new CancelAction(),
         dialog_style
     ));
@@ -299,27 +280,24 @@ void CreateSaveAsFileDialog::operator () () {
 
 
 CreateSaveAsFileDialog *CreateSaveAsFileDialog::clone() {
-    return new CreateSaveAsFileDialog(
-        window,
-        group,
-        dialog_style
-    );
+    return new CreateSaveAsFileDialog(window, dialog_style);
 }
 
 
 // ============================================================================
 
 
-SaveFileAction::SaveFileAction(CanvasGroup &group_) :
-    group(group_) {}
+SaveFileAction::SaveFileAction() {}
+
 
 void SaveFileAction::operator () () {
-    CanvasView *canvas = group.getActive();
+    CanvasView *canvas = CANVAS_GROUP.getActive();
     
     if (canvas && canvas->isImageOpen())
         canvas->saveImage();
 }
 
+
 SaveAsFileAction *SaveFileAction::clone() {
-    return new SaveAsFileAction(group);
+    return new SaveAsFileAction();
 }

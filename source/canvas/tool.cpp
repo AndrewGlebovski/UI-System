@@ -68,6 +68,8 @@ void PencilTool::onMove(const Vec2d &mouse) {
         array[1] = Vertex(mouse, color_palette->getFGColor());
 
         prev_position = mouse;
+
+        ASSERT(canvas, "Canvas is nullptr!\n");
         canvas->draw(array);
     }
 }
@@ -407,7 +409,7 @@ void PolygonTool::onMove(const Vec2d &mouse) {
 
 void PolygonTool::onConfirm() {
     if (is_drawing) {
-        canvas->draw(getPolygonArray(Vec2d(), points, color_palette->getFGColor(), TriangleFan));
+        canvas->draw(getPolygonArray(Vec2d(), points, color_palette->getFGColor(), LineStrip));
         is_drawing = false;
     }
 

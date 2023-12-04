@@ -12,68 +12,13 @@
 #include "widget/widget.hpp"
 
 
-class CanvasView;
-
-
-class CanvasGroup {
-private:
-    List<CanvasView*> canvases;     ///< Canvases in this group
-    size_t active;              ///< Currently active canvas
-
-
-    /**
-     * \brief Returns index of the canvas in list
-    */
-    size_t getIndex(CanvasView *canvas) const;
-
-public:
-    /**
-     * \brief Creates empty group
-    */
-    CanvasGroup();
-
-
-    /**
-     * \brief Sets active canvas
-    */
-    void setActive(CanvasView *new_active);
-
-
-    /**
-     * \brief Returns active canvas
-    */
-    CanvasView *getActive();
-
-
-    /**
-     * \brief Adds canvas to this group
-    */
-    void addCanvas(CanvasView *new_canvas);
-
-
-    /**
-     * \brief Removes canvas from this group
-    */
-    void removeCanvas(CanvasView *canvas);
-
-
-    /**
-     * \brief Checks if the canvas is in this group
-    */
-    bool isInGroup(CanvasView *canvas) const;
-};
-
-
 /// Draws canvas and supply events to tools
 class CanvasView : public Widget {
 public:
     /**
      * \brief Creates empty canvas
     */
-    CanvasView(
-        size_t id_, const LayoutBox &layout_,
-        CanvasGroup &group_
-    );
+    CanvasView(size_t id_, const LayoutBox &layout_);
 
     CanvasView(const CanvasView &canvas) = default;
 
@@ -166,9 +111,64 @@ protected:
 
     SFMLCanvas canvas;
     Vec2d texture_offset;
-    CanvasGroup *group;
     std::string filename;
 };
+
+
+/**
+ * \brief Holds references to all CanvasView and active one
+ * \note This class is a singleton (you must use getInstance to get it)
+*/
+class CanvasGroup {
+public:
+    /**
+     * \brief Sets active canvas
+    */
+    void setActive(CanvasView *new_active);
+
+    /**
+     * \brief Returns active canvas
+    */
+    CanvasView *getActive();
+
+    /**
+     * \brief Adds canvas to this group
+    */
+    void addCanvas(CanvasView *new_canvas);
+
+    /**
+     * \brief Removes canvas from this group
+    */
+    void removeCanvas(CanvasView *canvas);
+
+    /**
+     * \brief Checks if the canvas is in this group
+    */
+    bool isInGroup(CanvasView *canvas) const;
+
+    /**
+     * \brief Returns single instance of CanvasGroup
+    */
+    static CanvasGroup &getInstance();
+
+private:
+    /**
+     * \brief Creates empty group
+    */
+    CanvasGroup();
+
+    /**
+     * \brief Returns index of the canvas in list
+    */
+    size_t getIndex(CanvasView *canvas) const;
+
+    List<CanvasView*> canvases;     ///< CanvasView in this group
+    size_t active;                  ///< Currently active CanvasView
+};
+
+
+/// Shortcut for getting CanvasGroup instance
+#define CANVAS_GROUP CanvasGroup::getInstance()
 
 
 #endif

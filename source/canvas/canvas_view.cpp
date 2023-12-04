@@ -11,78 +11,14 @@
 // ============================================================================
 
 
-size_t CanvasGroup::getIndex(CanvasView *canvas) const {
-    for (size_t i = 0; i < canvases.size(); i++)
-        if (canvases[i] == canvas) return i;
-    
-    return canvases.size();
-}
-
-
-CanvasGroup::CanvasGroup() : canvases(), active(0) {}
-
-
-void CanvasGroup::setActive(CanvasView *new_active) {
-    size_t index = getIndex(new_active);
-    if (index < canvases.size()) active = index;
-}
-
-
-CanvasView *CanvasGroup::getActive() {
-    if (canvases.size() == 0) return nullptr;
-    return canvases[active];
-}
-
-
-void CanvasGroup::addCanvas(CanvasView *new_canvas) {
-    if (!isInGroup(new_canvas)) {
-        canvases.push_back(new_canvas);
-        setActive(new_canvas);
-    }
-}
-
-
-void CanvasGroup::removeCanvas(CanvasView *canvas) {
-    size_t index = getIndex(canvas);
-    if (index < canvases.size()) {
-        canvases.remove(index);
-
-        if (canvases.size()) {
-            if (index < active) {
-                active--;
-                setActive(canvases[active]);
-            }
-            else if (index == active) {
-                active = 0;
-                setActive(canvases[active]);
-            }
-        }
-        else active = 0;
-    }
-}
-
-
-bool CanvasGroup::isInGroup(CanvasView *canvas) const {
-    return (getIndex(canvas) < canvases.size()); 
-}
-
-
-// ============================================================================
-
-
-CanvasView::CanvasView(
-    size_t id_, const LayoutBox &layout_,
-    CanvasGroup &group_
-) :
+CanvasView::CanvasView(size_t id_, const LayoutBox &layout_) :
     Widget(id_, layout_),
     canvas(),
     texture_offset(Vec2d(0, 0)),
-    group(&group_),
     filename("")
 {
     TOOL_PALETTE.setActiveCanvas(canvas);
-    
-    group->addCanvas(this);
+    CANVAS_GROUP.addCanvas(this);
 }
 
 
@@ -158,8 +94,7 @@ Canvas &CanvasView::getCanvas() {
 
 
 bool CanvasView::isActive() const {
-    ASSERT(group, "CanvasView must be assigned to group!\n");
-    return (this == group->getActive());
+    return (this == CANVAS_GROUP.getActive());
 }
 
 
@@ -226,9 +161,7 @@ void CanvasView::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
 
     if (isInsideRect(global_position, global_size, event.pos)) {
         if (!isActive()) {
-            ASSERT(group, "CanvasView must be assigned to group!\n");
-            group->setActive(this);
-            
+            CANVAS_GROUP.setActive(this);
             TOOL_PALETTE.setActiveCanvas(canvas);
         }
 
@@ -295,6 +228,70 @@ void CanvasView::onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc
 
 
 CanvasView::~CanvasView() {
-    ASSERT(group, "CanvasView is not in group!\n");
-    group->removeCanvas(this);
+    CANVAS_GROUP.removeCanvas(this);
+}
+
+
+// ============================================================================
+
+
+size_t CanvasGroup::getIndex(CanvasView *canvas) const {
+    for (size_t i = 0; i < canvases.size(); i++)
+        if (canvases[i] == canvas) return i;
+    
+    return canvases.size();
+}
+
+
+CanvasGroup::CanvasGroup() : canvases(), active(0) {}
+
+
+void CanvasGroup::setActive(CanvasView *new_active) {
+    size_t index = getIndex(new_active);
+    if (index < canvases.size()) active = index;
+}
+
+
+CanvasView *CanvasGroup::getActive() {
+    if (canvases.size() == 0) return nullptr;
+    return canvases[active];
+}
+
+
+void CanvasGroup::addCanvas(CanvasView *new_canvas) {
+    if (!isInGroup(new_canvas)) {
+        canvases.push_back(new_canvas);
+        setActive(new_canvas);
+    }
+}
+
+
+void CanvasGroup::removeCanvas(CanvasView *canvas) {
+    size_t index = getIndex(canvas);
+    if (index < canvases.size()) {
+        canvases.remove(index);
+
+        if (canvases.size()) {
+            if (index < active) {
+                active--;
+                setActive(canvases[active]);
+            }
+            else if (index == active) {
+                active = 0;
+                setActive(canvases[active]);
+            }
+        }
+        else active = 0;
+    }
+}
+
+
+bool CanvasGroup::isInGroup(CanvasView *canvas) const {
+    return (getIndex(canvas) < canvases.size()); 
+}
+
+
+CanvasGroup &CanvasGroup::getInstance() {
+    static CanvasGroup canvas_group;
+    return canvas_group;
 }

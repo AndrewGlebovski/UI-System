@@ -28,13 +28,11 @@ const size_t MAX_PATH = 256;            ///< Max length of path to root dir and 
 PluginLoader::PluginLoader(
     const char *root_dir_,
     Menu &menu_,
-    size_t menu_button_id_,
-    CanvasGroup &group_
+    size_t menu_button_id_
 ) :
     root_dir(root_dir_),
     menu(menu_),
-    menu_button_id(menu_button_id_),
-    group(group_)
+    menu_button_id(menu_button_id_)
 {
     scan();
 }
@@ -111,7 +109,7 @@ bool PluginLoader::loadTool(Plugin *plugin) {
     
     if (tool) {
         // Set tool color palette and active canvas
-        tool->setActiveCanvas(group.getActive()->getCanvas());
+        tool->setActiveCanvas(CANVAS_GROUP.getActive()->getCanvas());
         tool->setColorPalette(COLOR_PALETTE);
 
         // Add tool to palette view
@@ -133,10 +131,7 @@ bool PluginLoader::loadFilter(Plugin *plugin) {
         menu.addButton(
             menu_button_id,
             filter->getPluginData()->getName(),
-            new FilterAction(
-                FILTER_PALETTE.getFilterCount() - 1,
-                group
-            )
+            new FilterAction(FILTER_PALETTE.getFilterCount() - 1)
         );
 
         return true;

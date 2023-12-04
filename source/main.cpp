@@ -78,21 +78,18 @@ int main() {
     );
     ASSERT(main_menu, "Failed to allocate tool main menu!\n");
 
-    CanvasGroup *canvas_group = new CanvasGroup();
-    ASSERT(canvas_group, "Failed to allocate canvas group!\n");
-
     FileDialogStyle dialog_style(window_style);
 
     main_menu->addMenuButton("File");
-    main_menu->addButton(0, "Open", new CreateOpenFileDialog(*main_window, *canvas_group, dialog_style, scrollbar_style));
-    main_menu->addButton(0, "Save", new SaveFileAction(*canvas_group));
-    main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(*main_window, *canvas_group, dialog_style));
+    main_menu->addButton(0, "Open", new CreateOpenFileDialog(*main_window, dialog_style, scrollbar_style));
+    main_menu->addButton(0, "Save", new SaveFileAction());
+    main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(*main_window, dialog_style));
     
     main_menu->addMenuButton("Filter");
-    main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER, *canvas_group));
-    main_menu->addButton(1, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER, *canvas_group));
-    main_menu->addButton(1, "Monochrome", new FilterAction(FilterPalette::MONOCHROME_FILTER, *canvas_group));
-    main_menu->addButton(1, "Negative", new FilterAction(FilterPalette::NEGATIVE_FILTER, *canvas_group));
+    main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER));
+    main_menu->addButton(1, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER));
+    main_menu->addButton(1, "Monochrome", new FilterAction(FilterPalette::MONOCHROME_FILTER));
+    main_menu->addButton(1, "Negative", new FilterAction(FilterPalette::NEGATIVE_FILTER));
 
     main_window->setMenu(main_menu);
 
@@ -102,15 +99,12 @@ int main() {
         clock_style
     ));
     
-    main_window->addChild(new FilterHotkey(
-        main_window,
-        *canvas_group
-    ));
+    main_window->addChild(new FilterHotkey());
 
-    main_window->addChild(openPicture(nullptr, *canvas_group, window_style, scrollbar_style));
+    main_window->addChild(openPicture(nullptr, window_style, scrollbar_style));
     main_window->addChild(createToolPaletteView(window_style, palette_asset));
     
-    PluginLoader plugin_loader("plugins", *main_menu, 1, *canvas_group);
+    PluginLoader plugin_loader("plugins", *main_menu, 1);
 
     TransformStack stack;
 
@@ -153,7 +147,6 @@ int main() {
     }
     
     delete main_window;
-    delete canvas_group;
     
     printf("UI System!\n");
     return 0;

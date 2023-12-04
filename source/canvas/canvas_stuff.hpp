@@ -19,7 +19,6 @@
 */
 Widget *openPicture(
     const char *filename,
-    CanvasGroup &group,
     WindowStyle &window_style,
     ScrollBarStyle &scrollbar_style
 );
@@ -52,13 +51,10 @@ public:
 /// Supports hot keys for applying filters
 class FilterHotkey : public Widget {
 public:
-    FilterHotkey(Widget *parent_, CanvasGroup &group_);
+    FilterHotkey();
 
 protected:
     virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
-
-private:
-    CanvasGroup &group;
 };
 
 
@@ -66,14 +62,11 @@ private:
 class FilterAction : public ButtonAction {
 private:
     size_t filter_id;
-    CanvasGroup &group;
 
 public:
-    FilterAction(size_t filter_id_, CanvasGroup &group_);
-
+    FilterAction(size_t filter_id_);
 
     virtual void operator () () override;
-
 
     virtual FilterAction *clone() override;
 };
@@ -84,7 +77,6 @@ class OpenFileAction : public DialogAction {
 public:
     OpenFileAction(
         Window &window_,
-        CanvasGroup &group_,
         WindowStyle &window_style_,
         ScrollBarStyle &scrollbar_style_
     );
@@ -95,7 +87,6 @@ public:
 
 private:
     Window &window;
-    CanvasGroup &group;
     WindowStyle &window_style;
     ScrollBarStyle &scrollbar_style;
 };
@@ -104,14 +95,11 @@ private:
 /// Saves active canvas texture to image
 class SaveAsFileAction : public DialogAction {
 public:
-    SaveAsFileAction(CanvasGroup &group_);
+    SaveAsFileAction();
 
     virtual void operator () () override;
 
     virtual SaveAsFileAction *clone() override;
-
-private:
-    CanvasGroup &group;
 };
 
 
@@ -129,7 +117,6 @@ class CreateOpenFileDialog : public ButtonAction {
 public:
     CreateOpenFileDialog(
         Window &window_,
-        CanvasGroup &group_,
         FileDialogStyle &dialog_style_,
         ScrollBarStyle &scrollbar_style_
     );
@@ -140,7 +127,6 @@ public:
 
 private:
     Window &window;
-    CanvasGroup &group;
     FileDialogStyle &dialog_style;
     ScrollBarStyle &scrollbar_style;
 };
@@ -151,7 +137,6 @@ class CreateSaveAsFileDialog : public ButtonAction {
 public:
     CreateSaveAsFileDialog(
         Window &window_,
-        CanvasGroup &group_,
         FileDialogStyle &dialog_style_
     );
 
@@ -161,7 +146,6 @@ public:
 
 private:
     Window &window;
-    CanvasGroup &group;
     FileDialogStyle &dialog_style;
 };
 
@@ -169,14 +153,11 @@ private:
 /// If active canvas has opened image, saves it to the same path
 class SaveFileAction : public ButtonAction {
 public:
-    SaveFileAction(CanvasGroup &group_);
+    SaveFileAction();
 
     virtual void operator () () override;
 
     virtual SaveAsFileAction *clone() override;
-
-private:
-    CanvasGroup &group;
 };
 
 
