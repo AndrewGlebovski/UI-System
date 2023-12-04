@@ -5,11 +5,22 @@
 
 
 /// Creates tool palette view in new subwindow
-Widget *createToolPaletteView(WindowStyle &window_style, PaletteViewAsset &palette_asset);
+Widget *createToolPaletteView(
+    WindowStyle &window_style,
+    PaletteViewAsset &palette_asset
+);
 
 
 /// Creates palettes for palette manager
 void setupPaletteManager();
+
+
+/// Creates menu for main window
+Menu *createMainMenu(
+    Window &dialog_parent,
+    FileDialogStyle &dialog_style,
+    ScrollBarStyle &scrollbar_style
+);
 
 
 int main() {
@@ -60,38 +71,10 @@ int main() {
         window_style
     );
     ASSERT(main_window, "Failed to allocate tool main window!\n");
-    
-    Menu *main_menu = new Menu(
-        Widget::AUTO_ID,
-        BoundLayoutBox(),
-        RectButtonStyle(
-            Color(0xd4d0c8ff),
-            Color(0x000080ff),
-            Color(0x000080ff),
-            font,
-            25,
-            Black,
-            White,
-            White
-        ),
-        Color(0xd4d0c8ff)
-    );
-    ASSERT(main_menu, "Failed to allocate tool main menu!\n");
 
     FileDialogStyle dialog_style(window_style);
 
-    main_menu->addMenuButton("File");
-    main_menu->addButton(0, "Open", new CreateOpenFileDialog(*main_window, dialog_style, scrollbar_style));
-    main_menu->addButton(0, "Save", new SaveFileAction());
-    main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(*main_window, dialog_style));
-    
-    main_menu->addMenuButton("Filter");
-    main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER));
-    main_menu->addButton(1, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER));
-    main_menu->addButton(1, "Monochrome", new FilterAction(FilterPalette::MONOCHROME_FILTER));
-    main_menu->addButton(1, "Negative", new FilterAction(FilterPalette::NEGATIVE_FILTER));
-
-    main_window->setMenu(main_menu);
+    main_window->setMenu(createMainMenu(*main_window, dialog_style, scrollbar_style));
 
     main_window->addChild(new Clock(
         Widget::AUTO_ID,
@@ -104,7 +87,7 @@ int main() {
     main_window->addChild(openPicture(nullptr, window_style, scrollbar_style));
     main_window->addChild(createToolPaletteView(window_style, palette_asset));
     
-    PluginLoader plugin_loader("plugins", *main_menu, 1);
+    PluginLoader plugin_loader("plugins", *main_window->getMenu(), 1);
 
     TransformStack stack;
 
@@ -183,4 +166,42 @@ void setupPaletteManager() {
     PaletteManager::getInstance().setToolPalette(new ToolPalette(COLOR_PALETTE));
 
     PaletteManager::getInstance().setFilterPalette(new FilterPalette());
+}
+
+
+Menu *createMainMenu(
+    Window &dialog_parent,
+    FileDialogStyle &dialog_style,
+    ScrollBarStyle &scrollbar_style
+) {
+    Menu *main_menu = new Menu(
+        Widget::AUTO_ID,
+        BoundLayoutBox(),
+        RectButtonStyle(
+            Color(0xd4d0c8ff),
+            Color(0x000080ff),
+            Color(0x000080ff),
+            dialog_style.window.font,
+            25,
+            Black,
+            White,
+            White
+        ),
+        Color(0xd4d0c8ff)
+    );
+
+    ASSERT(main_menu, "Failed to allocate tool main menu!\n");
+
+    main_menu->addMenuButton("File");
+    main_menu->addButton(0, "Open", new CreateOpenFileDialog(dialog_parent, dialog_style, scrollbar_style));
+    main_menu->addButton(0, "Save", new SaveFileAction());
+    main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(dialog_parent, dialog_style));
+    
+    main_menu->addMenuButton("Filter");
+    main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER));
+    main_menu->addButton(1, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER));
+    main_menu->addButton(1, "Monochrome", new FilterAction(FilterPalette::MONOCHROME_FILTER));
+    main_menu->addButton(1, "Negative", new FilterAction(FilterPalette::NEGATIVE_FILTER));
+
+    return main_menu;
 }
