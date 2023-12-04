@@ -270,7 +270,7 @@ void EraserTool::onMainButton(ControlState state, const Vec2d &mouse) {
             is_drawing = true;
             prev_position = mouse;
 
-            CircleShape circle(mouse, ERASER_RADIUS, CANVAS_BACKGROUND);
+            CircleShape circle(mouse, ERASER_RADIUS, color_palette->getBGColor());
             circle.draw(*canvas);
 
             break;
@@ -290,7 +290,7 @@ void EraserTool::onMove(const Vec2d &mouse) {
             (mouse.y - prev_position.y) / ERASER_STEP
         );
 
-        CircleShape circle(mouse, ERASER_RADIUS, CANVAS_BACKGROUND);
+        CircleShape circle(mouse, ERASER_RADIUS, color_palette->getBGColor());
 
         for (int i = 0; i < ERASER_STEP; i++) {
             circle.draw(*canvas);

@@ -11,6 +11,12 @@ Widget *createToolPaletteView(
 );
 
 
+/// Creates color palette view in new subwindow
+Widget *createColorPaletteView(
+    WindowStyle &window_style
+);
+
+
 /// Creates palettes for palette manager
 void setupPaletteManager(WindowStyle &window_style);
 
@@ -86,7 +92,8 @@ int main() {
 
     main_window->addChild(openPicture(nullptr, window_style, scrollbar_style));
     main_window->addChild(createToolPaletteView(window_style, palette_asset));
-    
+    main_window->addChild(createColorPaletteView(window_style));
+
     PluginLoader plugin_loader(PLUGIN_DIR, *main_window->getMenu(), 1, *main_window);
 
     TransformStack stack;
@@ -155,6 +162,29 @@ Widget *createToolPaletteView(WindowStyle &window_style, PaletteViewAsset &palet
         Widget::AUTO_ID,
         AnchorLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H), Vec2d(), Vec2d(SCREEN_W, SCREEN_H)),
         palette_asset
+    ));
+
+    return subwindow;
+}
+
+
+Widget *createColorPaletteView(WindowStyle &window_style) {
+    WindowStyle subwindow_style(window_style);
+    subwindow_style.outline = 0;
+
+    Window *subwindow = new Window(
+        Widget::AUTO_ID,
+        BoundLayoutBox(Vec2d(1280, 100), Vec2d(218, 451)),
+        "Colors",
+        subwindow_style,
+        false,
+        true,
+        false
+    );
+
+    subwindow->addChild(new ColorPaletteView(
+        Widget::AUTO_ID,
+        AnchorLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H), Vec2d(), Vec2d(SCREEN_W, SCREEN_H))
     ));
 
     return subwindow;

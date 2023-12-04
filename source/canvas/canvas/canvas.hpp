@@ -12,9 +12,6 @@
 #include <canvas/canvas/selection_mask.hpp>
 
 
-const Color CANVAS_BACKGROUND = White;   ///< Canvas background color
-
-
 class Canvas {
 public:
     virtual ~Canvas() = default;

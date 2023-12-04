@@ -28,7 +28,7 @@ bool CanvasView::createImage(size_t width, size_t height) {
 
     Texture texture(width, height);
     for (size_t i = 0; i < width * height; i++)
-        texture.data[i] = CANVAS_BACKGROUND;
+        texture.data[i] = COLOR_PALETTE.getBGColor();
     
     TextureShape(texture).draw(canvas, Vec2d(), canvas.getSize());
 

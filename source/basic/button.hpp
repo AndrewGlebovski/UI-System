@@ -220,6 +220,38 @@ struct RectButtonStyle {
 };
 
 
+/// Contains rect button style
+struct SimpleRectButtonStyle {
+    Color normal;           ///< Button pressed color
+    Color hover;            ///< Button hover color
+    Color pressed;          ///< Button pressed color
+
+    /**
+     * \brief Constructs style
+    */
+    SimpleRectButtonStyle(Color normal_, Color hover_, Color pressed_) :
+        normal(normal_), hover(hover_), pressed(pressed_) {}
+};
+
+
+/// Rectangle button
+class SimpleRectButton : public ActionButton {
+protected:
+    SimpleRectButtonStyle style;
+
+public:
+    SimpleRectButton(
+        size_t id_, const LayoutBox &layout_,
+        ButtonAction *action_,
+        const SimpleRectButtonStyle &style_
+    );
+
+    virtual bool isInsideButton(const Vec2d &point, const Vec2d &global_size) const override;
+
+    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+};
+
+
 /// Rectangle button with some text
 class RectButton : public ActionButton {
 protected:
@@ -234,9 +266,7 @@ public:
         const RectButtonStyle &style_
     );
 
-
     virtual bool isInsideButton(const Vec2d &point, const Vec2d &global_size) const override;
-
 
     virtual void draw(RenderTarget &result, TransformStack &stack) override;
 };

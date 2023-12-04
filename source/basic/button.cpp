@@ -88,7 +88,7 @@ void ActionButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 void ActionButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
     Vec2d global_size = ehc.stack.apply_size(layout->getSize());
-    
+
     if (!isInsideButton(event.pos - global_position, global_size)) return;
 
     setButtonStatus(BUTTON_PRESSED);
@@ -176,6 +176,47 @@ void ButtonGroup::removeButton(ActionButton *button) {
 
 bool ButtonGroup::isInGroup(ActionButton *button) const {
     return (getIndex(button) < buttons.size()); 
+}
+
+
+// ============================================================================
+
+
+SimpleRectButton::SimpleRectButton(
+    size_t id_, const LayoutBox &layout_,
+    ButtonAction *action_,
+    const SimpleRectButtonStyle &style_
+) :
+    ActionButton(id_, layout_, action_),
+    style(style_)
+{}
+
+
+bool SimpleRectButton::isInsideButton(const Vec2d &point, const Vec2d &global_size) const {
+    return isInsideRect(Vec2d(), global_size, point);
+}
+
+
+void SimpleRectButton::draw(RenderTarget &result, TransformStack &stack) {
+    Vec2d global_position = stack.apply(layout->getPosition());
+    Vec2d global_size = stack.apply_size(layout->getSize());
+
+    RectShape btn_rect(global_position, global_size, Color());
+
+    switch(status) {
+        case BUTTON_NORMAL:
+            btn_rect.setColor(style.normal);
+            break;
+        case BUTTON_HOVER:
+            btn_rect.setColor(style.hover);
+            break;
+        case BUTTON_PRESSED:
+            btn_rect.setColor(style.pressed);
+            break;
+        default: ASSERT(0, "Invalid button status!\n");
+    }
+
+    btn_rect.draw(result);
 }
 
 
