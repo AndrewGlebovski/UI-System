@@ -76,7 +76,8 @@ void loadTexture(Texture **texture_ptr, const char *filename) {
 // ============================================================================
 
 
-RenderTexture::RenderTexture() : render_texture(), inner_texture(nullptr) {}
+RenderTexture::RenderTexture() :
+    render_texture(), inner_texture(nullptr), is_changed(new bool[1]) {}
 
 
 void RenderTexture::create(size_t width, size_t height) {
@@ -84,16 +85,22 @@ void RenderTexture::create(size_t width, size_t height) {
     
     inner_texture = new Texture(width, height);
     ASSERT(inner_texture, "Failed to allocate texture!\n");
+
+    setChanged(true);
 }
 
 
 const Texture &RenderTexture::getTexture() const {
-    sf::Image image = render_texture.getTexture().copyToImage();
-    
-    const uint8_t *src = image.getPixelsPtr();
+    if (isChanged()) {
+        sf::Image image = render_texture.getTexture().copyToImage();
+        
+        const uint8_t *src = image.getPixelsPtr();
 
-    for (size_t i = 0; i < inner_texture->width * inner_texture->height; i++)
-        inner_texture->data[i] = Color(src[i * 4], src[i * 4 + 1], src[i * 4 + 2], src[i * 4 + 3]);
+        for (size_t i = 0; i < inner_texture->width * inner_texture->height; i++)
+            inner_texture->data[i] = Color(src[i * 4], src[i * 4 + 1], src[i * 4 + 2], src[i * 4 + 3]);
+        
+        setChanged(false);
+    }
 
     return *inner_texture;
 }
@@ -111,6 +118,7 @@ void RenderTexture::draw(const VertexArray& array) {
     render_texture.draw(vertices);
 
     render_texture.display();
+    setChanged(true);
 }
 
 
@@ -132,11 +140,13 @@ void RenderTexture::draw(const VertexArray& array, const Texture& texture) {
     render_texture.draw(vertices, &tex);
 
     render_texture.display();
+    setChanged(true);
 }
 
 
 void RenderTexture::clear(Color color) {
     render_texture.clear(color);
+    setChanged(true);
 }
 
 
@@ -153,4 +163,14 @@ const sf::Texture &RenderTexture::getSFMLTexture() const {
 RenderTexture::~RenderTexture() {
     if (inner_texture)
         delete inner_texture;
+}
+
+
+void RenderTexture::setChanged(bool is_changed_) const {
+    *is_changed = is_changed_;
+}
+
+
+bool RenderTexture::isChanged() const {
+    return *is_changed;
 }

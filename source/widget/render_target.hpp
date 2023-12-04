@@ -85,8 +85,13 @@ public:
     virtual ~RenderTexture() override;
 
 private:
+    void setChanged(bool is_changed_) const;
+
+    bool isChanged() const;
+
     sf::RenderTexture render_texture;
     Texture *inner_texture;
+    bool *const is_changed;
 };
 
 
