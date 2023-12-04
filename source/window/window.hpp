@@ -100,12 +100,12 @@ public:
      * \brief Adds new widget to window container
      * \warning Widgets should be allocated using new and will be deleted by window
     */
-    virtual size_t addChild(Widget *child) override;
+    virtual size_t addChild(Widget *child);
 
     /**
      * \brief Removes child from window container
     */
-    virtual void removeChild(size_t child_id) override;
+    virtual void removeChild(size_t child_id);
 
     /**
      * \brief Returns window style

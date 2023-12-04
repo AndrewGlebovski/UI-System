@@ -21,12 +21,45 @@
 #include "event.hpp"
 
 
-/// Base class for all widgets
-class Widget {
+/// Widget basic interface
+class WidgetInterface {
+public:
+    virtual ~WidgetInterface() = default;
+
+    virtual void draw(RenderTarget &result, TransformStack &stack) = 0;
+
+    virtual void onEvent(const Event &event, EHC &ehc) = 0;
+
+    virtual void onParentUpdate(const LayoutBox &parent_layout) = 0;
+
+    virtual LayoutBox &getLayoutBox() = 0;
+
+    virtual const LayoutBox &getLayoutBox() const = 0;
+
+    virtual void setLayoutBox(const LayoutBox &layout_) = 0;
+
+protected:
+    virtual bool covers(TransformStack &stack, const Vec2d &position) const = 0;
+
+    virtual void onTick(const TickEvent &event, EHC &ehc) {};
+    
+    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) {};
+    
+    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) {};
+    
+    virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {};
+    
+    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {};
+    
+    virtual void onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc) {};
+};
+
+
+/// Extended widget interface with common implementation
+class Widget : public WidgetInterface {
 public:
     /// Pass into constructor to generate new ID
     static const size_t AUTO_ID = 0;
-
 
     /// Shows parent if some actions requiered for this widget
     enum WIDGET_STATUS {
@@ -42,13 +75,13 @@ public:
 
     /**
      * \brief Default copy constructor
-     * \note id is AUTO, z-index is set to 0, parent is set nullptr
+     * \note id is AUTO, parent is set nullptr
     */
     Widget(const Widget &widget);
 
     /**
      * \brief Default assignment
-     * \note z-index is set to 0, parent is set to nullptr
+     * \note Parent is set to nullptr
     */
     Widget &operator = (const Widget &widget);
 
@@ -60,17 +93,17 @@ public:
     /**
      * \brief Returns current layout box
     */
-    LayoutBox &getLayoutBox();
+    virtual LayoutBox &getLayoutBox() override;
 
     /**
      * \brief Returns current layout box
     */
-    const LayoutBox &getLayoutBox() const;
+    virtual const LayoutBox &getLayoutBox() const override;
 
     /**
      * \brief Sets layout box
     */
-    void setLayoutBox(const LayoutBox &layout_);
+    virtual void setLayoutBox(const LayoutBox &layout_) override;
 
     /**
      * \brief Generates transform using widget position
@@ -98,18 +131,6 @@ public:
     virtual Widget *findWidget(size_t widget_id);
 
     /**
-     * \brief Adds child widget for this
-     * \warning If widget is not supposed to have children, abort() will be called
-    */
-    virtual size_t addChild(Widget *child);
-
-    /**
-     * \brief Removes child by its id
-     * \warning If widget is not supposed to have children, abort() will be called
-    */
-    virtual void removeChild(size_t child_id);
-
-    /**
      * \brief Returns widget status
     */
     int getStatus() const;
@@ -133,7 +154,7 @@ public:
     /**
      * \brief Allows widget to change its position and size according to parent
     */
-    virtual void onParentUpdate(const LayoutBox &parent_layout) { layout->onParentUpdate(parent_layout); }
+    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
 
     /**
      * \brief Checks children statuses
@@ -144,31 +165,20 @@ public:
     /**
      * \brief Delete layout box
     */
-    virtual ~Widget() { delete layout; };
+    virtual ~Widget() override;
 
 protected:
-    const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
-    LayoutBox *layout;      ///< Widget position and size encapsulated
-    int z_index;            ///< Shows order in which widgets are drawn
-    Widget *parent;         ///< Parent that holds this widget
-    int status;             ///< Shows parent if some actions requiered
+    virtual bool covers(TransformStack &stack, const Vec2d &position) const override;
 
     /**
      * \brief If requested_id != AUTO_ID returns requested_id, otherwise returns unique id
     */
     size_t generateId(size_t requested_id);
 
-    virtual void onTick(const TickEvent &event, EHC &ehc) {}
-    
-    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) {}
-    
-    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) {}
-    
-    virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {}
-    
-    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {}
-    
-    virtual void onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc) {}
+    const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
+    LayoutBox *layout;      ///< Widget position and size encapsulated
+    Widget *parent;         ///< Parent that holds this widget
+    int status;             ///< Shows parent if some actions requiered
 };
 
 

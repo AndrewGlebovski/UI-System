@@ -41,7 +41,7 @@ void BasicTool::onConfirm() { is_drawing = false; }
 void BasicTool::onCancel() { is_drawing = false; }
 
 
-Widget *BasicTool::getWidget() { return nullptr; }
+WidgetInterface *BasicTool::getWidget() { return nullptr; }
 
 
 Plugin *BasicTool::tryGetInterface(PluginGuid guid) {
@@ -78,7 +78,7 @@ const PluginData *BasicTool::getPluginData() const { return nullptr; }
 BasicFilter::BasicFilter() : ref_count(0) {}
 
 
-Widget *BasicFilter::getWidget() { return nullptr; }
+WidgetInterface *BasicFilter::getWidget() { return nullptr; }
 
 
 Plugin *BasicFilter::tryGetInterface(PluginGuid guid) {

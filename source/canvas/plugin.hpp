@@ -89,7 +89,7 @@ public:
     
     virtual void onCancel() = 0;
     
-    virtual Widget *getWidget() = 0;
+    virtual WidgetInterface *getWidget() = 0;
 };
 
 
@@ -98,7 +98,7 @@ class Filter : public Plugin {
 public:
     virtual void applyFilter(Canvas &canvas) const = 0;
 
-    virtual Widget *getWidget() = 0;
+    virtual WidgetInterface *getWidget() = 0;
 };
 
 
@@ -129,7 +129,7 @@ public:
     
     virtual void onCancel() override;
     
-    virtual Widget *getWidget() override;
+    virtual WidgetInterface *getWidget() override;
 
     virtual Plugin *tryGetInterface(PluginGuid guid) override;
 
@@ -152,7 +152,7 @@ class BasicFilter : public Filter {
 public:
     BasicFilter();
 
-    virtual Widget *getWidget() override;
+    virtual WidgetInterface *getWidget() override;
 
     virtual Plugin *tryGetInterface(PluginGuid guid) override;
 

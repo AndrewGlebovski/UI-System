@@ -14,7 +14,6 @@
 Widget::Widget(size_t id_, const LayoutBox &layout_) :
     id(generateId(id_)),
     layout(layout_.clone()),
-    z_index(0),
     parent(nullptr),
     status(PASS)
 {}
@@ -23,7 +22,6 @@ Widget::Widget(size_t id_, const LayoutBox &layout_) :
 Widget::Widget(const Widget &widget) :
     id(AUTO_ID),
     layout(widget.getLayoutBox().clone()),
-    z_index(0),
     parent(nullptr),
     status(PASS)
 {}
@@ -76,18 +74,6 @@ Widget *Widget::findWidget(size_t widget_id) {
 }
 
 
-size_t Widget::addChild(Widget *child) {
-    printf("This widget does not support children!\n");
-    abort();
-}
-
-
-void Widget::removeChild(size_t child_id) {
-    printf("This widget does not support children!\n");
-    abort();
-}
-
-
 int Widget::getStatus() const { return status; }
 
 
@@ -116,6 +102,25 @@ void Widget::onEvent(const Event &event, EHC &ehc) {
         case KeyboardReleased: onKeyboardReleased(static_cast<const KeyboardReleasedEvent&>(event), ehc); break;
         default: printf("Uknown event type!\n"); abort();
     }
+}
+
+
+void Widget::onParentUpdate(const LayoutBox &parent_layout) {
+    getLayoutBox().onParentUpdate(parent_layout);
+}
+
+
+bool Widget::covers(TransformStack &stack, const Vec2d &position) const {
+    return isInsideRect(
+        stack.apply(getLayoutBox().getPosition()),
+        stack.apply_size(getLayoutBox().getSize()),
+        position
+    );
+}
+
+
+Widget::~Widget() {
+    delete layout;
 }
 
 

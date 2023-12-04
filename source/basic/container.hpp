@@ -37,12 +37,12 @@ public:
      * \brief Adds new widget to manager
      * \warning Widgets should be allocated using new and will be deleted by manager
     */
-    virtual size_t addChild(Widget *child) override;
+    virtual size_t addChild(Widget *child);
 
     /**
      * \brief Removes child from container
     */
-    virtual void removeChild(size_t child_id) override;
+    virtual void removeChild(size_t child_id);
 
     /**
      * \brief Returns number of children

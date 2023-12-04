@@ -154,7 +154,7 @@ void RectTool::onConfirm() {
 }
 
 
-Widget *RectTool::getWidget() {
+WidgetInterface *RectTool::getWidget() {
     return (is_drawing) ? rect_preview : nullptr;
 }
 
@@ -246,7 +246,7 @@ void LineTool::onConfirm() {
 }
 
 
-Widget *LineTool::getWidget() {
+WidgetInterface *LineTool::getWidget() {
     return (is_drawing) ? line_preview : nullptr;
 }
 
@@ -423,7 +423,7 @@ void PolygonTool::onCancel() {
 }
 
 
-Widget *PolygonTool::getWidget() {
+WidgetInterface *PolygonTool::getWidget() {
     return (is_drawing) ? polygon_preview : nullptr;
 }
 
@@ -495,7 +495,7 @@ void TextTool::onCancel() {
 }
 
 
-Widget *TextTool::getWidget() {
+WidgetInterface *TextTool::getWidget() {
     return (is_drawing) ? text_preview : nullptr;
 }
 

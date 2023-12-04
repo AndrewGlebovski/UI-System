@@ -49,7 +49,7 @@ public:
     virtual void onMainButton(ControlState state, const Vec2d &mouse) override;
     virtual void onMove(const Vec2d &mouse) override;
     virtual void onConfirm() override;
-    virtual Widget *getWidget() override;
+    virtual WidgetInterface *getWidget() override;
 
 
     virtual ~RectTool() override;
@@ -72,7 +72,7 @@ public:
     virtual void onMainButton(ControlState state, const Vec2d &mouse) override;
     virtual void onMove(const Vec2d &mouse) override;
     virtual void onConfirm() override;
-    virtual Widget *getWidget() override;
+    virtual WidgetInterface *getWidget() override;
 
 
     virtual ~LineTool() override;
@@ -125,7 +125,7 @@ public:
     virtual void onMove(const Vec2d &mouse) override;
     virtual void onConfirm() override;
     virtual void onCancel() override;
-    virtual Widget *getWidget() override;
+    virtual WidgetInterface *getWidget() override;
 
     virtual ~PolygonTool() override;
 };
@@ -148,7 +148,7 @@ public:
     virtual void onMainButton(ControlState state, const Vec2d &mouse) override;
     virtual void onConfirm() override;
     virtual void onCancel() override;
-    virtual Widget *getWidget() override;
+    virtual WidgetInterface *getWidget() override;
 
 
     virtual ~TextTool() override;
