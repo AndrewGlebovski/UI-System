@@ -8,6 +8,7 @@
 #include "canvas/tool.hpp"
 #include "window/window.hpp"
 #include "canvas/palettes/palette_manager.hpp"
+#include "canvas/canvas_view.hpp"
 
 
 // ============================================================================
@@ -71,6 +72,10 @@ void ToolPalette::setColorPalette(ColorPalette &color_palette) {
 
 
 void ToolPalette::addTool(Tool &tool) {
+    // Set tool color palette and active canvas
+    tool.setActiveCanvas(CANVAS_GROUP.getActive()->getCanvas());
+    tool.setColorPalette(COLOR_PALETTE);
+
     tools.push_back(&tool);
 }
 

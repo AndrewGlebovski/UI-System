@@ -108,10 +108,6 @@ bool PluginLoader::loadTool(Plugin *plugin) {
     Tool *tool = static_cast<Tool*>(plugin->tryGetInterface(PluginGuid::Tool));
     
     if (tool) {
-        // Set tool color palette and active canvas
-        tool->setActiveCanvas(CANVAS_GROUP.getActive()->getCanvas());
-        tool->setColorPalette(COLOR_PALETTE);
-
         // Add tool to palette view
         TOOL_PALETTE.addTool(*tool);
 

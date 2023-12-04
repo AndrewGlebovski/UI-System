@@ -17,7 +17,6 @@ CanvasView::CanvasView(size_t id_, const LayoutBox &layout_) :
     texture_offset(Vec2d(0, 0)),
     filename("")
 {
-    TOOL_PALETTE.setActiveCanvas(canvas);
     CANVAS_GROUP.addCanvas(this);
 }
 
@@ -160,10 +159,7 @@ void CanvasView::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
     Vec2d global_size = ehc.stack.apply_size(layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos)) {
-        if (!isActive()) {
-            CANVAS_GROUP.setActive(this);
-            TOOL_PALETTE.setActiveCanvas(canvas);
-        }
+        if (!isActive()) CANVAS_GROUP.setActive(this);
 
         TOOL_PALETTE.getCurrentTool()->onMainButton(
             State::Pressed, 
@@ -248,7 +244,10 @@ CanvasGroup::CanvasGroup() : canvases(), active(0) {}
 
 void CanvasGroup::setActive(CanvasView *new_active) {
     size_t index = getIndex(new_active);
-    if (index < canvases.size()) active = index;
+    if (index < canvases.size()) {
+        active = index;
+        TOOL_PALETTE.setActiveCanvas(new_active->getCanvas());
+    }
 }
 
 
