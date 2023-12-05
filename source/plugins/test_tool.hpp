@@ -29,7 +29,7 @@ class TestTool : public BasicTool {
 public:
     TestTool();
 
-    virtual void onMainButton(ControlState state, const Vec2d &mouse) override;
+    virtual void onMainButton(const ControlState &state, const Vec2d &mouse) override;
 
     virtual void onMove(const Vec2d &mouse) override;
 

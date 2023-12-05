@@ -27,9 +27,9 @@ Clock::Clock(
 }
 
 
-void Clock::draw(RenderTarget &result, TransformStack &stack) {
+void Clock::draw(TransformStack &stack, RenderTarget &result) {
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     size_t hours = (daytime / 3600) % 24;
     size_t minutes = (daytime / 60) % 60;
@@ -40,7 +40,7 @@ void Clock::draw(RenderTarget &result, TransformStack &stack) {
 
     text.setText(str);
 
-    Vec2d text_size = stack.apply_size(text.getTextureSize());
+    Vec2d text_size = applySize(stack, text.getTextureSize());
 
     text.draw(
         result,

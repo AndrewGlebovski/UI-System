@@ -49,6 +49,8 @@ public:
         Filter *filter = FILTER_PALETTE.getFilter(FilterPalette::INTENSITY_CURVE);
         filter->applyFilter(CANVAS_GROUP.getActive()->getCanvas());
 
+        FILTER_PALETTE.setLastFilter(FilterPalette::INTENSITY_CURVE);
+
         dialog->setStatus(Widget::Status::Delete);
     }
 
@@ -80,7 +82,7 @@ class IntensityCurve : public Widget {
 public:
     IntensityCurve(size_t id_, IntensityCurveFilter &filter_);
 
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 
 protected:
     virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
@@ -105,9 +107,9 @@ IntensityCurve::IntensityCurve(size_t id_, IntensityCurveFilter &filter_) :
 {}
 
 
-void IntensityCurve::draw(RenderTarget &result, TransformStack &stack) {
+void IntensityCurve::draw(TransformStack &stack, RenderTarget &result) {
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape background(global_position, global_size, White);
     background.draw(result);
@@ -127,7 +129,7 @@ void IntensityCurve::draw(RenderTarget &result, TransformStack &stack) {
 
 void IntensityCurve::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isPointMoving()) {
         Vec2d new_point = event.pos - global_position;
@@ -143,7 +145,7 @@ void IntensityCurve::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 
 void IntensityCurve::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos)) {
         Vec2d new_point = event.pos - global_position;
@@ -157,7 +159,7 @@ void IntensityCurve::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
 
 void IntensityCurve::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     moving_point = filter.getPointCount();
 

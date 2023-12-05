@@ -20,16 +20,16 @@ void BasicTool::setColorPalette(ColorPalette &color_palette_) { color_palette = 
 void BasicTool::setActiveCanvas(Canvas &canvas_) { onCancel(); canvas = &canvas_; }
 
 
-void BasicTool::onSecondaryButton(ControlState state, const Vec2d &mouse)  {}
+void BasicTool::onSecondaryButton(const ControlState &state, const Vec2d &mouse)  {}
 
 
-void BasicTool::onModifier1(ControlState state) {}
+void BasicTool::onModifier1(const ControlState &state) {}
 
 
-void BasicTool::onModifier2(ControlState state) {}
+void BasicTool::onModifier2(const ControlState &state) {}
 
 
-void BasicTool::onModifier3(ControlState state) {}
+void BasicTool::onModifier3(const ControlState &state) {}
 
 
 void BasicTool::onMove(const Vec2d &mouse) {}

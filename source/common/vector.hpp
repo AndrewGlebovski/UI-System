@@ -18,28 +18,17 @@ typedef double vec_t;
 /// Math vector with x, y components
 class Vec2d {
 public:
-    vec_t x;    ///< Vector X component
-    vec_t y;    ///< Vector Y component
-
-    /**
-     * \brief Constructs zero vector
-    */
-    Vec2d();
-
     /**
      * \brief Constructs vector from initial components
     */
-    Vec2d(vec_t init_x, vec_t init_y);
+    explicit Vec2d(const double x_ = 0.0, const double y_ = 0.0) : x(x_), y(y_) {}
+
+    Vec2d(const Vec2d &src) = default;
 
     /**
-     * \brief Constructs vector from its SFML analogue
+     * \brief Fills all fields with NAN
     */
-    Vec2d(const sf::Vector2f &vec);
-
-    /**
-     * \brief Constructs vector from SFML Vector2u
-    */
-    Vec2d(const sf::Vector2u &vec);
+    ~Vec2d();
 
     /**
      * \brief Vector length
@@ -52,9 +41,14 @@ public:
     vec_t length2() const;
 
     /**
-     * \brief Prints vector components
+     * \brief Constructs vector from its SFML analogue
     */
-    void print() const;
+    Vec2d(const sf::Vector2f &vec);
+
+    /**
+     * \brief Constructs vector from SFML Vector2u
+    */
+    Vec2d(const sf::Vector2u &vec);
 
     /**
      * \brief Converts Vec2d to its SFML analogue
@@ -66,10 +60,8 @@ public:
     */
     operator sf::Vector2i() const;
 
-    /**
-     * \brief Fills all fields with NAN
-    */
-    ~Vec2d();
+    vec_t x;    ///< Vector X component
+    vec_t y;    ///< Vector Y component
 };
 
 

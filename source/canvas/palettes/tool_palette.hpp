@@ -70,7 +70,7 @@ public:
     /**
      * \brief Draws tool buttons
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 
     /**
      * \brief Broadcast events to tool buttons

@@ -71,7 +71,7 @@ ButtonGroup *ActionButton::getButtonGroup() { return group; }
 
 void ActionButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
     
     if (isInsideButton(event.pos - global_position, global_size)) {
         if (status != BUTTON_PRESSED)
@@ -87,7 +87,7 @@ void ActionButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 
 void ActionButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (!isInsideButton(event.pos - global_position, global_size)) return;
 
@@ -101,7 +101,7 @@ void ActionButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
 
 void ActionButton::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideButton(event.pos - global_position, global_size)) {
         if (!isPressedInGroup()) setButtonStatus(BUTTON_HOVER);
@@ -197,9 +197,9 @@ bool SimpleRectButton::isInsideButton(const Vec2d &point, const Vec2d &global_si
 }
 
 
-void SimpleRectButton::draw(RenderTarget &result, TransformStack &stack) {
+void SimpleRectButton::draw(TransformStack &stack, RenderTarget &result) {
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape btn_rect(global_position, global_size, Color());
 
@@ -240,9 +240,9 @@ bool RectButton::isInsideButton(const Vec2d &point, const Vec2d &global_size) co
 }
 
 
-void RectButton::draw(RenderTarget &result, TransformStack &stack) {
+void RectButton::draw(TransformStack &stack, RenderTarget &result) {
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape btn_rect(global_position, global_size, Color());
 
@@ -264,7 +264,7 @@ void RectButton::draw(RenderTarget &result, TransformStack &stack) {
 
     btn_rect.draw(result);
 
-    Vec2d text_size = stack.apply_size(text_shape.getTextureSize());
+    Vec2d text_size = applySize(stack, text_shape.getTextureSize());
 
     text_shape.draw(
         result,
@@ -294,9 +294,9 @@ bool TextureButton::isInsideButton(const Vec2d &point, const Vec2d &global_size)
 }
 
 
-void TextureButton::draw(RenderTarget &result, TransformStack &stack) {
+void TextureButton::draw(TransformStack &stack, RenderTarget &result) {
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     switch(status) {
         case BUTTON_NORMAL:
@@ -328,11 +328,11 @@ TextureIconButton::TextureIconButton(
 {}
 
 
-void TextureIconButton::draw(RenderTarget &result, TransformStack &stack) {
-    TextureButton::draw(result, stack);
+void TextureIconButton::draw(TransformStack &stack, RenderTarget &result) {
+    TextureButton::draw(stack, result);
 
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     TextureShape(icon).draw(result, global_position, global_size);
 }

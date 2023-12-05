@@ -26,7 +26,7 @@ class WidgetInterface {
 public:
     virtual ~WidgetInterface() = default;
 
-    virtual void draw(RenderTarget &result, TransformStack &stack) = 0;
+    virtual void draw(TransformStack &stack, RenderTarget &result) = 0;
 
     virtual void onEvent(const Event &event, EHC &ehc) = 0;
 
@@ -147,7 +147,7 @@ public:
      * \brief Draws widget on render target
      * \note By default draws red rectangle for debug purposes
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 
     /**
      * \brief Handle all sorts of events event

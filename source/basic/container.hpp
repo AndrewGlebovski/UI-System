@@ -26,7 +26,7 @@ public:
     /**
      * \brief Draws widgets under his management
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 
     /**
      * \brief Searches for widget among its children

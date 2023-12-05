@@ -24,7 +24,7 @@ public:
     /**
      * \brief Draws button
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override = 0;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override = 0;
 };
 
 
@@ -103,7 +103,7 @@ public:
     /**
      * \brief Draws button
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override = 0;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override = 0;
 
     /**
      * \brief Delete action if button has one
@@ -248,7 +248,7 @@ public:
 
     virtual bool isInsideButton(const Vec2d &point, const Vec2d &global_size) const override;
 
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 };
 
 
@@ -268,7 +268,7 @@ public:
 
     virtual bool isInsideButton(const Vec2d &point, const Vec2d &global_size) const override;
 
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 };
 
 
@@ -288,7 +288,7 @@ public:
 
     virtual bool isInsideButton(const Vec2d &point, const Vec2d &global_size) const override;
 
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 };
 
 
@@ -311,7 +311,7 @@ public:
     /**
      * \brief Draws texture button and icon over it
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 };
 
 

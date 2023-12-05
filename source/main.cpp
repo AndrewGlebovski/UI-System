@@ -120,6 +120,7 @@ int main() {
             }
             
             main_window->parseEvent(event, stack);
+            ASSERT(stack.top().getOffset() == Vec2d(), "WTF!\n");
         }
         
         EHC ehc(stack, false, false);
@@ -129,7 +130,7 @@ int main() {
         
         render_texture.clear(Black);
 
-        main_window->draw(render_texture, stack);
+        main_window->draw(stack, render_texture);
 
         render_window.draw(sf::Sprite(render_texture.getSFMLTexture()));
 

@@ -19,9 +19,9 @@ ScrollBar::ScrollBar(
 }
 
 
-void ScrollBar::draw(RenderTarget &result, TransformStack &stack) {
+void ScrollBar::draw(TransformStack &stack, RenderTarget &result) {
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
     
     RectShape frame(global_position, global_size, style.background_color);
     frame.setBorder(style.frame_outline, style.frame_color);
@@ -48,7 +48,7 @@ void ScrollBar::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 
 void ScrollBar::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos)) {
         Vec2d scroller_absolute = global_position + scroller.getPosition();

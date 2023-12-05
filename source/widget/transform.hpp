@@ -77,36 +77,36 @@ public:
     */
     TransformStack();
 
+    virtual ~TransformStack() = default;
+
     /**
      * \brief Pushes last transform to stack and applies it to the stack top
     */
-    void enter(const Transform &transform);
+    virtual void enter(const Transform &transform);
 
     /**
      * \brief Pops last transform from stack
     */
-    void leave();
+    virtual void leave();
 
     /**
      * \brief Returns value of the stack first element
     */
-    Transform top() const;
+    virtual Transform top() const;
 
     /**
      * \brief Applies final transform to position
     */
-    Vec2d apply(const Vec2d &vec) const;
+    virtual Vec2d apply(const Vec2d &vec) const;
 
     /**
      * \brief Restore position using final transform
     */
-    Vec2d restore(const Vec2d &vec) const;
-
-    /**
-     * \brief Applies final transform to size
-    */
-    Vec2d apply_size(const Vec2d &vec) const;
+    virtual Vec2d restore(const Vec2d &vec) const;
 };
+
+
+Vec2d applySize(const TransformStack &stack, const Vec2d &vec);
 
 
 /// Tool class for temporarily applying local transform

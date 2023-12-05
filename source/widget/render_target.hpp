@@ -40,19 +40,21 @@ struct Texture {
  * \param [in]  filename        Path to image
  * \warning Texture is allocated using new, do not forget to delete it
 */
-void loadTexture(Texture **texture_ptr, const char *filename);
+bool loadTexture(Texture **texture_ptr, const char *filename);
 
 
 /// Base class for drawing
 class RenderTarget {
 public:
+    virtual ~RenderTarget() = default;
+
     virtual void draw(const VertexArray& array) = 0;
 
     virtual void draw(const VertexArray& array, const Texture& texture) = 0;
 
     virtual void clear(Color color) = 0;
 
-    virtual ~RenderTarget() = default;
+    virtual void setActive(bool active) = 0;
 };
 
 
@@ -83,6 +85,8 @@ public:
     const sf::Texture &getSFMLTexture() const;
 
     virtual ~RenderTexture() override;
+
+    virtual void setActive(bool active) override { printf("WTF!\n"); }
 
 private:
     void setChanged(bool is_changed_) const;

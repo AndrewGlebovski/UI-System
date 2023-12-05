@@ -86,7 +86,7 @@ public:
     /**
      * \brief Draws canvas inner texture
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 
     /**
      * \brief Broadcast events to tool widget

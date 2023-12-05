@@ -33,7 +33,7 @@ public:
     /**
      * \brief Draws menu button and list option buttons if it's open
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 
     /**
      * \brief Broadcast events to option buttons
@@ -88,7 +88,7 @@ public:
     /**
      * \brief Draws menu rect and menu buttons
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 
     /**
      * \brief Broadcast events to menu buttons

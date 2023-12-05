@@ -88,9 +88,9 @@ ColorPaletteView::ColorPaletteView(size_t id_, const LayoutBox &layout_) :
 #undef ADD_COLOR_BUTTON
 
 
-void ColorPaletteView::draw(RenderTarget &result, TransformStack &stack) {
+void ColorPaletteView::draw(TransformStack &stack, RenderTarget &result) {
     TransformApplier add_transform(stack, getTransform());
-    buttons.draw(result, stack);
+    buttons.draw(stack, result);
 }
 
 

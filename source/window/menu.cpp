@@ -63,14 +63,14 @@ void MenuButton::setOpened(bool is_opened_) {
 }
 
 
-void MenuButton::draw(RenderTarget &result, TransformStack &stack) {
-    RectButton::draw(result, stack);
+void MenuButton::draw(TransformStack &stack, RenderTarget &result) {
+    RectButton::draw(stack, result);
 
     TransformApplier add_transform(stack, getTransform());
 
     if (is_opened) {
         for (size_t i = 0; i < buttons.size(); i++)
-            buttons[i]->draw(result, stack);
+            buttons[i]->draw(stack, result);
     }
 }
 
@@ -170,9 +170,9 @@ void Menu::addButton(size_t menu_id, const std::string &text, ButtonAction *acti
 }
 
 
-void Menu::draw(RenderTarget &result, TransformStack &stack) {
+void Menu::draw(TransformStack &stack, RenderTarget &result) {
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape rect(global_position, global_size, background);
 #ifdef DEBUG_DRAW
@@ -183,7 +183,7 @@ void Menu::draw(RenderTarget &result, TransformStack &stack) {
     TransformApplier add_transform(stack, getTransform());
 
     for (size_t i = 0; i < buttons.size(); i++)
-        buttons[i]->draw(result, stack);
+        buttons[i]->draw(stack, result);
 }
 
 

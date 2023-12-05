@@ -2,7 +2,7 @@
 COMPILER = g++
 
 # Флаги компиляции
-FLAGS = \
+FLAGS = -ggdb3 \
  -Wno-unused-parameter -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal 						\
  -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-default -Weffc++ -Wmain 			\
  -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wctor-dtor-privacy -Wempty-body -Wformat-security 					\
@@ -95,7 +95,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 # Указывать файлы нужно в порядке зависимостей друг от друга
 $(PLUGIN_BIN_DIR)/%.so : $(BUILD_DIR)/$(PLUGIN_SRC_DIR)/%.o $(OBJ)
 	@mkdir -p $(@D)
-	@$(COMPILER) -shared -z defs -o $@ $^ -lsfml-graphics -lsfml-window -lsfml-system
+	@$(COMPILER) -shared -o $@ $^
 
 # Удаляет результаты компиляции
 .PHONY : clean

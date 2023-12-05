@@ -6,12 +6,6 @@
 const vec_t EPS = 1e-5;             ///< Requiered for comparsion
 
 
-Vec2d::Vec2d() : x(0), y(0) {}
-
-
-Vec2d::Vec2d(vec_t init_x, vec_t init_y) : x(init_x), y(init_y) {}
-
-
 Vec2d::Vec2d(const sf::Vector2f &vec) : x(vec_t(vec.x)), y(vec_t(vec.y)) {}
 
 
@@ -44,11 +38,6 @@ vec_t Vec2d::length2() const {
 Vec2d normalize(const Vec2d &v) {
     vec_t len = v.length();
     return Vec2d(v.x / len, v.y / len);
-}
-
-
-void Vec2d::print() const { 
-    printf("x: %15.3lf, y: %15.3lf\n", x, y);
 }
 
 

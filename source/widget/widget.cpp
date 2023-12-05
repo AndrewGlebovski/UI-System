@@ -80,11 +80,11 @@ Widget::Status Widget::getStatus() const { return status; }
 void Widget::setStatus(Status new_status) { status = new_status; }
 
 
-void Widget::draw(RenderTarget &result, TransformStack &stack) {
+void Widget::draw(TransformStack &stack, RenderTarget &result) {
 #ifdef DEBUG_DRAW
     RectShape rect(
         stack.apply(layout->getPosition()),
-        stack.apply_size(layout->getSize()),
+        applySize(stack, layout->getSize()),
         Color(255, 0, 0)
     );
     rect.draw(result);
@@ -113,7 +113,7 @@ void Widget::onParentUpdate(const LayoutBox &parent_layout) {
 bool Widget::covers(TransformStack &stack, const Vec2d &position) const {
     return isInsideRect(
         stack.apply(getLayoutBox().getPosition()),
-        stack.apply_size(getLayoutBox().getSize()),
+        applySize(stack, getLayoutBox().getSize()),
         position
     );
 }

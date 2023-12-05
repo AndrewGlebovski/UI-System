@@ -63,7 +63,7 @@ public:
     /**
      * \brief Draws background, border and scroller
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 
     /**
      * \brief Deletes scroll action

@@ -22,7 +22,7 @@ TestTool::TestTool() :
     my_data(), prev_position() {}
 
 
-void TestTool::onMainButton(ControlState state, const Vec2d &mouse) {
+void TestTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
     switch (state.state) {
         case State::Pressed:
             is_drawing = true;

@@ -35,7 +35,7 @@ public:
         const ClockStyle &style_
     );
 
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
 
 protected:
     virtual void onTick(const TickEvent &event, EHC &ehc) override;

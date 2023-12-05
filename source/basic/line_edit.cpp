@@ -82,9 +82,9 @@ void LineEdit::setKeyboardFocus(bool is_focused) {
 }
 
 
-void LineEdit::draw(RenderTarget &result, TransformStack &stack) {
+void LineEdit::draw(TransformStack &stack, RenderTarget &result) {
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape rect(global_position, global_size, style.background_color);
     rect.setBorder(style.border_thickness, style.border_color);
@@ -127,7 +127,7 @@ void LineEdit::draw(RenderTarget &result, TransformStack &stack) {
 
 void LineEdit::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos)) {
         setKeyboardFocus(true);

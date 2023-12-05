@@ -73,15 +73,15 @@ public:
     
     virtual void setActiveCanvas(Canvas &canvas_) = 0;
 
-    virtual void onMainButton(ControlState state, const Vec2d &mouse) = 0;
+    virtual void onMainButton(const ControlState &state, const Vec2d &mouse) = 0;
     
-    virtual void onSecondaryButton(ControlState state, const Vec2d &mouse) = 0;
+    virtual void onSecondaryButton(const ControlState &state, const Vec2d &mouse) = 0;
     
-    virtual void onModifier1(ControlState state) = 0;
+    virtual void onModifier1(const ControlState &state) = 0;
     
-    virtual void onModifier2(ControlState state) = 0;
+    virtual void onModifier2(const ControlState &state) = 0;
     
-    virtual void onModifier3(ControlState state) = 0;
+    virtual void onModifier3(const ControlState &state) = 0;
     
     virtual void onMove(const Vec2d &mouse) = 0;
     
@@ -115,13 +115,13 @@ public:
     
     virtual void setActiveCanvas(Canvas &canvas_) override;
 
-    virtual void onSecondaryButton(ControlState state, const Vec2d &mouse) override;
+    virtual void onSecondaryButton(const ControlState &state, const Vec2d &mouse) override;
 
-    virtual void onModifier1(ControlState state) override;
+    virtual void onModifier1(const ControlState &state) override;
     
-    virtual void onModifier2(ControlState state) override;
+    virtual void onModifier2(const ControlState &state) override;
     
-    virtual void onModifier3(ControlState state) override;
+    virtual void onModifier3(const ControlState &state) override;
     
     virtual void onMove(const Vec2d &mouse) override;
     

@@ -165,14 +165,14 @@ ToolPaletteView::ToolPaletteView(
 #undef ADD_TOOL_BUTTON
 
 
-void ToolPaletteView::draw(RenderTarget &result, TransformStack &stack) {
+void ToolPaletteView::draw(TransformStack &stack, RenderTarget &result) {
     TransformApplier add_transform(stack, getTransform());
 
     updateButtons();
 
     updateCurrentButton();
 
-    buttons.draw(result, stack);
+    buttons.draw(stack, result);
 }
 
 
@@ -235,8 +235,21 @@ void ToolPaletteView::addTool(size_t tool_id) {
 
     const char *texture_path = new_tool.getPluginData()->getTexturePath();
 
-    icons.push_back(nullptr);
-    loadTexture(&icons.back(), texture_path);
+    Texture *new_icon = nullptr;
+    loadTexture(&new_icon, texture_path);
+
+    if (new_icon) {
+        icons.push_back(new_icon);
+        printf("%s, %s added!\n", new_tool.getPluginData()->getName(), new_tool.getPluginData()->getTexturePath());
+    }
+    else {
+        if (new_tool.getPluginData()->getName())
+            printf("%s icon not found!\n", new_tool.getPluginData()->getName());
+        else
+            printf("Tool icon not found!\n");
+    }
+
+    //printf("%s added!\n", new_tool.getPluginData()->getName());
 
     Widget *prev_button = buttons.findWidget(Widget::AUTO_ID + tool_id);
 
@@ -259,7 +272,7 @@ void ToolPaletteView::addTool(size_t tool_id) {
         asset[PaletteViewAsset::NORMAL_TEXTURE],
         asset[PaletteViewAsset::NORMAL_TEXTURE],
         asset[PaletteViewAsset::SELECTED_TEXTURE],
-        *icons.back()
+        (new_icon) ? *new_icon : asset[PaletteViewAsset::ERASER_TEXTURE]
     );
 
     btn->setButtonGroup(group);

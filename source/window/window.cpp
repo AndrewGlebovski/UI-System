@@ -32,7 +32,7 @@ public:
     /**
      * \brief Draws cyan rectangle for debug purposes
     */
-    void draw(RenderTarget &result, TransformStack &stack) override;
+    void draw(TransformStack &stack, RenderTarget &result) override;
 
 protected:
     Window &window;         ///< Window to move
@@ -88,7 +88,7 @@ public:
     /**
      * \brief Draws red rectangle for debug purposes
     */
-    void draw(RenderTarget &result, TransformStack &stack) override;
+    void draw(TransformStack &stack, RenderTarget &result) override;
 
 protected:
     Window &window;         ///< Window to move
@@ -314,10 +314,10 @@ Vec2d Window::getAreaSize() const {
 
 
 #define DRAW_TEXTURE(TEXTURE_ID, POSITION, TEXTURE_RECT_SIZE) \
-    TextureShape(style.asset[TEXTURE_ID]).draw(result, POSITION + global_position, stack.apply_size(TEXTURE_RECT_SIZE))
+    TextureShape(style.asset[TEXTURE_ID]).draw(result, POSITION + global_position, applySize(stack, TEXTURE_RECT_SIZE))
 
 
-void Window::draw(RenderTarget &result, TransformStack &stack) {
+void Window::draw(TransformStack &stack, RenderTarget &result) {
     Vec2d global_position = stack.apply(layout->getPosition());
 
     Vec2d tl_size = Vec2d(style.asset[WindowAsset::FRAME_TL].width, style.asset[WindowAsset::FRAME_TL].height);
@@ -336,14 +336,14 @@ void Window::draw(RenderTarget &result, TransformStack &stack) {
     DRAW_TEXTURE(WindowAsset::TITLE,        Vec2d(tl_size.x, 0),                                Vec2d(center_w, tl_size.y));
     DRAW_TEXTURE(WindowAsset::FRAME_CENTER, tl_size,                                            Vec2d(center_w, center_h));
 
-    title.draw(result, global_position + style.title_offset - title.getTextOffset(), stack.apply_size(title.getTextureSize()));
+    title.draw(result, global_position + style.title_offset - title.getTextOffset(), applySize(stack, title.getTextureSize()));
 
     TransformApplier add_transform(stack, getTransform());
 
-    container.draw(result, stack);
-    buttons.draw(result, stack);
+    container.draw(stack, result);
+    buttons.draw(stack, result);
 
-    if (menu) menu->draw(result, stack);
+    if (menu) menu->draw(stack, result);
 }
 
 
@@ -414,7 +414,7 @@ void Window::onEvent(const Event &event, EHC &ehc) {
 
 void Window::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos))
         ehc.overlapped = true;
@@ -423,7 +423,7 @@ void Window::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 
 void Window::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos))
         ehc.stopped = true;
@@ -569,10 +569,10 @@ MoveButton::MoveButton(
 {}
 
 
-void MoveButton::draw(RenderTarget &result, TransformStack &stack) {
+void MoveButton::draw(TransformStack &stack, RenderTarget &result) {
 # ifdef DEBUG_DRAW
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape rect(global_position, global_size, Cyan);
     rect.draw(result);
@@ -598,7 +598,7 @@ void MoveButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 
 void MoveButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos)) {
         is_moving = true;
@@ -644,10 +644,10 @@ ResizeButton::ResizeButton(
 {}
 
 
-void ResizeButton::draw(RenderTarget &result, TransformStack &stack) {
+void ResizeButton::draw(TransformStack &stack, RenderTarget &result) {
 # ifdef DEBUG_DRAW
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape rect(global_position, global_size, Red);
     rect.draw(result);
@@ -718,7 +718,7 @@ void ResizeButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 
 void ResizeButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos)) {
         is_moving = true;

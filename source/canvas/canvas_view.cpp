@@ -105,9 +105,9 @@ void CanvasView::setTextureOffset(const Vec2d &texture_offset_) {
 }
 
 
-void CanvasView::draw(RenderTarget &result, TransformStack &stack) {
+void CanvasView::draw(TransformStack &stack, RenderTarget &result) {
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     Vec2d size = canvas.getSize();
     if (size.x > global_size.x) size.x = global_size.x;
@@ -125,7 +125,7 @@ void CanvasView::draw(RenderTarget &result, TransformStack &stack) {
     if (isActive() && TOOL_PALETTE.getCurrentTool()->getWidget()) {
         TransformApplier canvas_transform(stack, getTransform());
         TransformApplier texture_transform(stack, Transform(-texture_offset));
-        TOOL_PALETTE.getCurrentTool()->getWidget()->draw(result, stack);
+        TOOL_PALETTE.getCurrentTool()->getWidget()->draw(stack, result);
     }
 }
 
@@ -156,7 +156,7 @@ void CanvasView::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
     if (event.button_id != MouseLeft) return;
 
     Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos)) {
         if (!isActive()) CANVAS_GROUP.setActive(this);

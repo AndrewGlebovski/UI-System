@@ -55,11 +55,11 @@ Texture::~Texture() {
 // ============================================================================
 
 
-void loadTexture(Texture **texture_ptr, const char *filename) {
-    ASSERT(filename, "Filename is nullptr!\n");
+bool loadTexture(Texture **texture_ptr, const char *filename) {
+    if (!filename) return false;
 
     sf::Image image;
-    ASSERT(image.loadFromFile(filename), "Failed to load image!\n");
+    if (!image.loadFromFile(filename)) return false;
 
     const uint8_t *src = image.getPixelsPtr();
 
@@ -70,6 +70,8 @@ void loadTexture(Texture **texture_ptr, const char *filename) {
 
     for (size_t i = 0; i < texture.width * texture.height; i++)
         texture.data[i] = Color(src[i * 4], src[i * 4 + 1], src[i * 4 + 2], src[i * 4 + 3]);
+    
+    return true;
 }
 
 

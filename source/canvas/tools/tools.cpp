@@ -46,7 +46,7 @@ VertexArray getPolygonArray(const Transform &trans, const List<Vec2d> &points, C
 PencilTool::PencilTool() : prev_position() {}
 
 
-void PencilTool::onMainButton(ControlState state, const Vec2d &mouse) {
+void PencilTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
     switch (state.state) {
         case State::Pressed:
             is_drawing = true;
@@ -88,9 +88,9 @@ public:
         Widget(1, LazyLayoutBox()), tool(tool_) {}
     
 
-    virtual void draw(RenderTarget &result, TransformStack &stack) override {
+    virtual void draw(TransformStack &stack, RenderTarget &result) override {
         Vec2d global_position = stack.apply(layout->getPosition());
-        Vec2d global_size = stack.apply_size(layout->getSize());
+        Vec2d global_size = applySize(stack, layout->getSize());
 
         RectShape rect(global_position, global_size, Color(0));
         rect.setBorder(RECT_PREVIEW_OUTLINE, PREVIEW_COLOR);
@@ -116,7 +116,7 @@ RectShape RectTool::createRect(const Vec2d &p1, const Vec2d &p2) const {
 }
 
 
-void RectTool::onMainButton(ControlState state, const Vec2d &mouse) {
+void RectTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
     switch (state.state) {
         case State::Pressed:
             is_drawing = true;
@@ -183,7 +183,7 @@ public:
     /**
      * \note Transform offset used as line's first point and size as second
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override {
+    virtual void draw(TransformStack &stack, RenderTarget &result) override {
         // REMAINDER: transform.offset = point1, size = point2
         Vec2d p1 = stack.apply(layout->getPosition());
         Vec2d p2 = stack.apply(layout->getSize());
@@ -203,7 +203,7 @@ LineTool::LineTool() : line_preview(nullptr) {
 }
 
 
-void LineTool::onMainButton(ControlState state, const Vec2d &mouse) {
+void LineTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
     ASSERT(line_preview, "Line preview is nullptr!\n");
 
     switch (state.state) {
@@ -264,7 +264,7 @@ LineTool::~LineTool() {
 EraserTool::EraserTool() : prev_position() {}
 
 
-void EraserTool::onMainButton(ControlState state, const Vec2d &mouse) {
+void EraserTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
     switch (state.state) {
         case State::Pressed: {
             is_drawing = true;
@@ -305,7 +305,7 @@ void EraserTool::onMove(const Vec2d &mouse) {
 // ============================================================================
 
 
-void ColorPicker::onMainButton(ControlState state, const Vec2d &mouse) {
+void ColorPicker::onMainButton(const ControlState &state, const Vec2d &mouse) {
     if (state.state == State::Pressed)
         color_palette->setFGColor(canvas->getPixel(mouse.x, mouse.y));
 }
@@ -314,7 +314,7 @@ void ColorPicker::onMainButton(ControlState state, const Vec2d &mouse) {
 // ============================================================================
 
 
-void BucketTool::onMainButton(ControlState state, const Vec2d &mouse) {
+void BucketTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
     if (state.state == State::Pressed) {
         Color color = color_palette->getFGColor();
         Color origin = canvas->getPixel(mouse.x, mouse.y);
@@ -368,7 +368,7 @@ public:
         Widget(1, LazyLayoutBox()), tool(tool_) {}
     
 
-    virtual void draw(RenderTarget &result, TransformStack &stack) override {
+    virtual void draw(TransformStack &stack, RenderTarget &result) override {
         result.draw(getPolygonArray(stack.top(), tool.getPoints(), PREVIEW_COLOR, LineStrip));
     }
 };
@@ -384,7 +384,7 @@ List<Vec2d> &PolygonTool::getPoints() {
 }
 
 
-void PolygonTool::onMainButton(ControlState state, const Vec2d &mouse) {
+void PolygonTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
     if (state.state == State::Pressed) {
         is_drawing = true;
         if (points.size() && (points[0] - mouse).length() < POLYGON_EPSILON)
@@ -458,7 +458,7 @@ TextTool::TextTool() : text_font(), text_preview(nullptr) {
 }
 
 
-void TextTool::onMainButton(ControlState state, const Vec2d &mouse) {
+void TextTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
     if (state.state == State::Pressed) {
         is_drawing = true;
         text_preview->getLayoutBox().setPosition(mouse);

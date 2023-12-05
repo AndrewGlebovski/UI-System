@@ -57,7 +57,7 @@ TransformStack::TransformStack() : transforms() {
 
 
 void TransformStack::enter(const Transform &transform) {
-    transforms.push_back(transforms.back().combine(transform));
+    transforms.push_back(transform.combine(top()));
 }
 
 
@@ -81,8 +81,11 @@ Vec2d TransformStack::restore(const Vec2d &vec) const {
 }
 
 
-Vec2d TransformStack::apply_size(const Vec2d &vec) const {
-    return vec * top().getScale();
+// ============================================================================
+
+
+Vec2d applySize(const TransformStack &stack, const Vec2d &vec) {
+    return vec * stack.top().getScale();
 }
 
 

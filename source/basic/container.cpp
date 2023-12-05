@@ -16,10 +16,10 @@ Container::Container(
 {}
 
 
-void Container::draw(RenderTarget &result, TransformStack &stack) {
+void Container::draw(TransformStack &stack, RenderTarget &result) {
 # ifdef DEBUG_DRAW
     Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape rect(global_position, global_size, Color(0));
     rect.setBorder(1, Magenta);
@@ -32,7 +32,7 @@ void Container::draw(RenderTarget &result, TransformStack &stack) {
         switch (widgets[i]->getStatus()) {
             case Status::Normal:
             case Status::Disabled:
-                widgets[i]->draw(result, stack);
+                widgets[i]->draw(stack, result);
                 break;
             
             default: break;

@@ -115,7 +115,7 @@ public:
     /**
      * \brief Draws window frame, title bar and its content
     */
-    virtual void draw(RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(TransformStack &stack, RenderTarget &result) override;
     
     /**
      * \brief Broadcast events to window children
