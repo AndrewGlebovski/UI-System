@@ -20,7 +20,7 @@ class TestToolData : public PluginData {
     }
 
     virtual const char *getTexturePath() const override {
-        return "assets/textures/tools/pencil.png";
+        return "Plugins/TestTool/pencil.png";
     }
 };
 

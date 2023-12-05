@@ -180,7 +180,7 @@ IntensityCurveDialog::IntensityCurveDialog(
 ) :
     Dialog(id_, layout_, "Intensity Curve", style_)
 {
-    setSize(Vec2d(350, 450));
+    setSize(Vec2d(285, 400));
 
     ApplyFilterAction *apply_action = new ApplyFilterAction();
     CancelAction *cancel_action = new CancelAction();
@@ -201,7 +201,7 @@ IntensityCurveDialog::IntensityCurveDialog(
 
     container.addChild(new RectButton(
         1,
-        LazyLayoutBox(Vec2d(0, 300), Vec2d(100, 50)),
+        LazyLayoutBox(Vec2d(0, 275), Vec2d(100, 50)),
         apply_action,
         "Apply",
         button_style
@@ -209,7 +209,7 @@ IntensityCurveDialog::IntensityCurveDialog(
 
     container.addChild(new RectButton(
         2,
-        LazyLayoutBox(Vec2d(120, 300), Vec2d(100, 50)),
+        LazyLayoutBox(Vec2d(120, 275), Vec2d(100, 50)),
         cancel_action,
         "Cancel",
         button_style

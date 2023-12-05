@@ -36,3 +36,6 @@
 
 # Log directory
 log
+
+# Plugins director
+Plugins

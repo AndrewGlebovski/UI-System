@@ -24,9 +24,25 @@ public:
 
 private:
     /**
-     * \brief Scans root folder for plugins
+     * \brief Scans root folder for plugin directories
     */
     void scan();
+
+    /**
+     * \brief Scans directory for .so file and loads plugin
+     * \return True if plugin loaded successfully
+    */
+    bool scanPluginDir(const char *path);
+
+    /**
+     * \brief True if file at path is directory
+    */
+    bool isDir(const char *path) const;
+
+    /**
+     * \brief True if file at path has .so extension
+    */
+    bool isPluginFile(const char *path) const;
 
     /**
      * \brief Loads plugin dl and returns plugin instance

@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <cstring>
 #include "common/assert.hpp"
 #include "canvas/plugin_loader.hpp"
 #include "canvas/palettes/palette_manager.hpp"
@@ -47,38 +48,91 @@ void PluginLoader::scan() {
     dir = opendir(root_dir);
     
     if (!dir) {
-        printf("Failed to open plugin folder!\n");
+        printf("Failed to open root folder!\n");
         return;
     }
 
-    char filename[MAX_PATH * 2] = "";
+    char plugin_dir[MAX_PATH * 2] = "";
 
     while ((dir_info = readdir(dir)) != NULL) {
-        sprintf(filename, "%s/%s", root_dir, dir_info->d_name);
+        sprintf(plugin_dir, "%s/%s", root_dir, dir_info->d_name);
+        if (isDir(plugin_dir)) scanPluginDir(plugin_dir);
+    }
 
-        Plugin *plugin = loadPlugin(filename);
+    ASSERT(closedir(dir) != -1, "Failed to close root folder!\n");
+}
+
+
+bool PluginLoader::scanPluginDir(const char *path) {
+    ASSERT(path, "Path is nullptr!\n");
+    
+    DIR *dir = NULL;
+    struct dirent *dir_info = NULL;
+
+    dir = opendir(path);
+    
+    if (!dir) {
+        printf("Failed to open plugin folder!\n");
+        return false;
+    }
+
+    char plugin_file[MAX_PATH * 2] = "";
+
+    while ((dir_info = readdir(dir)) != NULL) {
+        sprintf(plugin_file, "%s/%s", path, dir_info->d_name);
+        
+        if (!isPluginFile(plugin_file)) continue;
+
+        Plugin *plugin = loadPlugin(plugin_file);
 
         if (!plugin) continue;
 
         if (!loadTool(plugin) && !loadFilter(plugin)) {
             printf("Plugin does not support any of interfaces!\n");
-            delete plugin;
+            plugin->release();
+            return false;
         }
+
+        plugin->release();
+        break;
     }
 
     ASSERT(closedir(dir) != -1, "Failed to close plugin folder!\n");
+    return true;
+}
+
+
+bool PluginLoader::isDir(const char *path) const {
+    struct stat file_info = {};
+
+    ASSERT(stat(path, &file_info) != -1, "Failed to get file info!\n");
+
+    return S_ISDIR(file_info.st_mode);
+}
+
+
+bool PluginLoader::isPluginFile(const char *path) const {
+    struct stat file_info = {};
+
+    ASSERT(stat(path, &file_info) != -1, "Failed to get file info!\n");
+
+    // File type check
+    if (!S_ISREG(file_info.st_mode)) return false;
+
+    // Extension check
+    size_t len = strlen(path);
+    if (len <= 3) return false;
+
+    if (path[len - 1] != 'o') return false;
+    if (path[len - 2] != 's') return false;
+    if (path[len - 3] != '.') return false;
+
+    return true;
 }
 
 
 Plugin *PluginLoader::loadPlugin(const char *path) {
     ASSERT(path, "Path is nullptr!\n");
-
-    struct stat file_info = {};
-
-    ASSERT(stat(path, &file_info) != -1, "Failed to get file info!\n");
-
-    // Skip '/.' and '/..' directories
-    if (!S_ISREG(file_info.st_mode)) return nullptr;
 
     void *handle = dlopen(path, RTLD_NOW | RTLD_NODELETE);
 

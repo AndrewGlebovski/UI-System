@@ -11,7 +11,7 @@
 
 
 BasicTool::BasicTool() :
-    is_drawing(false), canvas(nullptr), color_palette(nullptr), ref_count(0) {}
+    is_drawing(false), canvas(nullptr), color_palette(nullptr), ref_count(1) {}
 
 
 void BasicTool::setColorPalette(ColorPalette &color_palette_) { color_palette = &color_palette_; }
@@ -75,7 +75,7 @@ const PluginData *BasicTool::getPluginData() const { return nullptr; }
 // ============================================================================
 
 
-BasicFilter::BasicFilter() : ref_count(0) {}
+BasicFilter::BasicFilter() : ref_count(1) {}
 
 
 WidgetInterface *BasicFilter::getWidget() { return nullptr; }
