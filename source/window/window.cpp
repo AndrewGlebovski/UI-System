@@ -5,11 +5,12 @@
 
 
 #include "window/window.hpp"
+#include "common/utils.hpp"
 
 
 const float MIN_OUTLINE = 0.0001f;                          ///< If outline is smaller then window can not be resized
-const Vec2d CLOSE_OFFSET = Vec2d(-45, 12);                  ///< Window close button offset from window top-right corner
-const Vec2d EXPAND_OFFSET = Vec2d(-85, 12);                 ///< Window expand button offset from window top-right corner
+const plug::Vec2d CLOSE_OFFSET = plug::Vec2d(-45, 12);                  ///< Window close button offset from window top-right corner
+const plug::Vec2d EXPAND_OFFSET = plug::Vec2d(-85, 12);                 ///< Window expand button offset from window top-right corner
 const size_t CLOSE_BUTTON_ID = Widget::AUTO_ID + 1;         ///< Window append button ID
 const size_t EXPAND_BUTTON_ID = Widget::AUTO_ID + 2;        ///< Window close button ID
 const size_t BUTTONS_ID = Widget::AUTO_ID + 3;              ///< Window buttons container ID
@@ -32,16 +33,16 @@ public:
     /**
      * \brief Draws cyan rectangle for debug purposes
     */
-    void draw(TransformStack &stack, RenderTarget &result) override;
+    void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
 protected:
     Window &window;         ///< Window to move
-    Vec2d prev_mouse;       ///< Previous mouse click position
+    plug::Vec2d prev_mouse; ///< Previous mouse click position
     bool is_moving;         ///< If moving is active
 
-    void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
-    void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
-    void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
+    void onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) override;
+    void onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) override;
+    void onMouseReleased(const plug::MouseReleasedEvent &event, plug::EHC &ehc) override;
 };
 
 
@@ -55,9 +56,9 @@ private:
 public:
     MoveLayoutBox(MoveButton &btn_);
 
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 
-    virtual LayoutBox *clone() const override;
+    virtual plug::LayoutBox *clone() const override;
 };
 
 
@@ -88,17 +89,17 @@ public:
     /**
      * \brief Draws red rectangle for debug purposes
     */
-    void draw(TransformStack &stack, RenderTarget &result) override;
+    void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
 protected:
     Window &window;         ///< Window to move
-    Vec2d prev_mouse;       ///< Previous mouse click position
+    plug::Vec2d prev_mouse; ///< Previous mouse click position
     bool is_moving;         ///< If moving is active
     const int resize_dir;   ///< Resize direction
 
-    void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
-    void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
-    void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
+    void onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) override;
+    void onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) override;
+    void onMouseReleased(const plug::MouseReleasedEvent &event, plug::EHC &ehc) override;
 };
 
 
@@ -112,9 +113,9 @@ private:
 public:
     ResizeLayoutBox(ResizeButton &btn_);
 
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 
-    virtual LayoutBox *clone() const override;
+    virtual plug::LayoutBox *clone() const override;
 };
 
 
@@ -128,9 +129,9 @@ private:
 public:
     ContainerLayoutBox(Window &window_);
 
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 
-    virtual LayoutBox *clone() const override;
+    virtual plug::LayoutBox *clone() const override;
 };
 
 
@@ -162,8 +163,8 @@ public:
 class ExpandAction : public ButtonAction {
 private:
     Window &window;         ///< Window to expand
-    Vec2d prev_pos;         ///< Window position before expansion
-    Vec2d prev_size;        ///< Window size before expansion
+    plug::Vec2d prev_pos;         ///< Window position before expansion
+    plug::Vec2d prev_size;        ///< Window size before expansion
 
 public:
     ExpandAction(Window &window_) :
@@ -173,11 +174,11 @@ public:
     {}
 
     void operator () () override {
-        Vec2d prev_pos_ = window.getLayoutBox().getPosition();
-        Vec2d prev_size_ = window.getLayoutBox().getSize();
+        plug::Vec2d prev_pos_ = window.getLayoutBox().getPosition();
+        plug::Vec2d prev_size_ = window.getLayoutBox().getSize();
 
-        window.setPosition(Vec2d());
-        if (window.setSize(Vec2d(SCREEN_W, SCREEN_H))) {
+        window.setPosition(plug::Vec2d());
+        if (window.setSize(plug::Vec2d(SCREEN_W, SCREEN_H))) {
             prev_pos = prev_pos_;
             prev_size = prev_size_;
         }
@@ -197,7 +198,7 @@ public:
 
 
 Window::Window(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     const std::string &title_,
     const WindowStyle &style_,
     bool can_resize,
@@ -209,10 +210,10 @@ Window::Window(
     buttons(
         BUTTONS_ID,
         AnchorLayoutBox(
-            Vec2d(),
-            Vec2d(SCREEN_W, SCREEN_H),
-            Vec2d(),
-            Vec2d(SCREEN_W, SCREEN_H)
+            plug::Vec2d(),
+            plug::Vec2d(SCREEN_W, SCREEN_H),
+            plug::Vec2d(),
+            plug::Vec2d(SCREEN_W, SCREEN_H)
         ),
         false
     ),
@@ -247,9 +248,9 @@ void Window::addCloseButton() {
         CLOSE_BUTTON_ID,
         AnchorLayoutBox(
             CLOSE_OFFSET,
-            Vec2d(),
-            Vec2d(SCREEN_W, 0),
-            Vec2d()
+            plug::Vec2d(),
+            plug::Vec2d(SCREEN_W, 0),
+            plug::Vec2d()
         ),
         new CloseAction(*this),
         style.asset[WindowAsset::BUTTON_NORMAL],
@@ -267,9 +268,9 @@ void Window::addExpandButton() {
         EXPAND_BUTTON_ID,
         AnchorLayoutBox(
             EXPAND_OFFSET,
-            Vec2d(),
-            Vec2d(SCREEN_W, 0),
-            Vec2d()
+            plug::Vec2d(),
+            plug::Vec2d(SCREEN_W, 0),
+            plug::Vec2d()
         ),
         new ExpandAction(*this),
         style.asset[WindowAsset::BUTTON_NORMAL],
@@ -299,15 +300,15 @@ void Window::addResizeButtons() {
 }
 
 
-Vec2d Window::getAreaPosition() const {
-    Vec2d area_position = style.tl_offset;
+plug::Vec2d Window::getAreaPosition() const {
+    plug::Vec2d area_position = style.tl_offset;
     if (menu) area_position.y += menu->getLayoutBox().getSize().y;
     return area_position;
 }
 
 
-Vec2d Window::getAreaSize() const {
-    Vec2d area_size = layout->getSize() - style.tl_offset - style.br_offset;
+plug::Vec2d Window::getAreaSize() const {
+    plug::Vec2d area_size = layout->getSize() - style.tl_offset - style.br_offset;
     if (menu) area_size.y -= menu->getLayoutBox().getSize().y;
     return area_size;
 }
@@ -317,24 +318,24 @@ Vec2d Window::getAreaSize() const {
     TextureShape(style.asset[TEXTURE_ID]).draw(result, POSITION + global_position, applySize(stack, TEXTURE_RECT_SIZE))
 
 
-void Window::draw(TransformStack &stack, RenderTarget &result) {
-    Vec2d global_position = stack.apply(layout->getPosition());
+void Window::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
 
-    Vec2d tl_size = Vec2d(style.asset[WindowAsset::FRAME_TL].width, style.asset[WindowAsset::FRAME_TL].height);
-    Vec2d br_size = Vec2d(style.asset[WindowAsset::FRAME_BL].width, style.asset[WindowAsset::FRAME_BL].height);
+    plug::Vec2d tl_size = plug::Vec2d(style.asset[WindowAsset::FRAME_TL].width, style.asset[WindowAsset::FRAME_TL].height);
+    plug::Vec2d br_size = plug::Vec2d(style.asset[WindowAsset::FRAME_BL].width, style.asset[WindowAsset::FRAME_BL].height);
 
-    vec_t center_h = layout->getSize().y - tl_size.y - br_size.y;
-    vec_t center_w = layout->getSize().x - tl_size.x - br_size.x;
+    double center_h = layout->getSize().y - tl_size.y - br_size.y;
+    double center_w = layout->getSize().x - tl_size.x - br_size.x;
 
-    DRAW_TEXTURE(WindowAsset::FRAME_TL,     Vec2d(),                                            tl_size);
-    DRAW_TEXTURE(WindowAsset::FRAME_L,      Vec2d(0, tl_size.y),                                Vec2d(tl_size.x, center_h));
-    DRAW_TEXTURE(WindowAsset::FRAME_BL,     Vec2d(0, tl_size.y + center_h),                     Vec2d(tl_size.x, br_size.y));
-    DRAW_TEXTURE(WindowAsset::FRAME_B,      Vec2d(tl_size.x, tl_size.y + center_h),             Vec2d(center_w, br_size.y));
-    DRAW_TEXTURE(WindowAsset::FRAME_BR,     Vec2d(tl_size.x + center_w, tl_size.y + center_h),  br_size);
-    DRAW_TEXTURE(WindowAsset::FRAME_R,      Vec2d(tl_size.x + center_w, tl_size.y),             Vec2d(br_size.x, center_h));
-    DRAW_TEXTURE(WindowAsset::FRAME_TR,     Vec2d(tl_size.x + center_w, 0),                     Vec2d(br_size.x, tl_size.y));
-    DRAW_TEXTURE(WindowAsset::TITLE,        Vec2d(tl_size.x, 0),                                Vec2d(center_w, tl_size.y));
-    DRAW_TEXTURE(WindowAsset::FRAME_CENTER, tl_size,                                            Vec2d(center_w, center_h));
+    DRAW_TEXTURE(WindowAsset::FRAME_TL,     plug::Vec2d(),                                            tl_size);
+    DRAW_TEXTURE(WindowAsset::FRAME_L,      plug::Vec2d(0, tl_size.y),                                plug::Vec2d(tl_size.x, center_h));
+    DRAW_TEXTURE(WindowAsset::FRAME_BL,     plug::Vec2d(0, tl_size.y + center_h),                     plug::Vec2d(tl_size.x, br_size.y));
+    DRAW_TEXTURE(WindowAsset::FRAME_B,      plug::Vec2d(tl_size.x, tl_size.y + center_h),             plug::Vec2d(center_w, br_size.y));
+    DRAW_TEXTURE(WindowAsset::FRAME_BR,     plug::Vec2d(tl_size.x + center_w, tl_size.y + center_h),  br_size);
+    DRAW_TEXTURE(WindowAsset::FRAME_R,      plug::Vec2d(tl_size.x + center_w, tl_size.y),             plug::Vec2d(br_size.x, center_h));
+    DRAW_TEXTURE(WindowAsset::FRAME_TR,     plug::Vec2d(tl_size.x + center_w, 0),                     plug::Vec2d(br_size.x, tl_size.y));
+    DRAW_TEXTURE(WindowAsset::TITLE,        plug::Vec2d(tl_size.x, 0),                                plug::Vec2d(center_w, tl_size.y));
+    DRAW_TEXTURE(WindowAsset::FRAME_CENTER, tl_size,                                            plug::Vec2d(center_w, center_h));
 
     title.draw(result, global_position + style.title_offset - title.getTextOffset(), applySize(stack, title.getTextureSize()));
 
@@ -355,7 +356,7 @@ void Window::setMenu(Menu *menu_) {
 
     menu = menu_;
     menu->getLayoutBox().setPosition(style.tl_offset);
-    menu->getLayoutBox().setSize(Vec2d(getAreaSize().x, menu->getLayoutBox().getSize().y));
+    menu->getLayoutBox().setSize(plug::Vec2d(getAreaSize().x, menu->getLayoutBox().getSize().y));
     menu->setParent(this);
 
     container.onParentUpdate(*layout);
@@ -394,7 +395,7 @@ do {                            \
 } while(0)
 
 
-void Window::onEvent(const Event &event, EHC &ehc) {
+void Window::onEvent(const plug::Event &event, plug::EHC &ehc) {
     ehc.stack.enter(getTransform());
 
     CHECK_EHC(buttons.onEvent(event, ehc));
@@ -412,50 +413,50 @@ void Window::onEvent(const Event &event, EHC &ehc) {
 #undef CHECK_EHC
 
 
-void Window::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
-    Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(ehc.stack, layout->getSize());
+void Window::onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) {
+    plug::Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos))
         ehc.overlapped = true;
 }
 
 
-void Window::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
-    Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(ehc.stack, layout->getSize());
+void Window::onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) {
+    plug::Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos))
         ehc.stopped = true;
 }
 
 
-bool Window::setPosition(const Vec2d &position_) {
+bool Window::setPosition(const plug::Vec2d &position_) {
     return layout->setPosition(position_);
 }
 
 
-bool Window::setSize(const Vec2d &size_) {
+bool Window::setSize(const plug::Vec2d &size_) {
     if (!layout->setSize(size_)) return false;
 
     buttons.onParentUpdate(*layout);
     container.onParentUpdate(*layout);
     
     if (menu)
-        menu->getLayoutBox().setSize(Vec2d(getAreaSize().x, menu->getLayoutBox().getSize().y));
+        menu->getLayoutBox().setSize(plug::Vec2d(getAreaSize().x, menu->getLayoutBox().getSize().y));
     
     return true;
 }
 
 
-void Window::onParentUpdate(const LayoutBox &parent_layout) {
+void Window::onParentUpdate(const plug::LayoutBox &parent_layout) {
     layout->onParentUpdate(parent_layout);
 
     buttons.onParentUpdate(*layout);
     container.onParentUpdate(*layout);
     
     if (menu)
-        menu->getLayoutBox().setSize(Vec2d(getAreaSize().x, menu->getLayoutBox().getSize().y));
+        menu->getLayoutBox().setSize(plug::Vec2d(getAreaSize().x, menu->getLayoutBox().getSize().y));
 }
 
 
@@ -473,82 +474,90 @@ Window::~Window() {
 
 
 MainWindow::MainWindow(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     const std::string &title_, const WindowStyle &style_
 ) :
     Window(id_, layout_, title_, style_)
 {}
 
 
-void MainWindow::onParentUpdate(const LayoutBox &parent_layout) {
+void MainWindow::onParentUpdate(const plug::LayoutBox &parent_layout) {
     printf("Main window does not support parent update!\n");
     abort();
 }
 
 
-void MainWindow::parseEvent(const sf::Event &event, TransformStack &stack) {
+void MainWindow::parseEvent(const sf::Event &event, plug::TransformStack &stack) {
     static bool shift = false, ctrl = false, alt = false;
 
-    EHC ehc(stack, false, false);
+    plug::EHC ehc = {stack, false, false};
 
     switch (event.type) {
         case sf::Event::KeyPressed: {
-            switch (KEY_ID(event.key.code)) {
-                case LShift:
-                case RShift:
+            switch (static_cast<plug::KeyCode>(event.key.code)) {
+                case plug::KeyCode::LShift:
+                case plug::KeyCode::RShift:
                     shift = true; break;
-                case LControl:
-                case RControl:
+                case plug::KeyCode::LControl:
+                case plug::KeyCode::RControl:
                     ctrl = true; break;
-                case LAlt:
-                case RAlt:
+                case plug::KeyCode::LAlt:
+                case plug::KeyCode::RAlt:
                     alt = true; break;
                 default:
                     break;
             }
 
-            KeyboardPressedEvent event_(KEY_ID(event.key.code), shift, ctrl, alt);
+            plug::KeyboardPressedEvent event_(
+                static_cast<plug::KeyCode>(event.key.code),
+                shift, ctrl, alt
+            );
 
             onEvent(event_, ehc); break;
         }
         case sf::Event::KeyReleased: {
-            switch (KEY_ID(event.key.code)) {
-                case LShift:
-                case RShift:
+            switch (static_cast<plug::KeyCode>(event.key.code)) {
+                case plug::KeyCode::LShift:
+                case plug::KeyCode::RShift:
                     shift = false; break;
-                case LControl:
-                case RControl:
+                case plug::KeyCode::LControl:
+                case plug::KeyCode::RControl:
                     ctrl = false; break;
-                case LAlt:
-                case RAlt:
+                case plug::KeyCode::LAlt:
+                case plug::KeyCode::RAlt:
                     alt = false; break;
                 default:
                     break;
             }
 
-            KeyboardReleasedEvent event_(KEY_ID(event.key.code), shift, ctrl, alt);
+            plug::KeyboardReleasedEvent event_(
+                static_cast<plug::KeyCode>(event.key.code),
+                shift, ctrl, alt
+            );
+
             onEvent(event_, ehc); break;
         }
         case sf::Event::MouseButtonPressed: {
-            MousePressedEvent event_(
-                MOUSE_BUTTON_ID(event.mouseButton.button),
-                shift, ctrl, alt,
-                Vec2d(event.mouseButton.x, event.mouseButton.y)
+            plug::MousePressedEvent event_(
+                static_cast<plug::MouseButton>(event.mouseButton.button),
+                plug::Vec2d(event.mouseButton.x, event.mouseButton.y),
+                shift, ctrl, alt
             );
+
             onEvent(event_, ehc); break;
         }
         case sf::Event::MouseButtonReleased: {
-            MouseReleasedEvent event_(
-                MOUSE_BUTTON_ID(event.mouseButton.button),
-                shift, ctrl, alt,
-                Vec2d(event.mouseButton.x, event.mouseButton.y)
+            plug::MouseReleasedEvent event_(
+                static_cast<plug::MouseButton>(event.mouseButton.button),
+                plug::Vec2d(event.mouseButton.x, event.mouseButton.y),
+                shift, ctrl, alt
             );
             onEvent(event_, ehc); break;
         }
         case sf::Event::MouseMoved: {
-            MouseMoveEvent event_(
-                shift, ctrl, alt,
-                Vec2d(event.mouseMove.x, event.mouseMove.y)
+            plug::MouseMoveEvent event_(
+                plug::Vec2d(event.mouseMove.x, event.mouseMove.y),
+                shift, ctrl, alt
             );
             onEvent(event_, ehc); break;
         }
@@ -565,14 +574,13 @@ MoveButton::MoveButton(
     size_t id_, Window &window_
 ) :
     BaseButton(id_, MoveLayoutBox(*this)),
-    window(window_), prev_mouse(Vec2d()), is_moving(false)
-{}
+    window(window_), prev_mouse(), is_moving(false) {}
 
 
-void MoveButton::draw(TransformStack &stack, RenderTarget &result) {
+void MoveButton::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
 # ifdef DEBUG_DRAW
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(stack, layout->getSize());
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape rect(global_position, global_size, Cyan);
     rect.draw(result);
@@ -580,14 +588,14 @@ void MoveButton::draw(TransformStack &stack, RenderTarget &result) {
 }
 
 
-void MoveButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
+void MoveButton::onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) {
     if (!is_moving) return;
 
     // WE CHANGED WINDOW POSITION SO CURRENT TRANSFORM WILL BE INCORRECT
     // BUT IT DOESN'T MATTER CAUSE EVENT IS HANDLED
     // AND FARTHER BROADCASTING IS NOT NEEDED
 
-    Vec2d new_position = window.getLayoutBox().getPosition() + (event.pos - prev_mouse);
+    plug::Vec2d new_position = window.getLayoutBox().getPosition() + (event.pos - prev_mouse);
     prev_mouse = event.pos;
 
     window.setPosition(new_position);
@@ -596,9 +604,9 @@ void MoveButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 }
 
 
-void MoveButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
-    Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(ehc.stack, layout->getSize());
+void MoveButton::onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) {
+    plug::Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos)) {
         is_moving = true;
@@ -608,7 +616,7 @@ void MoveButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
 }
 
 
-void MoveButton::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
+void MoveButton::onMouseReleased(const plug::MouseReleasedEvent &event, plug::EHC &ehc) {
     is_moving = false;
 }
 
@@ -619,16 +627,16 @@ void MoveButton::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
 MoveLayoutBox::MoveLayoutBox(MoveButton &btn_) : btn(btn_) {}
 
 
-void MoveLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
+void MoveLayoutBox::onParentUpdate(const plug::LayoutBox &parent_layout) {
     float outline = btn.window.getStyle().outline;
-    Vec2d window_size = btn.window.getLayoutBox().getSize();
+    plug::Vec2d window_size = btn.window.getLayoutBox().getSize();
 
-    position = Vec2d(1, 1) * outline;
-    size = Vec2d(window_size.x - 2 * outline, btn.window.getStyle().tl_offset.y - outline);
+    position = plug::Vec2d(1, 1) * outline;
+    size = plug::Vec2d(window_size.x - 2 * outline, btn.window.getStyle().tl_offset.y - outline);
 }
 
 
-LayoutBox *MoveLayoutBox::clone() const {
+plug::LayoutBox *MoveLayoutBox::clone() const {
     return new MoveLayoutBox(*this);
 }
 
@@ -640,14 +648,14 @@ ResizeButton::ResizeButton(
     size_t id_, Window &window_, RESIZE_DIRECTION resize_dir_
 ) :
     BaseButton(id_, ResizeLayoutBox(*this)),
-    window(window_), prev_mouse(Vec2d()), is_moving(false), resize_dir(resize_dir_)
+    window(window_), prev_mouse(plug::Vec2d()), is_moving(false), resize_dir(resize_dir_)
 {}
 
 
-void ResizeButton::draw(TransformStack &stack, RenderTarget &result) {
+void ResizeButton::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
 # ifdef DEBUG_DRAW
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(stack, layout->getSize());
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape rect(global_position, global_size, Red);
     rect.draw(result);
@@ -655,14 +663,14 @@ void ResizeButton::draw(TransformStack &stack, RenderTarget &result) {
 }
 
 
-void ResizeButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
+void ResizeButton::onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) {
     if (!is_moving) return;
 
-    Vec2d shift = event.pos - prev_mouse;
+    plug::Vec2d shift = event.pos - prev_mouse;
     prev_mouse = event.pos;
 
-    Vec2d prev_position = window.getLayoutBox().getPosition();
-    Vec2d prev_size = window.getLayoutBox().getSize();
+    plug::Vec2d prev_position = window.getLayoutBox().getPosition();
+    plug::Vec2d prev_size = window.getLayoutBox().getSize();
 
     switch (resize_dir) {
         case LEFT: 
@@ -694,15 +702,15 @@ void ResizeButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
             }
             break;
         case TOP_RIGHT:
-            if (window.setPosition(prev_position + Vec2d(0, shift.y))) {
+            if (window.setPosition(prev_position + plug::Vec2d(0, shift.y))) {
                 shift.y = window.getLayoutBox().getPosition().y - prev_position.y;
-                window.setSize(prev_size + Vec2d(shift.x, -shift.y));
+                window.setSize(prev_size + plug::Vec2d(shift.x, -shift.y));
             }
             break;
         case BOTTOM_LEFT:
-            if (window.setPosition(prev_position + Vec2d(shift.x, 0))) {
+            if (window.setPosition(prev_position + plug::Vec2d(shift.x, 0))) {
                 shift.x = window.getLayoutBox().getPosition().x - prev_position.x;
-                window.setSize(prev_size + Vec2d(-shift.x, shift.y));
+                window.setSize(prev_size + plug::Vec2d(-shift.x, shift.y));
             }
             break;
         case BOTTOM_RIGHT:
@@ -716,9 +724,9 @@ void ResizeButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 }
 
 
-void ResizeButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
-    Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(ehc.stack, layout->getSize());
+void ResizeButton::onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) {
+    plug::Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos)) {
         is_moving = true;
@@ -728,7 +736,7 @@ void ResizeButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
 }
 
 
-void ResizeButton::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
+void ResizeButton::onMouseReleased(const plug::MouseReleasedEvent &event, plug::EHC &ehc) {
     is_moving = false;
 }
 
@@ -739,42 +747,42 @@ void ResizeButton::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
 ResizeLayoutBox::ResizeLayoutBox(ResizeButton &btn_) : btn(btn_) {}
 
 
-void ResizeLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
+void ResizeLayoutBox::onParentUpdate(const plug::LayoutBox &parent_layout) {
     float outline = btn.window.getStyle().outline;
-    Vec2d window_size = btn.window.getLayoutBox().getSize();
+    plug::Vec2d window_size = btn.window.getLayoutBox().getSize();
 
     switch (btn.resize_dir) {
         case ResizeButton::LEFT:
-            position = Vec2d(0, outline);
-            size = Vec2d(outline, window_size.y - 2 * outline);
+            position = plug::Vec2d(0, outline);
+            size = plug::Vec2d(outline, window_size.y - 2 * outline);
             break;
         case ResizeButton::TOP:
-            position = Vec2d(outline, 0);
-            size = Vec2d(window_size.x - 2 * outline, outline);
+            position = plug::Vec2d(outline, 0);
+            size = plug::Vec2d(window_size.x - 2 * outline, outline);
             break;
         case ResizeButton::BOTTOM:
-            position = Vec2d(outline, window_size.y - outline);
-            size = Vec2d(window_size.x - 2 * outline, outline);
+            position = plug::Vec2d(outline, window_size.y - outline);
+            size = plug::Vec2d(window_size.x - 2 * outline, outline);
             break;
         case ResizeButton::RIGHT:
-            position = Vec2d(window_size.x - outline, outline);
-            size = Vec2d(outline, window_size.y - 2 * outline);
+            position = plug::Vec2d(window_size.x - outline, outline);
+            size = plug::Vec2d(outline, window_size.y - 2 * outline);
             break;
         case ResizeButton::TOP_LEFT:
-            position = Vec2d(0, 0);
-            size = Vec2d(outline, outline);
+            position = plug::Vec2d(0, 0);
+            size = plug::Vec2d(outline, outline);
             break;
         case ResizeButton::TOP_RIGHT:
-            position = Vec2d(window_size.x - outline, 0);
-            size = Vec2d(outline, outline);
+            position = plug::Vec2d(window_size.x - outline, 0);
+            size = plug::Vec2d(outline, outline);
             break;
         case ResizeButton::BOTTOM_LEFT:
-            position = Vec2d(0, window_size.y - outline);
-            size = Vec2d(outline, outline);
+            position = plug::Vec2d(0, window_size.y - outline);
+            size = plug::Vec2d(outline, outline);
             break;
         case ResizeButton::BOTTOM_RIGHT:
-            position = Vec2d(window_size.x - outline, window_size.y - outline);
-            size = Vec2d(outline, outline);
+            position = plug::Vec2d(window_size.x - outline, window_size.y - outline);
+            size = plug::Vec2d(outline, outline);
             break;
         default:
             printf("Unknown resize direction!\n"); abort();
@@ -782,7 +790,7 @@ void ResizeLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
 }
 
 
-LayoutBox *ResizeLayoutBox::clone() const {
+plug::LayoutBox *ResizeLayoutBox::clone() const {
     return new ResizeLayoutBox(*this);
 }
 
@@ -794,13 +802,13 @@ ContainerLayoutBox::ContainerLayoutBox(Window &window_) :
     window(window_) {}
 
 
-void ContainerLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
+void ContainerLayoutBox::onParentUpdate(const plug::LayoutBox &parent_layout) {
     bound = window.getAreaSize();
     position = window.getAreaPosition();
     size = bound;
 }
 
 
-LayoutBox *ContainerLayoutBox::clone() const {
+plug::LayoutBox *ContainerLayoutBox::clone() const {
     return new ContainerLayoutBox(window);
 }

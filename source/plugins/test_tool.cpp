@@ -5,12 +5,13 @@
 
 
 #include "plugins/test_tool.hpp"
+#include "common/utils.hpp"
 
 
 // ============================================================================
 
 
-extern "C" Plugin *loadPlugin() {
+extern "C" plug::Plugin *loadPlugin() {
     return new TestTool();
 }
 
@@ -22,13 +23,13 @@ TestTool::TestTool() :
     my_data(), prev_position() {}
 
 
-void TestTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
+void TestTool::onMainButton(const plug::ControlState &state, const plug::Vec2d &mouse) {
     switch (state.state) {
-        case State::Pressed:
+        case plug::State::Pressed:
             is_drawing = true;
             prev_position = mouse;
             break;
-        case State::Released:
+        case plug::State::Released:
             is_drawing = false;
         default:
             break;
@@ -36,12 +37,12 @@ void TestTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
 }
 
 
-void TestTool::onMove(const Vec2d &mouse) {
+void TestTool::onMove(const plug::Vec2d &mouse) {
     if (is_drawing) {
-        VertexArray array(Lines, 2);
+        plug::VertexArray array(plug::Lines, 2);
 
-        array[0] = Vertex(prev_position, color_palette->getFGColor());
-        array[1] = Vertex(mouse, color_palette->getFGColor());
+        array[0] = plug::Vertex(prev_position, color_palette->getFGColor());
+        array[1] = plug::Vertex(mouse, color_palette->getFGColor());
 
         prev_position = mouse;
         canvas->draw(array);
@@ -49,6 +50,6 @@ void TestTool::onMove(const Vec2d &mouse) {
 }
 
 
-const PluginData *TestTool::getPluginData() const {
-    return static_cast<const PluginData*>(&my_data);
+const plug::PluginData *TestTool::getPluginData() const {
+    return static_cast<const plug::PluginData*>(&my_data);
 }

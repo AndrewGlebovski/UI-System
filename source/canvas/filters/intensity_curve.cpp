@@ -8,6 +8,7 @@
 #include "canvas/filters/intensity_curve.hpp"
 #include "canvas/palettes/palette_manager.hpp"
 #include "canvas/canvas_view.hpp"
+#include "common/utils.hpp"
 
 
 // ============================================================================
@@ -29,13 +30,13 @@ const double ALPHA = 0.5;
 // ============================================================================
 
 
-static double getKnotInterval(Vec2d p1, Vec2d p2);
+static double getKnotInterval(plug::Vec2d p1, plug::Vec2d p2);
 
 
 static double lerp(double a, double b, double t);
 
 
-static Vec2d remap(double a, double b, Vec2d c, Vec2d d, double u);
+static plug::Vec2d remap(double a, double b, plug::Vec2d c, plug::Vec2d d, double u);
 
 
 // ============================================================================
@@ -46,7 +47,7 @@ public:
     ApplyFilterAction() {}
 
     virtual void operator () () override {
-        Filter *filter = FILTER_PALETTE.getFilter(FilterPalette::INTENSITY_CURVE);
+        plug::Filter *filter = FILTER_PALETTE.getFilter(FilterPalette::INTENSITY_CURVE);
         filter->applyFilter(CANVAS_GROUP.getActive()->getCanvas());
 
         FILTER_PALETTE.setLastFilter(FilterPalette::INTENSITY_CURVE);
@@ -82,14 +83,14 @@ class IntensityCurve : public Widget {
 public:
     IntensityCurve(size_t id_, IntensityCurveFilter &filter_);
 
-    virtual void draw(TransformStack &stack, RenderTarget &result) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
 protected:
-    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
+    virtual void onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) override;
     
-    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    virtual void onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) override;
     
-    virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
+    virtual void onMouseReleased(const plug::MouseReleasedEvent &event, plug::EHC &ehc) override;
 
 private:
     bool isPointMoving() const;
@@ -103,22 +104,22 @@ private:
 
 
 IntensityCurve::IntensityCurve(size_t id_, IntensityCurveFilter &filter_) : 
-    Widget(id_, LazyLayoutBox(Vec2d(), Vec2d(255, 255))), filter(filter_), moving_point(filter_.getPointCount())
+    Widget(id_, LazyLayoutBox(plug::Vec2d(), plug::Vec2d(255, 255))), filter(filter_), moving_point(filter_.getPointCount())
 {}
 
 
-void IntensityCurve::draw(TransformStack &stack, RenderTarget &result) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(stack, layout->getSize());
+void IntensityCurve::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape background(global_position, global_size, White);
     background.draw(result);
 
-    static VertexArray array(LineStrip, 256);
+    static plug::VertexArray array(plug::LineStrip, 256);
 
     for (size_t i = 0; i < 256; i++) {
-        array[i] = Vertex(
-            Vec2d(i, 255 - filter.getIntensity(i)) + global_position,
+        array[i] = plug::Vertex(
+            plug::Vec2d(i, 255 - filter.getIntensity(i)) + global_position,
             Black
         );
     }
@@ -127,12 +128,12 @@ void IntensityCurve::draw(TransformStack &stack, RenderTarget &result) {
 }
 
 
-void IntensityCurve::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
-    Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(ehc.stack, layout->getSize());
+void IntensityCurve::onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) {
+    plug::Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isPointMoving()) {
-        Vec2d new_point = event.pos - global_position;
+        plug::Vec2d new_point = event.pos - global_position;
         new_point.y = 255 - new_point.y;
 
         filter.setPointHeight(moving_point, new_point.y);
@@ -143,12 +144,12 @@ void IntensityCurve::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 }
 
 
-void IntensityCurve::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
-    Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(ehc.stack, layout->getSize());
+void IntensityCurve::onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) {
+    plug::Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideRect(global_position, global_size, event.pos)) {
-        Vec2d new_point = event.pos - global_position;
+        plug::Vec2d new_point = event.pos - global_position;
 
         moving_point = filter.addPoint(new_point.x);
         
@@ -157,9 +158,9 @@ void IntensityCurve::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
 }
 
 
-void IntensityCurve::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
-    Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(ehc.stack, layout->getSize());
+void IntensityCurve::onMouseReleased(const plug::MouseReleasedEvent &event, plug::EHC &ehc) {
+    plug::Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     moving_point = filter.getPointCount();
 
@@ -177,12 +178,12 @@ bool IntensityCurve::isPointMoving() const {
 
 
 IntensityCurveDialog::IntensityCurveDialog(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     const WindowStyle &style_
 ) :
     Dialog(id_, layout_, "Intensity Curve", style_)
 {
-    setSize(Vec2d(285, 400));
+    setSize(plug::Vec2d(285, 400));
 
     ApplyFilterAction *apply_action = new ApplyFilterAction();
     CancelAction *cancel_action = new CancelAction();
@@ -191,19 +192,19 @@ IntensityCurveDialog::IntensityCurveDialog(
     cancel_action->setDialog(*this);
 
     RectButtonStyle button_style(
-        Color(BUTTON_NORMAL_COLOR),
-        Color(BUTTON_HOVER_COLOR),
-        Color(BUTTON_PRESSED_COLOR),
+        hex2Color(BUTTON_NORMAL_COLOR),
+        hex2Color(BUTTON_HOVER_COLOR),
+        hex2Color(BUTTON_PRESSED_COLOR),
         style_.font,
         BUTTON_FONT_SIZE,
-        Color(BUTTON_FONT_NORMAL_COLOR),
-        Color(BUTTON_FONT_HOVER_COLOR),
-        Color(BUTTON_FONT_PRESSED_COLOR)
+        hex2Color(BUTTON_FONT_NORMAL_COLOR),
+        hex2Color(BUTTON_FONT_HOVER_COLOR),
+        hex2Color(BUTTON_FONT_PRESSED_COLOR)
     );
 
     container.addChild(new RectButton(
         1,
-        LazyLayoutBox(Vec2d(0, 275), Vec2d(100, 50)),
+        LazyLayoutBox(plug::Vec2d(0, 275), plug::Vec2d(100, 50)),
         apply_action,
         "Apply",
         button_style
@@ -211,7 +212,7 @@ IntensityCurveDialog::IntensityCurveDialog(
 
     container.addChild(new RectButton(
         2,
-        LazyLayoutBox(Vec2d(120, 275), Vec2d(100, 50)),
+        LazyLayoutBox(plug::Vec2d(120, 275), plug::Vec2d(100, 50)),
         cancel_action,
         "Cancel",
         button_style
@@ -227,7 +228,7 @@ IntensityCurveDialog::IntensityCurveDialog(
 // ============================================================================
 
 
-static double getKnotInterval(Vec2d p1, Vec2d p2) {
+static double getKnotInterval(plug::Vec2d p1, plug::Vec2d p2) {
     return pow((p2 - p1).length2(), ALPHA * 0.5);
 }
 
@@ -237,7 +238,7 @@ static double lerp(double a, double b, double t) {
 }
 
 
-static Vec2d remap(double a, double b, Vec2d c, Vec2d d, double u) {
+static plug::Vec2d remap(double a, double b, plug::Vec2d c, plug::Vec2d d, double u) {
     return (b - u) / (b - a) * c + (u - a) / (b - a) * d;
 }
 
@@ -250,25 +251,25 @@ IntensityCurveFilter::IntensityCurveFilter(const WindowStyle &style_) :
 {
     ASSERT(plot, "Failed to allocate plot buffer!\n");
 
-    points.push_back(Vec2d(-1, -1));
-    points.push_back(Vec2d(0, 0));
-    points.push_back(Vec2d(255, 255));
-    points.push_back(Vec2d(256, 256));
+    points.push_back(plug::Vec2d(-1, -1));
+    points.push_back(plug::Vec2d(0, 0));
+    points.push_back(plug::Vec2d(255, 255));
+    points.push_back(plug::Vec2d(256, 256));
 
     redrawCurve();
 }
 
 
-void IntensityCurveFilter::applyFilter(Canvas &canvas) const {
-    SelectionMask &mask = canvas.getSelectionMask();
-    Texture texture(canvas.getTexture());
+void IntensityCurveFilter::applyFilter(plug::Canvas &canvas) const {
+    plug::SelectionMask &mask = canvas.getSelectionMask();
+    plug::Texture texture(canvas.getTexture());
     
     for (size_t y = 0; y < mask.getHeight(); y++) {
         for (size_t x = 0; x < mask.getWidth(); x++) {
             if (mask.getPixel(x, y)) {
-                Color origin(texture.getPixel(x, y));
+                plug::Color origin(texture.getPixel(x, y));
                 
-                texture.setPixel(x, y, Color(
+                texture.setPixel(x, y, plug::Color(
                     getIntensity(origin.r),
                     getIntensity(origin.g),
                     getIntensity(origin.b)
@@ -277,20 +278,20 @@ void IntensityCurveFilter::applyFilter(Canvas &canvas) const {
         }
     }
 
-    TextureShape(texture).draw(canvas, Vec2d(), canvas.getSize());
+    TextureShape(texture).draw(canvas, plug::Vec2d(), canvas.getSize());
 }
 
 
-WidgetInterface *IntensityCurveFilter::getWidget() {
+plug::Widget *IntensityCurveFilter::getWidget() {
     return new IntensityCurveDialog(
         Widget::AUTO_ID,
-        LazyLayoutBox(Vec2d(), Vec2d()),
+        LazyLayoutBox(plug::Vec2d(), plug::Vec2d()),
         style
     );
 }
 
 
-const Vec2d &IntensityCurveFilter::getPoint(size_t index) const {
+const plug::Vec2d &IntensityCurveFilter::getPoint(size_t index) const {
     ASSERT(index < points.size(), "Index is out of range!\n");
 
     return points[index];
@@ -311,7 +312,7 @@ size_t IntensityCurveFilter::addPoint(double x) {
         }
 
         if (x < getPoint(i).x) {
-            points.insert(i, Vec2d(x, getIntensity(x)));
+            points.insert(i, plug::Vec2d(x, getIntensity(x)));
             redrawCurve();
             return i;
         }
@@ -340,10 +341,10 @@ uint8_t IntensityCurveFilter::getIntensity(uint8_t value) const {
 void IntensityCurveFilter::redrawCurve() {
     for (size_t i = 0; i < getPointCount() - 3; i++) {
         // Get control points
-        Vec2d p0 = getPoint(i);
-        Vec2d p1 = getPoint(i + 1);
-        Vec2d p2 = getPoint(i + 2);
-        Vec2d p3 = getPoint(i + 3);
+        plug::Vec2d p0 = getPoint(i);
+        plug::Vec2d p1 = getPoint(i + 1);
+        plug::Vec2d p2 = getPoint(i + 2);
+        plug::Vec2d p3 = getPoint(i + 3);
 
         // Calculate knots
         double t0 = 0;
@@ -359,12 +360,12 @@ void IntensityCurveFilter::redrawCurve() {
             // Calculate pixel intensity
             double u = lerp(t1, t2, j / double(count));
             
-            Vec2d A1 = remap(t0, t1, p0, p1, u);
-            Vec2d A2 = remap(t1, t2, p1, p2, u);
-            Vec2d A3 = remap(t2, t3, p2, p3, u);
-            Vec2d B1 = remap(t0, t2, A1, A2, u);
-            Vec2d B2 = remap(t1, t3, A2, A3, u);
-            Vec2d C = remap(t1, t2, B1, B2, u);
+            plug::Vec2d A1 = remap(t0, t1, p0, p1, u);
+            plug::Vec2d A2 = remap(t1, t2, p1, p2, u);
+            plug::Vec2d A3 = remap(t2, t3, p2, p3, u);
+            plug::Vec2d B1 = remap(t0, t2, A1, A2, u);
+            plug::Vec2d B2 = remap(t1, t3, A2, A3, u);
+            plug::Vec2d C = remap(t1, t2, B1, B2, u);
 
             if (C.y < 0.5) plot[base + j] = 0;
             else if (C.y > 254.5) plot[base + j] = 255;

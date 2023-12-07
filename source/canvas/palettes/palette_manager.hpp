@@ -23,7 +23,7 @@ public:
      * \brief Returns reference to color palette
      * \warning Palette must be set first
     */
-    ColorPalette &getColorPalette();
+    plug::ColorPalette &getColorPalette();
 
     /**
      * \brief Returns reference to tool palette
@@ -39,15 +39,15 @@ public:
 
     /**
      * \brief Sets color palette
-     * \note If ToolPalette is set, updates ColorPalette for tools
+     * \note If ToolPalette is set, updates plug::ColorPalette for tools
      * \warning Nullptr argument is prohibited
      * \warning Palette must be allocated using 'new' and got delete automatically
     */
-    void setColorPalette(ColorPalette *color_palette_);
+    void setColorPalette(plug::ColorPalette *color_palette_);
 
     /**
      * \brief Sets tool palette
-     * \note If ColorPalette is set, updates ColorPalette for tools
+     * \note If plug::ColorPalette is set, updates plug::ColorPalette for tools
      * \warning Nullptr argument is prohibited
      * \warning Palette must be allocated using 'new' and got delete automatically
     */
@@ -77,7 +77,7 @@ private:
     
     PaletteManager &operator = (const PaletteManager&) = delete;
 
-    ColorPalette *color_palette;        ///< Current color palette
+    plug::ColorPalette *color_palette;        ///< Current color palette
     ToolPalette *tool_palette;          ///< Current tool palette
     FilterPalette *filter_palette;      ///< Current filter palette
 };

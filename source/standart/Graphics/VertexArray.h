@@ -15,9 +15,9 @@
 #include <cassert>
 #include <cstddef>
 
-#include "Plug/Color.h"
-#include "Plug/Graphics/PrimitiveType.h"
-#include "Plug/Math.h"
+#include "standart/Color.h"
+#include "standart/Graphics/PrimitiveType.h"
+#include "standart/Math.h"
 
 namespace plug {
 
@@ -27,6 +27,11 @@ namespace plug {
  */
 class Vertex {
 public:
+  Vertex() : position(), tex_coords(), color() {}
+
+  Vertex(const Vec2d &pos, Color color_, const Vec2d &tex_coords_ = Vec2d()) :
+    position(pos), tex_coords(tex_coords_), color(color_) {}
+
   /**
    * @brief Vertex position in piskels (SFML screen units, equal to 1 pixel if
    * the window is not resizable)
@@ -112,12 +117,12 @@ private:
 };
 
 inline VertexArray::VertexArray(PrimitiveType type, size_t size = 0)
-    : m_type(type), m_size(size), m_capacity(std::max(size, 1ul)) {
+    : m_type(type), m_data(nullptr), m_size(size), m_capacity(std::max(size, 1ul)) {
   m_data = new Vertex[m_capacity];
 }
 
 inline VertexArray::VertexArray(const VertexArray &other)
-    : m_type(other.m_type), m_size(other.m_size), m_capacity(other.m_capacity) {
+    : m_type(other.m_type), m_data(nullptr), m_size(other.m_size), m_capacity(other.m_capacity) {
   m_data = new Vertex[m_capacity];
   for (size_t ind = 0; ind < m_size; ++ind) {
     m_data[ind] = other.m_data[ind];

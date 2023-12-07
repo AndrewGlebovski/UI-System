@@ -12,12 +12,12 @@
 #ifndef __PLUG_TOOL_TOOL_H
 #define __PLUG_TOOL_TOOL_H
 
-#include "Plug/Canvas.h"
-#include "Plug/Color.h"
-#include "Plug/Plugin.h"
-#include "Plug/Tool/ColorPalette.h"
-#include "Plug/Tool/ControlState.h"
-#include "Plug/Widget.h"
+#include "standart/Canvas.h"
+#include "standart/Color.h"
+#include "standart/Plugin.h"
+#include "standart/Tool/ColorPalette.h"
+#include "standart/Tool/ControlState.h"
+#include "standart/Widget.h"
 
 namespace plug {
 

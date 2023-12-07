@@ -47,19 +47,19 @@ private:
     /**
      * \brief Loads plugin dl and returns plugin instance
     */
-    Plugin *loadPlugin(const char *path);
+    plug::Plugin *loadPlugin(const char *path);
 
     /**
      * \brief Tries to get tool interface from plugin and add it to palette view
      * \return True if tool interface is supported
     */
-    bool loadTool(Plugin *plugin);
+    bool loadTool(plug::Plugin *plugin);
 
     /**
      * \brief Tries to get filter interface from plugin and add it to menu
      * \return True if filter interface is supported
     */
-    bool loadFilter(Plugin *plugin);
+    bool loadFilter(plug::Plugin *plugin);
 
     const char *root_dir;           ///< Path to root folder
     Menu &menu;                     ///< Menu to add new filter button

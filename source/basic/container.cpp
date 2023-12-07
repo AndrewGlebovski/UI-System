@@ -5,10 +5,11 @@
 
 
 #include "basic/container.hpp"
+#include "common/utils.hpp"
 
 
 Container::Container(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     bool focus_enabled_
 ) :
     Widget(id_, layout_),
@@ -16,12 +17,12 @@ Container::Container(
 {}
 
 
-void Container::draw(TransformStack &stack, RenderTarget &result) {
+void Container::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
 # ifdef DEBUG_DRAW
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(stack, layout->getSize());
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
 
-    RectShape rect(global_position, global_size, Color(0));
+    RectShape rect(global_position, global_size, hex2Color(0));
     rect.setBorder(1, Magenta);
     rect.draw(result);
 #endif
@@ -96,7 +97,7 @@ void Container::removeChild(size_t child_id) {
 size_t Container::getChildCount() const { return widgets.size(); }
 
 
-void Container::onEvent(const Event &event, EHC &ehc) {
+void Container::onEvent(const plug::Event &event, plug::EHC &ehc) {
     TransformApplier add_transform(ehc.stack, getTransform());
 
     for (size_t i = widgets.size() - 1; i < widgets.size(); i--) {
@@ -106,7 +107,7 @@ void Container::onEvent(const Event &event, EHC &ehc) {
                 widgets[i]->onEvent(event, ehc);
 
                 if (ehc.stopped) {
-                    if (event.getType() == MousePressed) setFocused(i);
+                    if (event.getType() == plug::MousePressed) setFocused(i);
                     return;
                 }
                 break;
@@ -117,7 +118,7 @@ void Container::onEvent(const Event &event, EHC &ehc) {
 }
 
 
-void Container::onParentUpdate(const LayoutBox &parent_layout) {
+void Container::onParentUpdate(const plug::LayoutBox &parent_layout) {
     Widget::onParentUpdate(parent_layout);
 
     for (size_t i = 0; i < widgets.size(); i++)

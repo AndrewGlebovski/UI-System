@@ -32,7 +32,7 @@ protected:
 public:
     VScrollCanvas(CanvasView &canvas_);
 
-    virtual void operator () (vec_t param) override;
+    virtual void operator () (double param) override;
 };
 
 
@@ -44,7 +44,7 @@ protected:
 public:
     HScrollCanvas(CanvasView &canvas_);
 
-    virtual void operator () (vec_t param) override;
+    virtual void operator () (double param) override;
 };
 
 
@@ -54,7 +54,7 @@ public:
     FilterHotkey();
 
 protected:
-    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
+    virtual void onKeyboardPressed(const plug::KeyboardPressedEvent &event, plug::EHC &ehc) override;
 };
 
 

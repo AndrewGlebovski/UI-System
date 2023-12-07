@@ -2,6 +2,7 @@
 #include "canvas/canvas_stuff.hpp"
 #include "canvas/plugin_loader.hpp"
 #include "canvas/palettes/palette_manager.hpp"
+#include "common/utils.hpp"
 
 
 /// Creates tool palette view in new subwindow
@@ -43,7 +44,7 @@ int main() {
     PaletteViewAsset palette_asset(PALETTE_ASSET_DIR);
     
     WindowStyle window_style(
-        Color(WINDOW_TITLE_COLOR),
+        hex2Color(WINDOW_TITLE_COLOR),
         WINDOW_TITLE_OFFSET,
         WINDOW_FONT_SIZE,
         font,
@@ -57,10 +58,10 @@ int main() {
     setupPaletteManager(window_style);
 
     ScrollBarStyle scrollbar_style(
-        Color(SCROLLBAR_FRAME_COLOR),
+        hex2Color(SCROLLBAR_FRAME_COLOR),
         SCROLLBAR_FRAME_OUTLINE,
-        Color(SCROLLBAR_BACKGROUND_COLOR),
-        Color(SCROLLBAR_SCROLLER_COLOR),
+        hex2Color(SCROLLBAR_BACKGROUND_COLOR),
+        hex2Color(SCROLLBAR_SCROLLER_COLOR),
         SCROLLBAR_SCROLLER_FACTOR
     );
 
@@ -72,7 +73,7 @@ int main() {
     
     MainWindow *main_window = new MainWindow(
         Widget::AUTO_ID,
-        BoundLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H)),
+        BoundLayoutBox(plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H)),
         "Paint",
         window_style
     );
@@ -84,7 +85,7 @@ int main() {
 
     main_window->addChild(new Clock(
         Widget::AUTO_ID,
-        BoundLayoutBox(Vec2d(), Vec2d(100, 50)),
+        BoundLayoutBox(plug::Vec2d(), plug::Vec2d(100, 50)),
         clock_style
     ));
     
@@ -120,12 +121,11 @@ int main() {
             }
             
             main_window->parseEvent(event, stack);
-            ASSERT(stack.top().getOffset() == Vec2d(), "WTF!\n");
         }
         
-        EHC ehc(stack, false, false);
+        plug::EHC ehc = {stack, false, false};
 
-        main_window->onEvent(TickEvent(timer.getElapsedTime().asSeconds()), ehc);
+        main_window->onEvent(plug::TickEvent(timer.getElapsedTime().asSeconds()), ehc);
         timer.restart();
         
         render_texture.clear(Black);
@@ -151,7 +151,7 @@ Widget *createToolPaletteView(WindowStyle &window_style, PaletteViewAsset &palet
 
     Window *subwindow = new Window(
         Widget::AUTO_ID,
-        BoundLayoutBox(Vec2d(0, 100), Vec2d(218, 451)),
+        BoundLayoutBox(plug::Vec2d(0, 100), plug::Vec2d(218, 451)),
         "Tools",
         subwindow_style,
         false,
@@ -161,7 +161,7 @@ Widget *createToolPaletteView(WindowStyle &window_style, PaletteViewAsset &palet
 
     subwindow->addChild(new ToolPaletteView(
         Widget::AUTO_ID,
-        AnchorLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H), Vec2d(), Vec2d(SCREEN_W, SCREEN_H)),
+        AnchorLayoutBox(plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H), plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H)),
         palette_asset
     ));
 
@@ -175,7 +175,7 @@ Widget *createColorPaletteView(WindowStyle &window_style) {
 
     Window *subwindow = new Window(
         Widget::AUTO_ID,
-        BoundLayoutBox(Vec2d(1280, 100), Vec2d(218, 451)),
+        BoundLayoutBox(plug::Vec2d(1280, 100), plug::Vec2d(218, 451)),
         "Colors",
         subwindow_style,
         false,
@@ -185,7 +185,7 @@ Widget *createColorPaletteView(WindowStyle &window_style) {
 
     subwindow->addChild(new ColorPaletteView(
         Widget::AUTO_ID,
-        AnchorLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H), Vec2d(), Vec2d(SCREEN_W, SCREEN_H))
+        AnchorLayoutBox(plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H), plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H))
     ));
 
     return subwindow;
@@ -210,16 +210,16 @@ Menu *createMainMenu(
         Widget::AUTO_ID,
         BoundLayoutBox(),
         RectButtonStyle(
-            Color(0xd4d0c8ff),
-            Color(0x000080ff),
-            Color(0x000080ff),
+            hex2Color(0xd4d0c8ff),
+            hex2Color(0x000080ff),
+            hex2Color(0x000080ff),
             dialog_style.window.font,
             25,
             Black,
             White,
             White
         ),
-        Color(0xd4d0c8ff)
+        hex2Color(0xd4d0c8ff)
     );
 
     ASSERT(main_menu, "Failed to allocate tool main menu!\n");

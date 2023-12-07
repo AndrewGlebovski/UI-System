@@ -18,7 +18,7 @@ public:
     /**
      * \brief Creates empty canvas
     */
-    CanvasView(size_t id_, const LayoutBox &layout_);
+    CanvasView(size_t id_, const plug::LayoutBox &layout_);
 
     CanvasView(const CanvasView &canvas) = default;
 
@@ -61,12 +61,12 @@ public:
     /**
      * \brief Returns size of the texture
     */
-    Vec2d getTextureSize() const;
+    plug::Vec2d getTextureSize() const;
 
     /**
      * \brief Returns reference to canvas
     */
-    Canvas &getCanvas();
+    plug::Canvas &getCanvas();
 
     /**
      * \brief Returns true if canvas is active in his group
@@ -76,22 +76,22 @@ public:
     /**
      * \brief Returns texture offset
     */
-    const Vec2d &getTextureOffset() const;
+    const plug::Vec2d &getTextureOffset() const;
 
     /**
      * \brief Sets texture offset
     */
-    void setTextureOffset(const Vec2d &texture_offset_);
+    void setTextureOffset(const plug::Vec2d &texture_offset_);
 
     /**
      * \brief Draws canvas inner texture
     */
-    virtual void draw(TransformStack &stack, RenderTarget &result) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
     /**
      * \brief Broadcast events to tool widget
     */
-    virtual void onEvent(const Event &event, EHC &ehc) override;
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Removes canvas from his group
@@ -99,18 +99,18 @@ public:
     virtual ~CanvasView() override;
 
 protected:
-    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
+    virtual void onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) override;
     
-    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    virtual void onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) override;
     
-    virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) override;
+    virtual void onMouseReleased(const plug::MouseReleasedEvent &event, plug::EHC &ehc) override;
     
-    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
+    virtual void onKeyboardPressed(const plug::KeyboardPressedEvent &event, plug::EHC &ehc) override;
     
-    virtual void onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc) override;
+    virtual void onKeyboardReleased(const plug::KeyboardReleasedEvent &event, plug::EHC &ehc) override;
 
     SFMLCanvas canvas;
-    Vec2d texture_offset;
+    plug::Vec2d texture_offset;
     std::string filename;
 };
 

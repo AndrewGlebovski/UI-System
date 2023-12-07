@@ -11,12 +11,12 @@
 #include "canvas/plugin.hpp"
 
 
-extern "C" Plugin *loadPlugin();
+extern "C" plug::Plugin *loadPlugin();
 
 
-class TestFilterData : public PluginData {
+class TestFilterData : public plug::PluginData {
     virtual const char *getName() const override {
-        return "Test Filter";
+        return "Test plug::Filter";
     }
 
     virtual const char *getTexturePath() const override {
@@ -29,9 +29,9 @@ class TestFilter : public BasicFilter {
 public:
     TestFilter();
 
-    virtual void applyFilter(Canvas &canvas) const override;
+    virtual void applyFilter(plug::Canvas &canvas) const override;
 
-    virtual const PluginData *getPluginData() const override;
+    virtual const plug::PluginData *getPluginData() const override;
  
 private:
     TestFilterData my_data;

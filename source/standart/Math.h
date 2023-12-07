@@ -12,8 +12,8 @@
 #ifndef __PLUG_MATH_H
 #define __PLUG_MATH_H
 
-#include "Plug/Math/Transform.h"
-#include "Plug/Math/TransformStack.h"
-#include "Plug/Math/Vec2d.h"
+#include "standart/Math/Transform.h"
+#include "standart/Math/TransformStack.h"
+#include "standart/Math/Vec2d.h"
 
 #endif /* Math.h */

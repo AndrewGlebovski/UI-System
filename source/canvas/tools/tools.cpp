@@ -6,12 +6,13 @@
 
 #include <cstring>
 #include "canvas/tools/tools.hpp"
+#include "common/utils.hpp"
 
 
 // ============================================================================
 
 
-const Color PREVIEW_COLOR = Blue;                       ///< Standart color for all previews
+const plug::Color PREVIEW_COLOR = Blue;                       ///< Standart color for all previews
 const float RECT_PREVIEW_OUTLINE = 1;                   ///< Rect preview outline thickness
 const int ERASER_STEP = 100;                            ///< Amount of spheres that drawn between two points
 const float ERASER_RADIUS = 25;                         ///< Eraser sphere radius
@@ -24,17 +25,27 @@ const size_t TEXT_MAX_LENGTH = 256;                     ///< Text tool text max 
 
 
 /// Creates vertex array for polygon
-VertexArray getPolygonArray(const Transform &trans, const List<Vec2d> &points, Color color, PrimitiveType type);
+plug::VertexArray getPolygonArray(
+    const plug::Transform &trans,
+    const List<plug::Vec2d> &points,
+    plug::Color color,
+    plug::PrimitiveType type
+);
 
 
 // ============================================================================
 
 
-VertexArray getPolygonArray(const Transform &trans, const List<Vec2d> &points, Color color, PrimitiveType type) {
-    VertexArray array(type, points.size());
+plug::VertexArray getPolygonArray(
+    const plug::Transform &trans,
+    const List<plug::Vec2d> &points,
+    plug::Color color,
+    plug::PrimitiveType type
+) {
+    plug::VertexArray array(type, points.size());
 
     for (size_t i = 0; i < points.size(); i++)
-        array[i] = Vertex(trans.apply(points[i]), color);
+        array[i] = plug::Vertex(trans.apply(points[i]), color);
 
     return array;
 }
@@ -46,13 +57,13 @@ VertexArray getPolygonArray(const Transform &trans, const List<Vec2d> &points, C
 PencilTool::PencilTool() : prev_position() {}
 
 
-void PencilTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
+void PencilTool::onMainButton(const plug::ControlState &state, const plug::Vec2d &mouse) {
     switch (state.state) {
-        case State::Pressed:
+        case plug::State::Pressed:
             is_drawing = true;
             prev_position = mouse;
             break;
-        case State::Released:
+        case plug::State::Released:
             is_drawing = false;
         default:
             break;
@@ -60,13 +71,13 @@ void PencilTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
 }
 
 
-void PencilTool::onMove(const Vec2d &mouse) {
+void PencilTool::onMove(const plug::Vec2d &mouse) {
     if (is_drawing) {
-        VertexArray array(Lines, 2);
+        plug::VertexArray array(plug::Lines, 2);
 
-        array[0] = Vertex(prev_position, color_palette->getFGColor());
-        array[1] = Vertex(mouse, color_palette->getFGColor());
-
+        array[0] = plug::Vertex(prev_position, color_palette->getFGColor());
+        array[1] = plug::Vertex(mouse, color_palette->getFGColor());
+        
         prev_position = mouse;
 
         ASSERT(canvas, "Canvas is nullptr!\n");
@@ -88,11 +99,11 @@ public:
         Widget(1, LazyLayoutBox()), tool(tool_) {}
     
 
-    virtual void draw(TransformStack &stack, RenderTarget &result) override {
-        Vec2d global_position = stack.apply(layout->getPosition());
-        Vec2d global_size = applySize(stack, layout->getSize());
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override {
+        plug::Vec2d global_position = stack.apply(layout->getPosition());
+        plug::Vec2d global_size = applySize(stack, layout->getSize());
 
-        RectShape rect(global_position, global_size, Color(0));
+        RectShape rect(global_position, global_size, hex2Color(0));
         rect.setBorder(RECT_PREVIEW_OUTLINE, PREVIEW_COLOR);
         rect.draw(result);
     }
@@ -104,27 +115,27 @@ RectTool::RectTool() : draw_start(), rect_preview(nullptr) {
 }
 
 
-RectShape RectTool::createRect(const Vec2d &p1, const Vec2d &p2) const {
-    Vec2d position = p1;
-    Vec2d size = p2 - p1;
+RectShape RectTool::createRect(const plug::Vec2d &p1, const plug::Vec2d &p2) const {
+    plug::Vec2d position = p1;
+    plug::Vec2d size = p2 - p1;
     if (position.x > p2.x) position.x = p2.x;
     if (position.y > p2.y) position.y = p2.y;
     if (size.x < 0) size.x *= -1;
     if (size.y < 0) size.y *= -1;
 
-    return RectShape(position, size, Color());
+    return RectShape(position, size, plug::Color());
 }
 
 
-void RectTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
+void RectTool::onMainButton(const plug::ControlState &state, const plug::Vec2d &mouse) {
     switch (state.state) {
-        case State::Pressed:
+        case plug::State::Pressed:
             is_drawing = true;
             draw_start = mouse;
             rect_preview->getLayoutBox().setPosition(mouse);
-            rect_preview->getLayoutBox().setSize(Vec2d());
+            rect_preview->getLayoutBox().setSize(plug::Vec2d());
             break;
-        case State::Released:
+        case plug::State::Released:
             onConfirm();
         default:
             break;
@@ -132,7 +143,7 @@ void RectTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
 }
 
 
-void RectTool::onMove(const Vec2d &mouse) {
+void RectTool::onMove(const plug::Vec2d &mouse) {
     RectShape rect = createRect(draw_start, mouse);
     rect_preview->getLayoutBox().setPosition(rect.getPosition());
     rect_preview->getLayoutBox().setSize(rect.getSize());
@@ -144,7 +155,7 @@ void RectTool::onConfirm() {
         RectShape rect(
             rect_preview->getLayoutBox().getPosition(),
             rect_preview->getLayoutBox().getSize(),
-            Color(0)
+            hex2Color(0)
         );
         rect.setBorder(RECT_PREVIEW_OUTLINE, color_palette->getFGColor());
         rect.draw(*canvas);
@@ -154,7 +165,7 @@ void RectTool::onConfirm() {
 }
 
 
-WidgetInterface *RectTool::getWidget() {
+plug::Widget *RectTool::getWidget() {
     return (is_drawing) ? rect_preview : nullptr;
 }
 
@@ -174,24 +185,24 @@ private:
 
 public:
     /**
-     * \note Transform offset used as line's first point and size as second
+     * \note plug::Transform offset used as line's first point and size as second
     */
     LinePreview(LineTool &tool_) :
         Widget(1, LazyLayoutBox()), tool(tool_) {}
     
 
     /**
-     * \note Transform offset used as line's first point and size as second
+     * \note plug::Transform offset used as line's first point and size as second
     */
-    virtual void draw(TransformStack &stack, RenderTarget &result) override {
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override {
         // REMAINDER: transform.offset = point1, size = point2
-        Vec2d p1 = stack.apply(layout->getPosition());
-        Vec2d p2 = stack.apply(layout->getSize());
+        plug::Vec2d p1 = stack.apply(layout->getPosition());
+        plug::Vec2d p2 = stack.apply(layout->getSize());
 
-        VertexArray array(Lines, 2);
+        plug::VertexArray array(plug::Lines, 2);
 
-        array[0] = Vertex(p1, PREVIEW_COLOR);
-        array[1] = Vertex(p2, PREVIEW_COLOR);
+        array[0] = plug::Vertex(p1, PREVIEW_COLOR);
+        array[1] = plug::Vertex(p2, PREVIEW_COLOR);
 
         result.draw(array);
     }
@@ -203,16 +214,16 @@ LineTool::LineTool() : line_preview(nullptr) {
 }
 
 
-void LineTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
+void LineTool::onMainButton(const plug::ControlState &state, const plug::Vec2d &mouse) {
     ASSERT(line_preview, "Line preview is nullptr!\n");
 
     switch (state.state) {
-        case State::Pressed:
+        case plug::State::Pressed:
             is_drawing = true;
             line_preview->getLayoutBox().setPosition(mouse);
             line_preview->getLayoutBox().setSize(mouse);
             break;
-        case State::Released:
+        case plug::State::Released:
             onConfirm();
         default:
             break;
@@ -220,7 +231,7 @@ void LineTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
 }
 
 
-void LineTool::onMove(const Vec2d &mouse) {
+void LineTool::onMove(const plug::Vec2d &mouse) {
     ASSERT(line_preview, "Line preview is nullptr!\n");
 
     line_preview->getLayoutBox().setSize(mouse);
@@ -231,13 +242,13 @@ void LineTool::onConfirm() {
     if (is_drawing) {
         ASSERT(line_preview, "Line preview is nullptr!\n");
 
-        Vec2d p1 = line_preview->getLayoutBox().getPosition();
-        Vec2d p2 = line_preview->getLayoutBox().getSize();
+        plug::Vec2d p1 = line_preview->getLayoutBox().getPosition();
+        plug::Vec2d p2 = line_preview->getLayoutBox().getSize();
 
-        VertexArray array(Lines, 2);
+        plug::VertexArray array(plug::Lines, 2);
 
-        array[0] = Vertex(p1, color_palette->getFGColor());
-        array[1] = Vertex(p2, color_palette->getFGColor());
+        array[0] = plug::Vertex(p1, color_palette->getFGColor());
+        array[1] = plug::Vertex(p2, color_palette->getFGColor());
 
         canvas->draw(array);
 
@@ -246,7 +257,7 @@ void LineTool::onConfirm() {
 }
 
 
-WidgetInterface *LineTool::getWidget() {
+plug::Widget *LineTool::getWidget() {
     return (is_drawing) ? line_preview : nullptr;
 }
 
@@ -264,9 +275,9 @@ LineTool::~LineTool() {
 EraserTool::EraserTool() : prev_position() {}
 
 
-void EraserTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
+void EraserTool::onMainButton(const plug::ControlState &state, const plug::Vec2d &mouse) {
     switch (state.state) {
-        case State::Pressed: {
+        case plug::State::Pressed: {
             is_drawing = true;
             prev_position = mouse;
 
@@ -275,7 +286,7 @@ void EraserTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
 
             break;
         }
-        case State::Released:
+        case plug::State::Released:
             is_drawing = false;
         default:
             break;
@@ -283,9 +294,9 @@ void EraserTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
 }
 
 
-void EraserTool::onMove(const Vec2d &mouse) {
+void EraserTool::onMove(const plug::Vec2d &mouse) {
     if (is_drawing) {
-        Vec2d step(
+        plug::Vec2d step(
             (mouse.x - prev_position.x) / ERASER_STEP, 
             (mouse.y - prev_position.y) / ERASER_STEP
         );
@@ -305,8 +316,8 @@ void EraserTool::onMove(const Vec2d &mouse) {
 // ============================================================================
 
 
-void ColorPicker::onMainButton(const ControlState &state, const Vec2d &mouse) {
-    if (state.state == State::Pressed)
+void ColorPicker::onMainButton(const plug::ControlState &state, const plug::Vec2d &mouse) {
+    if (state.state == plug::State::Pressed)
         color_palette->setFGColor(canvas->getPixel(mouse.x, mouse.y));
 }
 
@@ -314,12 +325,12 @@ void ColorPicker::onMainButton(const ControlState &state, const Vec2d &mouse) {
 // ============================================================================
 
 
-void BucketTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
-    if (state.state == State::Pressed) {
-        Color color = color_palette->getFGColor();
-        Color origin = canvas->getPixel(mouse.x, mouse.y);
+void BucketTool::onMainButton(const plug::ControlState &state, const plug::Vec2d &mouse) {
+    if (state.state == plug::State::Pressed) {
+        plug::Color color = color_palette->getFGColor();
+        plug::Color origin = canvas->getPixel(mouse.x, mouse.y);
 
-        Texture texture(canvas->getTexture());
+        plug::Texture texture(canvas->getTexture());
         
         List<sf::Vector2u> dfs;
         dfs.push_back(sf::Vector2u(mouse.x, mouse.y));
@@ -329,28 +340,28 @@ void BucketTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
             sf::Vector2u pixel = dfs.back();
             dfs.pop_back();
 
-            if (pixel.x > 0 && texture.getPixel(pixel.x - 1, pixel.y) == origin) {
+            if (pixel.x > 0 && isEqual(texture.getPixel(pixel.x - 1, pixel.y), origin)) {
                 dfs.push_back(sf::Vector2u(pixel.x - 1, pixel.y));
                 texture.setPixel(pixel.x - 1, pixel.y, color);
             }
 
-            if (pixel.x < texture.width - 1 && texture.getPixel(pixel.x + 1, pixel.y) == origin) {
+            if (pixel.x < texture.width - 1 && isEqual(texture.getPixel(pixel.x + 1, pixel.y), origin)) {
                 dfs.push_back(sf::Vector2u(pixel.x + 1, pixel.y));
                 texture.setPixel(pixel.x + 1, pixel.y, color);
             }
 
-            if (pixel.y > 0 && texture.getPixel(pixel.x, pixel.y - 1) == origin) {
+            if (pixel.y > 0 && isEqual(texture.getPixel(pixel.x, pixel.y - 1), origin)) {
                 dfs.push_back(sf::Vector2u(pixel.x, pixel.y - 1));
                 texture.setPixel(pixel.x, pixel.y - 1, color);
             }
 
-            if (pixel.y < texture.height - 1 && texture.getPixel(pixel.x, pixel.y + 1) == origin) {
+            if (pixel.y < texture.height - 1 && isEqual(texture.getPixel(pixel.x, pixel.y + 1), origin)) {
                 dfs.push_back(sf::Vector2u(pixel.x, pixel.y + 1));
                 texture.setPixel(pixel.x, pixel.y + 1, color);
             }
         }
         
-        TextureShape(texture).draw(*canvas, Vec2d(), canvas->getSize());
+        TextureShape(texture).draw(*canvas, plug::Vec2d(), canvas->getSize());
     }
 }
 
@@ -368,8 +379,8 @@ public:
         Widget(1, LazyLayoutBox()), tool(tool_) {}
     
 
-    virtual void draw(TransformStack &stack, RenderTarget &result) override {
-        result.draw(getPolygonArray(stack.top(), tool.getPoints(), PREVIEW_COLOR, LineStrip));
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override {
+        result.draw(getPolygonArray(stack.top(), tool.getPoints(), PREVIEW_COLOR, plug::LineStrip));
     }
 };
 
@@ -379,13 +390,13 @@ PolygonTool::PolygonTool() : points(), polygon_preview(nullptr) {
 }
 
 
-List<Vec2d> &PolygonTool::getPoints() {
+List<plug::Vec2d> &PolygonTool::getPoints() {
     return points;
 }
 
 
-void PolygonTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
-    if (state.state == State::Pressed) {
+void PolygonTool::onMainButton(const plug::ControlState &state, const plug::Vec2d &mouse) {
+    if (state.state == plug::State::Pressed) {
         is_drawing = true;
         if (points.size() && (points[0] - mouse).length() < POLYGON_EPSILON)
             onConfirm();
@@ -400,7 +411,7 @@ void PolygonTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
 }
 
 
-void PolygonTool::onMove(const Vec2d &mouse) {
+void PolygonTool::onMove(const plug::Vec2d &mouse) {
     if (is_drawing) {
         points[points.size() - 2] = mouse;
     }
@@ -409,21 +420,21 @@ void PolygonTool::onMove(const Vec2d &mouse) {
 
 void PolygonTool::onConfirm() {
     if (is_drawing) {
-        canvas->draw(getPolygonArray(Vec2d(), points, color_palette->getFGColor(), LineStrip));
+        canvas->draw(getPolygonArray(plug::Transform(), points, color_palette->getFGColor(), plug::LineStrip));
         is_drawing = false;
     }
 
-    points.resize(0, Vec2d());
+    points.resize(0, plug::Vec2d());
 }
 
 
 void PolygonTool::onCancel() {
     is_drawing = false;
-    points.resize(0, Vec2d());
+    points.resize(0, plug::Vec2d());
 }
 
 
-WidgetInterface *PolygonTool::getWidget() {
+plug::Widget *PolygonTool::getWidget() {
     return (is_drawing) ? polygon_preview : nullptr;
 }
 
@@ -443,23 +454,23 @@ TextTool::TextTool() : text_font(), text_preview(nullptr) {
         text_font,
         TEXT_SIZE,
         PREVIEW_COLOR,
-        Color(0),
+        hex2Color(0),
         PREVIEW_COLOR,
-        Color(0),
+        hex2Color(0),
         0
     );
 
     text_preview = new LineEdit(
         Widget::AUTO_ID,
-        LazyLayoutBox(Vec2d(), Vec2d(SCREEN_W, TEXT_SIZE + TEXT_OFFSET * 2)),
+        LazyLayoutBox(plug::Vec2d(), plug::Vec2d(SCREEN_W, TEXT_SIZE + TEXT_OFFSET * 2)),
         style,
         TEXT_MAX_LENGTH
     );
 }
 
 
-void TextTool::onMainButton(const ControlState &state, const Vec2d &mouse) {
-    if (state.state == State::Pressed) {
+void TextTool::onMainButton(const plug::ControlState &state, const plug::Vec2d &mouse) {
+    if (state.state == plug::State::Pressed) {
         is_drawing = true;
         text_preview->getLayoutBox().setPosition(mouse);
         text_preview->setKeyboardFocus(true);
@@ -476,7 +487,7 @@ void TextTool::onConfirm() {
 
         text_shape.draw(
             *canvas,
-            text_preview->getLayoutBox().getPosition() + Vec2d(TEXT_OFFSET, TEXT_OFFSET),
+            text_preview->getLayoutBox().getPosition() + plug::Vec2d(TEXT_OFFSET, TEXT_OFFSET),
             text_preview->getLayoutBox().getSize()
         );
 
@@ -495,7 +506,7 @@ void TextTool::onCancel() {
 }
 
 
-WidgetInterface *TextTool::getWidget() {
+plug::Widget *TextTool::getWidget() {
     return (is_drawing) ? text_preview : nullptr;
 }
 

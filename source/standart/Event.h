@@ -12,9 +12,9 @@
 #ifndef __PLUG_EVENT_H
 #define __PLUG_EVENT_H
 
-#include "Plug/Event/EHC.h"
-#include "Plug/Event/Event.h"
-#include "Plug/Event/KeyCode.h"
-#include "Plug/Event/MouseButton.h"
+#include "standart/Event/EHC.h"
+#include "standart/Event/Event.h"
+#include "standart/Event/KeyCode.h"
+#include "standart/Event/MouseButton.h"
 
 #endif /* Event.h */

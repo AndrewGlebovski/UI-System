@@ -10,8 +10,8 @@
 // ============================================================================
 
 
-ColorPalette &PaletteManager::getColorPalette() {
-    ASSERT(color_palette, "Color palette is nullptr!\n");
+plug::ColorPalette &PaletteManager::getColorPalette() {
+    ASSERT(color_palette, "plug::Color palette is nullptr!\n");
     return *color_palette;
 }
 
@@ -22,13 +22,13 @@ ToolPalette &PaletteManager::getToolPalette() {
 }
 
 FilterPalette &PaletteManager::getFilterPalette() {
-    ASSERT(filter_palette, "Filter palette is nullptr!\n");
+    ASSERT(filter_palette, "plug::Filter palette is nullptr!\n");
     return *filter_palette;
 }
 
 
-void PaletteManager::setColorPalette(ColorPalette *color_palette_) {
-    ASSERT(color_palette_, "Color palette is nullptr!\n");
+void PaletteManager::setColorPalette(plug::ColorPalette *color_palette_) {
+    ASSERT(color_palette_, "plug::Color palette is nullptr!\n");
     color_palette = color_palette_;
 
     if (tool_palette) getToolPalette().setColorPalette(getColorPalette());
@@ -44,7 +44,7 @@ void PaletteManager::setToolPalette(ToolPalette *tool_palette_) {
 
 
 void PaletteManager::setFilterPalette(FilterPalette *filter_palette_) {
-    ASSERT(filter_palette_, "Filter palette is nullptr!\n");
+    ASSERT(filter_palette_, "plug::Filter palette is nullptr!\n");
     filter_palette = filter_palette_;
 }
 
@@ -56,13 +56,13 @@ PaletteManager &PaletteManager::getInstance() {
 
 
 PaletteManager::~PaletteManager() {
-    ASSERT(color_palette, "Color palette is nullptr!\n");
+    ASSERT(color_palette, "plug::Color palette is nullptr!\n");
     delete color_palette;
 
     ASSERT(tool_palette, "Tool palette is nullptr!\n");
     delete tool_palette;
 
-    ASSERT(filter_palette, "Filter palette is nullptr!\n");
+    ASSERT(filter_palette, "plug::Filter palette is nullptr!\n");
     delete filter_palette;
 }
 

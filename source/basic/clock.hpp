@@ -13,12 +13,12 @@
 
 /// Controls how clock looks
 struct ClockStyle {
-    Color text_color;       ///< Text color
+    plug::Color text_color;       ///< Text color
     unsigned font_size;     ///< Font size
     const sf::Font &font;   ///< Font
 
     ClockStyle(
-        Color text_color_, 
+        plug::Color text_color_, 
         unsigned font_size_, sf::Font &font_
     ) :
         text_color(text_color_), 
@@ -31,14 +31,14 @@ struct ClockStyle {
 class Clock : public Widget {
 public:
     Clock(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const ClockStyle &style_
     );
 
-    virtual void draw(TransformStack &stack, RenderTarget &result) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
 protected:
-    virtual void onTick(const TickEvent &event, EHC &ehc) override;
+    virtual void onTick(const plug::TickEvent &event, plug::EHC &ehc) override;
 
     size_t daytime;
     ClockStyle style;

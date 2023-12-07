@@ -83,7 +83,7 @@ bool PluginLoader::scanPluginDir(const char *path) {
         
         if (!isPluginFile(plugin_file)) continue;
 
-        Plugin *plugin = loadPlugin(plugin_file);
+        plug::Plugin *plugin = loadPlugin(plugin_file);
 
         if (!plugin) continue;
 
@@ -131,7 +131,7 @@ bool PluginLoader::isPluginFile(const char *path) const {
 }
 
 
-Plugin *PluginLoader::loadPlugin(const char *path) {
+plug::Plugin *PluginLoader::loadPlugin(const char *path) {
     ASSERT(path, "Path is nullptr!\n");
 
     void *handle = dlopen(path, RTLD_NOW | RTLD_NODELETE);
@@ -151,7 +151,7 @@ Plugin *PluginLoader::loadPlugin(const char *path) {
     // RTLD_NODELETE flag leaves library in memory after close
     ASSERT(dlclose(handle) != -1, "Failed to close dl!\n");
 
-    Plugin *plugin = (*load_plugin)();
+    plug::Plugin *plugin = (*load_plugin)();
 
     if (!plugin)
         printf("Failed to get plugin instance!\n");
@@ -160,8 +160,10 @@ Plugin *PluginLoader::loadPlugin(const char *path) {
 }
 
 
-bool PluginLoader::loadTool(Plugin *plugin) {
-    Tool *tool = static_cast<Tool*>(plugin->tryGetInterface(PluginGuid::Tool));
+bool PluginLoader::loadTool(plug::Plugin *plugin) {
+    plug::Tool *tool = static_cast<plug::Tool*>(
+        plugin->tryGetInterface(static_cast<size_t>(plug::PluginGuid::Tool))
+    );
     
     if (tool) {
         // Add tool to palette view
@@ -174,8 +176,10 @@ bool PluginLoader::loadTool(Plugin *plugin) {
 }
 
 
-bool PluginLoader::loadFilter(Plugin *plugin) {
-    Filter *filter = static_cast<Filter*>(plugin->tryGetInterface(PluginGuid::Filter));
+bool PluginLoader::loadFilter(plug::Plugin *plugin) {
+    plug::Filter *filter = static_cast<plug::Filter*>(
+        plugin->tryGetInterface(static_cast<size_t>(plug::PluginGuid::Filter))
+    );
 
     if (filter) {
         FILTER_PALETTE.addFilter(*filter);

@@ -14,9 +14,9 @@
 
 #include <cstddef>
 
-#include "Plug/Event/KeyCode.h"
-#include "Plug/Event/MouseButton.h"
-#include "Plug/Math.h"
+#include "standart/Event/KeyCode.h"
+#include "standart/Event/MouseButton.h"
+#include "standart/Math.h"
 
 namespace plug {
 
@@ -29,7 +29,7 @@ enum EventType {
   MousePressed = 2,     /*!< MousePressedEvent */
   MouseReleased = 3,    /*!< MouseReleasedEvent */
   KeyboardPressed = 4,  /*!< KeyboardPressedEvent */
-  KeyboardReleased = 5, /*!< KeyboardReleasedEvent */
+  KeyboardReleased = 5, /*!< plug::KeyboardReleasedEvent */
 };
 
 /**

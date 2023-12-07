@@ -22,35 +22,35 @@ public:
         RECT_TOOL,          ///< Rectangle tool
         LINE_TOOL,          ///< Line tool
         ERASER_TOOL,        ///< Eraser
-        COLOR_PICKER,       ///< Color picker
+        COLOR_PICKER,       ///< plug::Color picker
         BUCKET_TOOL,        ///< Bucket tool
         POLYGON_TOOL,       ///< Polygon tool
         TEXT_TOOL,          ///< Text tool
         TOOLS_SIZE          ///< Count of predefined tools (this field must always be last!)
     };
 
-    ToolPalette(ColorPalette &color_palette);
+    ToolPalette(plug::ColorPalette &color_palette);
 
-    Tool *getTool(size_t index);
+    plug::Tool *getTool(size_t index);
 
     size_t getCurrentIndex() const;
 
-    Tool *getCurrentTool();
+    plug::Tool *getCurrentTool();
 
     void setCurrentTool(size_t index);
 
-    void setActiveCanvas(Canvas &canvas);
+    void setActiveCanvas(plug::Canvas &canvas);
 
-    void setColorPalette(ColorPalette &color_palette);
+    void setColorPalette(plug::ColorPalette &color_palette);
 
-    void addTool(Tool &new_tool);
+    void addTool(plug::Tool &new_tool);
 
     size_t getToolCount() const;
 
     virtual ~ToolPalette();
 
 private:
-    List<Tool*> tools;
+    List<plug::Tool*> tools;
     size_t current_tool;
 };
 
@@ -59,7 +59,7 @@ private:
 class ToolPaletteView : public Widget {
 public:
     ToolPaletteView(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const PaletteViewAsset &asset_
     );
 
@@ -70,12 +70,12 @@ public:
     /**
      * \brief Draws tool buttons
     */
-    virtual void draw(TransformStack &stack, RenderTarget &result) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
     /**
      * \brief Broadcast events to tool buttons
     */
-    virtual void onEvent(const Event &event, EHC &ehc) override;
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Deletes tool buttons
@@ -86,12 +86,12 @@ protected:
     /**
      * \brief Checks hot keys for tools
     */
-    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
+    virtual void onKeyboardPressed(const plug::KeyboardPressedEvent &event, plug::EHC &ehc) override;
 
     /**
      * \brief Resizes self and internal container
     */
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 
 private:
     /**
@@ -112,7 +112,7 @@ private:
     Container buttons;                  ///< ToolPalette buttons for tool selection
     const PaletteViewAsset &asset;      ///< Assets for buttons
     ButtonGroup *group;                 ///< Tool buttons group
-    List<Texture*> icons;               ///< Additional tools icons
+    List<plug::Texture*> icons;         ///< Additional tools icons
 };
 
 

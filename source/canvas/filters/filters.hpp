@@ -21,7 +21,7 @@ private:
 public:
     IntensityFilter(char intensity_);
 
-    virtual void applyFilter(Canvas &canvas) const override;
+    virtual void applyFilter(plug::Canvas &canvas) const override;
 };
 
 
@@ -30,7 +30,7 @@ class MonochromeFilter : public BasicFilter {
 public:
     MonochromeFilter();
 
-    virtual void applyFilter(Canvas &canvas) const override;
+    virtual void applyFilter(plug::Canvas &canvas) const override;
 };
 
 
@@ -39,7 +39,7 @@ class NegativeFilter : public BasicFilter {
 public:
     NegativeFilter();
 
-    virtual void applyFilter(Canvas &canvas) const override;
+    virtual void applyFilter(plug::Canvas &canvas) const override;
 };
 
 

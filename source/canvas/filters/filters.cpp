@@ -20,20 +20,20 @@ unsigned char IntensityFilter::clip(int channel) const {
 IntensityFilter::IntensityFilter(char intensity_) : intensity(intensity_) {}
 
 
-void IntensityFilter::applyFilter(Canvas &canvas) const {
-    SelectionMask &mask = canvas.getSelectionMask();
-    Texture texture(canvas.getTexture());
+void IntensityFilter::applyFilter(plug::Canvas &canvas) const {
+    plug::SelectionMask &mask = canvas.getSelectionMask();
+    plug::Texture texture(canvas.getTexture());
 
     for (size_t y = 0; y < mask.getHeight(); y++) {
         for (size_t x = 0; x < mask.getWidth(); x++) {
             if (mask.getPixel(x, y)) {
-                Color origin(texture.getPixel(x, y));
-                texture.setPixel(x, y, Color(clip(origin.r), clip(origin.g), clip(origin.b)));
+                plug::Color origin(texture.getPixel(x, y));
+                texture.setPixel(x, y, plug::Color(clip(origin.r), clip(origin.g), clip(origin.b)));
             }
         }
     }
 
-    TextureShape(texture).draw(canvas, Vec2d(), canvas.getSize());
+    TextureShape(texture).draw(canvas, plug::Vec2d(), canvas.getSize());
 }
 
 
@@ -43,21 +43,21 @@ void IntensityFilter::applyFilter(Canvas &canvas) const {
 MonochromeFilter::MonochromeFilter() {}
 
 
-void MonochromeFilter::applyFilter(Canvas &canvas) const {
-    SelectionMask &mask = canvas.getSelectionMask();
-    Texture texture(canvas.getTexture());
+void MonochromeFilter::applyFilter(plug::Canvas &canvas) const {
+    plug::SelectionMask &mask = canvas.getSelectionMask();
+    plug::Texture texture(canvas.getTexture());
     
     for (size_t y = 0; y < mask.getHeight(); y++) {
         for (size_t x = 0; x < mask.getWidth(); x++) {
             if (mask.getPixel(x, y)) {
-                Color origin(texture.getPixel(x, y));
+                plug::Color origin(texture.getPixel(x, y));
                 unsigned aver = (unsigned(origin.r) + unsigned(origin.g) + unsigned(origin.b)) / 3U;
-                texture.setPixel(x, y, Color(aver, aver, aver));
+                texture.setPixel(x, y, plug::Color(aver, aver, aver));
             }
         }
     }
     
-    TextureShape(texture).draw(canvas, Vec2d(), canvas.getSize());
+    TextureShape(texture).draw(canvas, plug::Vec2d(), canvas.getSize());
 }
 
 
@@ -67,18 +67,18 @@ void MonochromeFilter::applyFilter(Canvas &canvas) const {
 NegativeFilter::NegativeFilter() {}
 
 
-void NegativeFilter::applyFilter(Canvas &canvas) const {
-    SelectionMask &mask = canvas.getSelectionMask();
-    Texture texture(canvas.getTexture());
+void NegativeFilter::applyFilter(plug::Canvas &canvas) const {
+    plug::SelectionMask &mask = canvas.getSelectionMask();
+    plug::Texture texture(canvas.getTexture());
     
     for (size_t y = 0; y < mask.getHeight(); y++) {
         for (size_t x = 0; x < mask.getWidth(); x++) {
             if (mask.getPixel(x, y)) {
-                Color origin(texture.getPixel(x, y));
-                texture.setPixel(x, y, Color(255 - origin.r, 255 - origin.g, 255 - origin.b));
+                plug::Color origin(texture.getPixel(x, y));
+                texture.setPixel(x, y, plug::Color(255 - origin.r, 255 - origin.g, 255 - origin.b));
             }
         }
     }
     
-    TextureShape(texture).draw(canvas, Vec2d(), canvas.getSize());
+    TextureShape(texture).draw(canvas, plug::Vec2d(), canvas.getSize());
 }

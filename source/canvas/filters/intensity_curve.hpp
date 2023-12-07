@@ -24,17 +24,17 @@ public:
     /**
      * \brief Applies curve to canvas
     */
-    virtual void applyFilter(Canvas &canvas) const override;
+    virtual void applyFilter(plug::Canvas &canvas) const override;
 
     /**
      * \brief Returns IntensityCurveDialog for curve calibration
     */
-    virtual WidgetInterface *getWidget() override;
+    virtual plug::Widget *getWidget() override;
 
     /**
      * \brief Returns control point position
     */
-    const Vec2d &getPoint(size_t index) const;
+    const plug::Vec2d &getPoint(size_t index) const;
 
     /**
      * \brief Returns number of control points
@@ -68,7 +68,7 @@ private:
     */
     void redrawCurve();
 
-    List<Vec2d> points;     ///< Spline control points
+    List<plug::Vec2d> points;     ///< Spline control points
     uint8_t *plot;          ///< Stores curve values
     WindowStyle style;
 };
@@ -77,7 +77,7 @@ private:
 class IntensityCurveDialog : public Dialog {
 public:
     IntensityCurveDialog(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const WindowStyle &style_
     );
 };

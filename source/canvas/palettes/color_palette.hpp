@@ -1,6 +1,6 @@
 /**
  * \file
- * \brief Contains ColorPalette and ColorPaletteView interface
+ * \brief Contains plug::ColorPalette and ColorPaletteView interface
 */
 
 
@@ -8,34 +8,32 @@
 #define _COLOR_PALETTE_H_
 
 
-#include "widget/color.hpp"
 #include "basic/container.hpp"
+#include "standart/Tool/ColorPalette.h"
 
 
-class ColorPalette {
+class ColorPalette : public plug::ColorPalette {
 public:
-    ColorPalette(Color fg_color, Color bg_color);
+    ColorPalette(plug::Color fg_color, plug::Color bg_color);
 
-    virtual Color getFGColor() const;
+    virtual plug::Color getFGColor() const override;
 
-    virtual Color getBGColor() const;
+    virtual plug::Color getBGColor() const override;
 
-    virtual void setFGColor(Color new_fg_color);
+    virtual void setFGColor(plug::Color new_fg_color) override;
 
-    virtual void setBGColor(Color new_bg_color);
-
-    virtual ~ColorPalette() = default;
+    virtual void setBGColor(plug::Color new_bg_color) override;
 
 private:
-    Color foreground;
-    Color background;
+    plug::Color foreground;
+    plug::Color background;
 };
 
 
-/// GUI for ColorPalette
+/// GUI for plug::ColorPalette
 class ColorPaletteView : public Widget {
 public:
-    ColorPaletteView(size_t id_, const LayoutBox &layout_);
+    ColorPaletteView(size_t id_, const plug::LayoutBox &layout_);
 
     ColorPaletteView(const ColorPaletteView &palette_view) = default;
 
@@ -44,21 +42,21 @@ public:
     /**
      * \brief Draws color buttons
     */
-    virtual void draw(TransformStack &stack, RenderTarget &result) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
     /**
      * \brief Broadcast events to color buttons
     */
-    virtual void onEvent(const Event &event, EHC &ehc) override;
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
 protected:
     /**
      * \brief Resizes self and internal container
     */
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 
 private:
-    Container buttons;      ///< Color buttons for tool selection
+    Container buttons;      ///< plug::Color buttons for tool selection
 };
 
 

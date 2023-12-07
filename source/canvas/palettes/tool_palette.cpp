@@ -9,18 +9,19 @@
 #include "window/window.hpp"
 #include "canvas/palettes/palette_manager.hpp"
 #include "canvas/canvas_view.hpp"
+#include "common/utils.hpp"
 
 
 // ============================================================================
 
 
-const Vec2d TOOL_ICON_SIZE = Vec2d(94, 94);         ///< Tool icon size
+const plug::Vec2d TOOL_ICON_SIZE = plug::Vec2d(94, 94);         ///< Tool icon size
 
 
 // ============================================================================
 
 
-ToolPalette::ToolPalette(ColorPalette &color_palette) :
+ToolPalette::ToolPalette(plug::ColorPalette &color_palette) :
     tools(TOOLS_SIZE, nullptr), current_tool(PENCIL_TOOL)
 {
     tools[PENCIL_TOOL] = new PencilTool();
@@ -34,7 +35,7 @@ ToolPalette::ToolPalette(ColorPalette &color_palette) :
 }
 
 
-Tool *ToolPalette::getTool(size_t index) {
+plug::Tool *ToolPalette::getTool(size_t index) {
     ASSERT(index < tools.size(), "Index is out of range!\n");
 
     return tools[index];
@@ -46,7 +47,7 @@ size_t ToolPalette::getCurrentIndex() const {
 }
 
 
-Tool *ToolPalette::getCurrentTool() {
+plug::Tool *ToolPalette::getCurrentTool() {
     return getTool(getCurrentIndex());
 }
 
@@ -59,19 +60,19 @@ void ToolPalette::setCurrentTool(size_t index) {
 }
 
 
-void ToolPalette::setActiveCanvas(Canvas &canvas) {
+void ToolPalette::setActiveCanvas(plug::Canvas &canvas) {
     for (size_t i = 0; i < tools.size(); i++)
         tools[i]->setActiveCanvas(canvas);
 }
 
 
-void ToolPalette::setColorPalette(ColorPalette &color_palette) {
+void ToolPalette::setColorPalette(plug::ColorPalette &color_palette) {
     for (size_t i = 0; i < tools.size(); i++)
         tools[i]->setColorPalette(color_palette);
 }
 
 
-void ToolPalette::addTool(Tool &tool) {
+void ToolPalette::addTool(plug::Tool &tool) {
     // Set tool color palette and active canvas
     tool.setActiveCanvas(CANVAS_GROUP.getActive()->getCanvas());
     tool.setColorPalette(COLOR_PALETTE);
@@ -124,7 +125,7 @@ protected:
 do {                                                            \
     TextureIconButton *btn =  new TextureIconButton(            \
         Widget::AUTO_ID + TOOL_ID + 1,                          \
-        LazyLayoutBox(POSITION, Vec2d()),                       \
+        LazyLayoutBox(POSITION, plug::Vec2d()),                       \
         new PaletteAction(TOOL_ID),                             \
         asset[PaletteViewAsset::NORMAL_TEXTURE],                \
         asset[PaletteViewAsset::NORMAL_TEXTURE],                \
@@ -137,11 +138,11 @@ do {                                                            \
 
 
 ToolPaletteView::ToolPaletteView(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     const PaletteViewAsset &asset_
 ) :
     Widget(id_, layout_), 
-    buttons(1, AnchorLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H), Vec2d(), Vec2d(SCREEN_W, SCREEN_H)), false),
+    buttons(1, AnchorLayoutBox(plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H), plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H)), false),
     asset(asset_), group(nullptr),
     icons()
 {
@@ -149,14 +150,14 @@ ToolPaletteView::ToolPaletteView(
 
     group = new ButtonGroup();
 
-    ADD_TOOL_BUTTON(ToolPalette::PENCIL_TOOL,   PaletteViewAsset::PENCIL_TEXTURE,   Vec2d());
-    ADD_TOOL_BUTTON(ToolPalette::RECT_TOOL,     PaletteViewAsset::RECT_TEXTURE,     Vec2d(94, 0));
-    ADD_TOOL_BUTTON(ToolPalette::LINE_TOOL,     PaletteViewAsset::LINE_TEXTURE,     Vec2d(0, 94));
-    ADD_TOOL_BUTTON(ToolPalette::ERASER_TOOL,   PaletteViewAsset::ERASER_TEXTURE,   Vec2d(94, 94));
-    ADD_TOOL_BUTTON(ToolPalette::COLOR_PICKER,  PaletteViewAsset::PICKER_TEXTURE,   Vec2d(0, 188));
-    ADD_TOOL_BUTTON(ToolPalette::BUCKET_TOOL,   PaletteViewAsset::BUCKET_TEXTURE,   Vec2d(94, 188));
-    ADD_TOOL_BUTTON(ToolPalette::POLYGON_TOOL,  PaletteViewAsset::POLYGON_TEXTURE,  Vec2d(0, 282));
-    ADD_TOOL_BUTTON(ToolPalette::TEXT_TOOL,     PaletteViewAsset::TEXT_TEXTURE,     Vec2d(94, 282));
+    ADD_TOOL_BUTTON(ToolPalette::PENCIL_TOOL,   PaletteViewAsset::PENCIL_TEXTURE,   plug::Vec2d());
+    ADD_TOOL_BUTTON(ToolPalette::RECT_TOOL,     PaletteViewAsset::RECT_TEXTURE,     plug::Vec2d(94, 0));
+    ADD_TOOL_BUTTON(ToolPalette::LINE_TOOL,     PaletteViewAsset::LINE_TEXTURE,     plug::Vec2d(0, 94));
+    ADD_TOOL_BUTTON(ToolPalette::ERASER_TOOL,   PaletteViewAsset::ERASER_TEXTURE,   plug::Vec2d(94, 94));
+    ADD_TOOL_BUTTON(ToolPalette::COLOR_PICKER,  PaletteViewAsset::PICKER_TEXTURE,   plug::Vec2d(0, 188));
+    ADD_TOOL_BUTTON(ToolPalette::BUCKET_TOOL,   PaletteViewAsset::BUCKET_TEXTURE,   plug::Vec2d(94, 188));
+    ADD_TOOL_BUTTON(ToolPalette::POLYGON_TOOL,  PaletteViewAsset::POLYGON_TEXTURE,  plug::Vec2d(0, 282));
+    ADD_TOOL_BUTTON(ToolPalette::TEXT_TOOL,     PaletteViewAsset::TEXT_TEXTURE,     plug::Vec2d(94, 282));
 
     updateCurrentButton();
 }
@@ -165,7 +166,7 @@ ToolPaletteView::ToolPaletteView(
 #undef ADD_TOOL_BUTTON
 
 
-void ToolPaletteView::draw(TransformStack &stack, RenderTarget &result) {
+void ToolPaletteView::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
     TransformApplier add_transform(stack, getTransform());
 
     updateButtons();
@@ -176,7 +177,7 @@ void ToolPaletteView::draw(TransformStack &stack, RenderTarget &result) {
 }
 
 
-void ToolPaletteView::onEvent(const Event &event, EHC &ehc) {
+void ToolPaletteView::onEvent(const plug::Event &event, plug::EHC &ehc) {
     Widget::onEvent(event, ehc);
     if (ehc.stopped) return;
 
@@ -185,19 +186,19 @@ void ToolPaletteView::onEvent(const Event &event, EHC &ehc) {
 }
 
 
-void ToolPaletteView::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
+void ToolPaletteView::onKeyboardPressed(const plug::KeyboardPressedEvent &event, plug::EHC &ehc) {
     // No modifiers pressed
     if (event.alt || event.ctrl || event.shift) return;
 
     switch(event.key_id) {
-        case P: TOOL_PALETTE.setCurrentTool(ToolPalette::PENCIL_TOOL); break;
-        case R: TOOL_PALETTE.setCurrentTool(ToolPalette::RECT_TOOL); break;
-        case L: TOOL_PALETTE.setCurrentTool(ToolPalette::LINE_TOOL); break;
-        case E: TOOL_PALETTE.setCurrentTool(ToolPalette::ERASER_TOOL); break;
-        case C: TOOL_PALETTE.setCurrentTool(ToolPalette::COLOR_PICKER); break;
-        case F: TOOL_PALETTE.setCurrentTool(ToolPalette::BUCKET_TOOL); break;
-        case O: TOOL_PALETTE.setCurrentTool(ToolPalette::POLYGON_TOOL); break;
-        case T: TOOL_PALETTE.setCurrentTool(ToolPalette::TEXT_TOOL); break;
+        case plug::KeyCode::P: TOOL_PALETTE.setCurrentTool(ToolPalette::PENCIL_TOOL); break;
+        case plug::KeyCode::R: TOOL_PALETTE.setCurrentTool(ToolPalette::RECT_TOOL); break;
+        case plug::KeyCode::L: TOOL_PALETTE.setCurrentTool(ToolPalette::LINE_TOOL); break;
+        case plug::KeyCode::E: TOOL_PALETTE.setCurrentTool(ToolPalette::ERASER_TOOL); break;
+        case plug::KeyCode::C: TOOL_PALETTE.setCurrentTool(ToolPalette::COLOR_PICKER); break;
+        case plug::KeyCode::F: TOOL_PALETTE.setCurrentTool(ToolPalette::BUCKET_TOOL); break;
+        case plug::KeyCode::O: TOOL_PALETTE.setCurrentTool(ToolPalette::POLYGON_TOOL); break;
+        case plug::KeyCode::T: TOOL_PALETTE.setCurrentTool(ToolPalette::TEXT_TOOL); break;
         default: return;
     }
 
@@ -205,7 +206,7 @@ void ToolPaletteView::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &
 }
 
 
-void ToolPaletteView::onParentUpdate(const LayoutBox &parent_layout) {
+void ToolPaletteView::onParentUpdate(const plug::LayoutBox &parent_layout) {
     getLayoutBox().onParentUpdate(parent_layout);
     buttons.onParentUpdate(getLayoutBox());
 }
@@ -231,16 +232,15 @@ void ToolPaletteView::updateButtons() {
 
 
 void ToolPaletteView::addTool(size_t tool_id) {
-    Tool &new_tool = *TOOL_PALETTE.getTool(tool_id);
+    plug::Tool &new_tool = *TOOL_PALETTE.getTool(tool_id);
 
     const char *texture_path = new_tool.getPluginData()->getTexturePath();
 
-    Texture *new_icon = nullptr;
+    plug::Texture *new_icon = nullptr;
     loadTexture(&new_icon, texture_path);
 
     if (new_icon) {
         icons.push_back(new_icon);
-        printf("%s, %s added!\n", new_tool.getPluginData()->getName(), new_tool.getPluginData()->getTexturePath());
     }
     else {
         if (new_tool.getPluginData()->getName())
@@ -249,25 +249,23 @@ void ToolPaletteView::addTool(size_t tool_id) {
             printf("Tool icon not found!\n");
     }
 
-    //printf("%s added!\n", new_tool.getPluginData()->getName());
-
     Widget *prev_button = buttons.findWidget(Widget::AUTO_ID + tool_id);
 
-    Vec2d position = prev_button->getLayoutBox().getPosition();
+    plug::Vec2d position = prev_button->getLayoutBox().getPosition();
 
     if (isEqual(position.x, 0)) position.x = TOOL_ICON_SIZE.x;
     else {
-        position = Vec2d(0, position.y + TOOL_ICON_SIZE.y);
+        position = plug::Vec2d(0, position.y + TOOL_ICON_SIZE.y);
 
         // Change parent window size to fit new tools
         Window *parent_window = static_cast<Window*>(getParent()->getParent());
-        Vec2d parent_size = parent_window->getLayoutBox().getSize();
-        parent_window->setSize(parent_size + Vec2d(0, TOOL_ICON_SIZE.y));
+        plug::Vec2d parent_size = parent_window->getLayoutBox().getSize();
+        parent_window->setSize(parent_size + plug::Vec2d(0, TOOL_ICON_SIZE.y));
     }
 
     TextureIconButton *btn = new TextureIconButton(
         Widget::AUTO_ID + tool_id + 1,
-        LazyLayoutBox(position, Vec2d()),
+        LazyLayoutBox(position, plug::Vec2d()),
         new PaletteAction(tool_id),
         asset[PaletteViewAsset::NORMAL_TEXTURE],
         asset[PaletteViewAsset::NORMAL_TEXTURE],

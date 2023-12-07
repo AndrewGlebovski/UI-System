@@ -18,7 +18,7 @@ Asset::Asset() : textures() {}
 
 Asset::Asset(const Asset &arg) : textures(arg.textures.size(), nullptr) {
     for (size_t i = 0; i < textures.size(); i++)
-        textures[i] = new Texture(*arg.textures[i]);
+        textures[i] = new plug::Texture(*arg.textures[i]);
 }
 
 
@@ -52,7 +52,7 @@ Asset &Asset::operator = (const Asset &arg) {
 }
 
 
-const Texture &Asset::getTexture(int id) const {
+const plug::Texture &Asset::getTexture(int id) const {
     ASSERT(0 <= id && size_t(id) < textures.size(), "Index is out of range!\n");
 
     return *(textures[id]);
@@ -87,7 +87,7 @@ WindowAsset::WindowAsset(const char *rootpath) {
 }
 
 
-const Texture &WindowAsset::operator [] (TEXTURE_ID id) const {
+const plug::Texture &WindowAsset::operator [] (TEXTURE_ID id) const {
     return getTexture(id);
 }
 
@@ -110,6 +110,6 @@ PaletteViewAsset::PaletteViewAsset(const char *rootpath) {
 }
 
 
-const Texture &PaletteViewAsset::operator [] (TEXTURE_ID id) const {
+const plug::Texture &PaletteViewAsset::operator [] (TEXTURE_ID id) const {
     return getTexture(id);
 }

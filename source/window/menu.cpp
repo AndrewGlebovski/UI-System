@@ -6,17 +6,18 @@
 
 #include <limits>
 #include "window/menu.hpp"
+#include "common/utils.hpp"
 
 
 const size_t INVALID_OPENED = std::numeric_limits<size_t>::max();   ///< No opened menu at the moment
-const Vec2d ADD_SIZE(20, 20);                                       ///< Additional size to text rect
+const plug::Vec2d ADD_SIZE(20, 20);                                       ///< Additional size to text rect
 
 
 // ============================================================================
 
 
 MenuButton::MenuButton(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     const std::string &text_, const RectButtonStyle &style_
 ) : 
     RectButton(AUTO_ID, layout_, nullptr, text_, style_), 
@@ -30,8 +31,8 @@ void MenuButton::addButton(const std::string &text_, ButtonAction *action_) {
     Widget *prev_btn = (buttons.size()) ? buttons.back() : nullptr;
 
     sf::Text btn_text(text_, style.font, style.font_size);
-    Vec2d btn_size = Vec2d(btn_text.getLocalBounds().width + ADD_SIZE.x, getLayoutBox().getSize().y);
-    Vec2d btn_pos = Vec2d();
+    plug::Vec2d btn_size = plug::Vec2d(btn_text.getLocalBounds().width + ADD_SIZE.x, getLayoutBox().getSize().y);
+    plug::Vec2d btn_pos = plug::Vec2d();
 
     if (prev_btn) {
         btn_pos.y = prev_btn->getLayoutBox().getPosition().y + prev_btn->getLayoutBox().getSize().y;
@@ -63,7 +64,7 @@ void MenuButton::setOpened(bool is_opened_) {
 }
 
 
-void MenuButton::draw(TransformStack &stack, RenderTarget &result) {
+void MenuButton::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
     RectButton::draw(stack, result);
 
     TransformApplier add_transform(stack, getTransform());
@@ -75,7 +76,7 @@ void MenuButton::draw(TransformStack &stack, RenderTarget &result) {
 }
 
 
-void MenuButton::onEvent(const Event &event, EHC &ehc) {
+void MenuButton::onEvent(const plug::Event &event, plug::EHC &ehc) {
     RectButton::onEvent(event, ehc);
     if (ehc.stopped) return;
 
@@ -102,15 +103,15 @@ MenuButton::~MenuButton() {
 
 
 Menu::Menu(
-    size_t id_, const LayoutBox &layout_,
-    const RectButtonStyle &style_, Color background_
+    size_t id_, const plug::LayoutBox &layout_,
+    const RectButtonStyle &style_, plug::Color background_
 ) :
     Widget(id_, layout_),
     buttons(), style(style_), background(background_) ,opened(INVALID_OPENED)
 {
     sf::Text btn_text("Test", style.font, style.font_size);
 
-    Vec2d auto_size(layout->getSize().x, btn_text.getLocalBounds().height + ADD_SIZE.y);
+    plug::Vec2d auto_size(layout->getSize().x, btn_text.getLocalBounds().height + ADD_SIZE.y);
 
     layout->setSize(auto_size);
 }
@@ -144,8 +145,8 @@ void Menu::addMenuButton(const std::string &text) {
     MenuButton *prev_btn = buttons.size() ? buttons.back() : nullptr;
 
     sf::Text btn_text(text, style.font, style.font_size);
-    Vec2d btn_size(btn_text.getLocalBounds().width + ADD_SIZE.x, layout->getSize().y);
-    Vec2d btn_pos;
+    plug::Vec2d btn_size(btn_text.getLocalBounds().width + ADD_SIZE.x, layout->getSize().y);
+    plug::Vec2d btn_pos;
 
     if (prev_btn)
         btn_pos.x = prev_btn->getLayoutBox().getPosition().x + prev_btn->getLayoutBox().getSize().x;
@@ -170,9 +171,9 @@ void Menu::addButton(size_t menu_id, const std::string &text, ButtonAction *acti
 }
 
 
-void Menu::draw(TransformStack &stack, RenderTarget &result) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(stack, layout->getSize());
+void Menu::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
 
     RectShape rect(global_position, global_size, background);
 #ifdef DEBUG_DRAW
@@ -187,13 +188,13 @@ void Menu::draw(TransformStack &stack, RenderTarget &result) {
 }
 
 
-void Menu::onEvent(const Event &event, EHC &ehc) {
+void Menu::onEvent(const plug::Event &event, plug::EHC &ehc) {
     TransformApplier add_transform(ehc.stack, getTransform());
 
     for (size_t i = 0; i < buttons.size(); i++) {
         buttons[i]->onEvent(event, ehc);
         if (ehc.stopped) {
-            if (event.getType() == MousePressed) openMenu(i);
+            if (event.getType() == plug::EventType::MousePressed) openMenu(i);
             break;
         }
     }

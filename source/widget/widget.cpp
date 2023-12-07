@@ -11,7 +11,7 @@
 // ============================================================================
 
 
-Widget::Widget(size_t id_, const LayoutBox &layout_) :
+Widget::Widget(size_t id_, const plug::LayoutBox &layout_) :
     id(generateId(id_)),
     layout(layout_.clone()),
     parent(nullptr),
@@ -43,16 +43,16 @@ size_t Widget::generateId(size_t requested_id) {
 size_t Widget::getId() const { return id; }
 
 
-LayoutBox &Widget::getLayoutBox() { return *layout; }
+plug::LayoutBox &Widget::getLayoutBox() { return *layout; }
 
 
-const LayoutBox &Widget::getLayoutBox() const { return *layout; }
+const plug::LayoutBox &Widget::getLayoutBox() const { return *layout; }
 
 
-void Widget::setLayoutBox(const LayoutBox &layout_) { layout = layout_.clone(); }
+void Widget::setLayoutBox(const plug::LayoutBox &layout_) { layout = layout_.clone(); }
 
 
-Transform Widget::getTransform() const { return Transform(layout->getPosition()); }
+plug::Transform Widget::getTransform() const { return plug::Transform(layout->getPosition()); }
 
 
 Widget *Widget::getParent() { return parent; }
@@ -80,37 +80,51 @@ Widget::Status Widget::getStatus() const { return status; }
 void Widget::setStatus(Status new_status) { status = new_status; }
 
 
-void Widget::draw(TransformStack &stack, RenderTarget &result) {
+void Widget::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
 #ifdef DEBUG_DRAW
     RectShape rect(
         stack.apply(layout->getPosition()),
         applySize(stack, layout->getSize()),
-        Color(255, 0, 0)
+        plug::Color(255, 0, 0)
     );
     rect.draw(result);
 #endif
 }
 
 
-void Widget::onEvent(const Event &event, EHC &ehc) {
+void Widget::onEvent(const plug::Event &event, plug::EHC &ehc) {
     switch(event.getType()) {
-        case Tick: onTick(static_cast<const TickEvent&>(event), ehc); break;
-        case MouseMove: onMouseMove(static_cast<const MouseMoveEvent&>(event), ehc); break;
-        case MousePressed: onMousePressed(static_cast<const MousePressedEvent&>(event), ehc); break;
-        case MouseReleased: onMouseReleased(static_cast<const MouseReleasedEvent&>(event), ehc); break;
-        case KeyboardPressed: onKeyboardPressed(static_cast<const KeyboardPressedEvent&>(event), ehc); break;
-        case KeyboardReleased: onKeyboardReleased(static_cast<const KeyboardReleasedEvent&>(event), ehc); break;
-        default: printf("Uknown event type!\n"); abort();
+        case plug::Tick:
+            onTick(static_cast<const plug::TickEvent&>(event), ehc);
+            break;
+        case plug::MouseMove:
+            onMouseMove(static_cast<const plug::MouseMoveEvent&>(event), ehc);
+            break;
+        case plug::MousePressed:
+            onMousePressed(static_cast<const plug::MousePressedEvent&>(event), ehc);
+            break;
+        case plug::MouseReleased:
+            onMouseReleased(static_cast<const plug::MouseReleasedEvent&>(event), ehc);
+            break;
+        case plug::KeyboardPressed:
+            onKeyboardPressed(static_cast<const plug::KeyboardPressedEvent&>(event), ehc);
+            break;
+        case plug::KeyboardReleased:
+            onKeyboardReleased(static_cast<const plug::KeyboardReleasedEvent&>(event), ehc);
+            break;
+        default:
+            printf("Uknown event type!\n");
+            abort();
     }
 }
 
 
-void Widget::onParentUpdate(const LayoutBox &parent_layout) {
+void Widget::onParentUpdate(const plug::LayoutBox &parent_layout) {
     getLayoutBox().onParentUpdate(parent_layout);
 }
 
 
-bool Widget::covers(TransformStack &stack, const Vec2d &position) const {
+bool Widget::covers(plug::TransformStack &stack, const plug::Vec2d &position) const {
     return isInsideRect(
         stack.apply(getLayoutBox().getPosition()),
         applySize(stack, getLayoutBox().getSize()),
@@ -127,7 +141,7 @@ Widget::~Widget() {
 // ============================================================================
 
 
-bool isInsideRect(Vec2d position, Vec2d size, Vec2d point) {
+bool isInsideRect(plug::Vec2d position, plug::Vec2d size, plug::Vec2d point) {
     if (point.x < position.x) return false;
     if (point.x > position.x + size.x) return false;
     if (point.y < position.y) return false;

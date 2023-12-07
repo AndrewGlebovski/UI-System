@@ -20,10 +20,10 @@ Widget *openPicture(
     CanvasView *canvas = new CanvasView(
         Widget::AUTO_ID,
         AnchorLayoutBox(
-            Vec2d(),
-            Vec2d(SCREEN_W - 30, SCREEN_H - 30),
-            Vec2d(),
-            Vec2d(SCREEN_W - 30, SCREEN_H - 30)
+            plug::Vec2d(),
+            plug::Vec2d(SCREEN_W - 30, SCREEN_H - 30),
+            plug::Vec2d(),
+            plug::Vec2d(SCREEN_W - 30, SCREEN_H - 30)
         )
     );
 
@@ -42,7 +42,7 @@ Widget *openPicture(
     // If canvas is correct we can create other stuff
     Window *subwindow = new Window(
         Widget::AUTO_ID,
-        BoundLayoutBox(Vec2d(300, 100), Vec2d(800, 600)),
+        BoundLayoutBox(plug::Vec2d(300, 100), plug::Vec2d(800, 600)),
         (filename) ? filename : "Canvas",
         window_style
     );
@@ -52,10 +52,10 @@ Widget *openPicture(
     subwindow->addChild(new VScrollBar(
         Widget::AUTO_ID,
         AnchorLayoutBox(
-            Vec2d(-20, 0),
-            Vec2d(20, SCREEN_H - 30),
-            Vec2d(SCREEN_W, 0),
-            Vec2d(0, SCREEN_H - 30)
+            plug::Vec2d(-20, 0),
+            plug::Vec2d(20, SCREEN_H - 30),
+            plug::Vec2d(SCREEN_W, 0),
+            plug::Vec2d(0, SCREEN_H - 30)
         ),
         new VScrollCanvas(*canvas),
         scrollbar_style
@@ -64,10 +64,10 @@ Widget *openPicture(
     subwindow->addChild(new HScrollBar(
         Widget::AUTO_ID,
         AnchorLayoutBox(
-            Vec2d(0, -20),
-            Vec2d(SCREEN_W, 20),
-            Vec2d(0, SCREEN_H),
-            Vec2d(SCREEN_W, 0)
+            plug::Vec2d(0, -20),
+            plug::Vec2d(SCREEN_W, 20),
+            plug::Vec2d(0, SCREEN_H),
+            plug::Vec2d(SCREEN_W, 0)
         ),
         new HScrollCanvas(*canvas),
         scrollbar_style
@@ -83,12 +83,12 @@ Widget *openPicture(
 VScrollCanvas::VScrollCanvas(CanvasView &canvas_) : canvas(canvas_) {}
 
 
-void VScrollCanvas::operator () (vec_t param) {
-    Vec2d canvas_size = canvas.getLayoutBox().getSize();
-    Vec2d texture_offset = canvas.getTextureOffset();
+void VScrollCanvas::operator () (double param) {
+    plug::Vec2d canvas_size = canvas.getLayoutBox().getSize();
+    plug::Vec2d texture_offset = canvas.getTextureOffset();
 
     if (canvas.getTextureSize().y > canvas_size.y) {
-        canvas.setTextureOffset(Vec2d(
+        canvas.setTextureOffset(plug::Vec2d(
             texture_offset.x,
             param * (canvas.getTextureSize().y - canvas_size.y)
         ));
@@ -101,12 +101,13 @@ void VScrollCanvas::operator () (vec_t param) {
 
 HScrollCanvas::HScrollCanvas(CanvasView &canvas_) : canvas(canvas_) {}
 
-void HScrollCanvas::operator () (vec_t param) {
-    Vec2d canvas_size = canvas.getLayoutBox().getSize();
-    Vec2d texture_offset = canvas.getTextureOffset();
+
+void HScrollCanvas::operator () (double param) {
+    plug::Vec2d canvas_size = canvas.getLayoutBox().getSize();
+    plug::Vec2d texture_offset = canvas.getTextureOffset();
 
     if (canvas.getTextureSize().x > canvas_size.x) {
-        canvas.setTextureOffset(Vec2d(
+        canvas.setTextureOffset(plug::Vec2d(
             param * (canvas.getTextureSize().x - canvas_size.x),
             texture_offset.y
         ));
@@ -121,9 +122,9 @@ FilterHotkey::FilterHotkey() :
     Widget(AUTO_ID, BoundLayoutBox()) {}
 
 
-void FilterHotkey::onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {
+void FilterHotkey::onKeyboardPressed(const plug::KeyboardPressedEvent &event, plug::EHC &ehc) {
     switch (event.key_id) {
-        case F: 
+        case plug::KeyCode::F: 
             if (event.ctrl) {
                 FILTER_PALETTE.getLastFilter()->applyFilter(CANVAS_GROUP.getActive()->getCanvas());
                 break;
@@ -145,7 +146,7 @@ FilterAction::FilterAction(Window &window_, size_t filter_id_) :
 
 void FilterAction::operator () () {
     if (CANVAS_GROUP.getActive()) {
-        Filter *filter = FILTER_PALETTE.getFilter(filter_id);
+        plug::Filter *filter = FILTER_PALETTE.getFilter(filter_id);
 
         Widget *filter_widget = static_cast<Widget*>(filter->getWidget());
 

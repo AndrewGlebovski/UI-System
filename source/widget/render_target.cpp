@@ -7,55 +7,13 @@
 #include <cstring>
 #include "common/assert.hpp"
 #include "widget/render_target.hpp"
+#include "common/utils.hpp"
 
 
 // ============================================================================
 
 
-Texture::Texture(size_t width_, size_t height_, const Color* data_) :
-    data(new Color[width_ * height_]), width(width_), height(height_)
-{
-    ASSERT(data, "Failed to allocate data!\n");
-    ASSERT(memcpy(data, data_, width * height * 4), "Memcpy failed!\n");
-}
-
-
-Texture::Texture(size_t width_, size_t height_) :
-    data(new Color[width_ * height_]), width(width_), height(height_) 
-{
-    ASSERT(data, "Failed to allocate buffer!\n");
-}
-
-
-Texture::Texture(const Texture &texture_) :
-    Texture(texture_.width, texture_.height, texture_.data) {}
-
-
-void Texture::setPixel(size_t x, size_t y, Color color) {
-    ASSERT(x < width, "Index is out of range!\n");
-    ASSERT(y < height, "index is out of range!\n");
-
-    data[y * width + x] = color;
-}
-
-
-Color Texture::getPixel(size_t x, size_t y) const {
-    ASSERT(x < width, "Index is out of range!\n");
-    ASSERT(y < height, "index is out of range!\n");
-
-    return data[y * width + x];
-}
-
-
-Texture::~Texture() {
-    delete[] data;
-}
-
-
-// ============================================================================
-
-
-bool loadTexture(Texture **texture_ptr, const char *filename) {
+bool loadTexture(plug::Texture **texture_ptr, const char *filename) {
     if (!filename) return false;
 
     sf::Image image;
@@ -63,13 +21,13 @@ bool loadTexture(Texture **texture_ptr, const char *filename) {
 
     const uint8_t *src = image.getPixelsPtr();
 
-    *texture_ptr = new Texture(image.getSize().x, image.getSize().y);
+    *texture_ptr = new plug::Texture(image.getSize().x, image.getSize().y);
     ASSERT(*texture_ptr, "Failed to allocate texture!\n");
 
-    Texture &texture = *(*texture_ptr);
+    plug::Texture &texture = *(*texture_ptr);
 
     for (size_t i = 0; i < texture.width * texture.height; i++)
-        texture.data[i] = Color(src[i * 4], src[i * 4 + 1], src[i * 4 + 2], src[i * 4 + 3]);
+        texture.data[i] = plug::Color(src[i * 4], src[i * 4 + 1], src[i * 4 + 2], src[i * 4 + 3]);
     
     return true;
 }
@@ -88,21 +46,21 @@ RenderTexture::RenderTexture() :
 void RenderTexture::create(size_t width, size_t height) {
     ASSERT(render_texture.create(width, height), "Failed to create SFML texture!\n");
     
-    inner_texture = new Texture(width, height);
+    inner_texture = new plug::Texture(width, height);
     ASSERT(inner_texture, "Failed to allocate texture!\n");
 
     setChanged(true);
 }
 
 
-const Texture &RenderTexture::getTexture() const {
+const plug::Texture &RenderTexture::getTexture() const {
     if (isChanged()) {
         sf::Image image = render_texture.getTexture().copyToImage();
         
         const uint8_t *src = image.getPixelsPtr();
 
         for (size_t i = 0; i < inner_texture->width * inner_texture->height; i++)
-            inner_texture->data[i] = Color(src[i * 4], src[i * 4 + 1], src[i * 4 + 2], src[i * 4 + 3]);
+            inner_texture->data[i] = plug::Color(src[i * 4], src[i * 4 + 1], src[i * 4 + 2], src[i * 4 + 3]);
         
         setChanged(false);
     }
@@ -111,15 +69,20 @@ const Texture &RenderTexture::getTexture() const {
 }
 
 
-void RenderTexture::draw(const VertexArray& array) {
+void RenderTexture::draw(const plug::VertexArray& array) {
     sf::VertexArray vertices(
         sf::PrimitiveType(array.getPrimitive()),
         array.getSize()
     );
 
-    for (size_t i = 0; i < array.getSize(); i++)
-        vertices[i] = sf::Vertex(array[i].position, array[i].color, array[i].tex_coords);
-    
+    for (size_t i = 0; i < array.getSize(); i++) {
+        vertices[i] = sf::Vertex(
+            getSfmlVector2f(array[i].position),
+            getSfmlColor(array[i].color),
+            getSfmlVector2f(array[i].tex_coords)
+        );
+    }
+
     render_texture.draw(vertices);
 
     render_texture.display();
@@ -127,14 +90,19 @@ void RenderTexture::draw(const VertexArray& array) {
 }
 
 
-void RenderTexture::draw(const VertexArray& array, const Texture& texture) {
+void RenderTexture::draw(const plug::VertexArray& array, const plug::Texture& texture) {
     static sf::VertexArray vertices;
 
     vertices.setPrimitiveType(sf::PrimitiveType(array.getPrimitive()));
     vertices.resize(array.getSize());
 
-    for (size_t i = 0; i < array.getSize(); i++)
-        vertices[i] = sf::Vertex(array[i].position, array[i].color, array[i].tex_coords);
+    for (size_t i = 0; i < array.getSize(); i++) {
+        vertices[i] = sf::Vertex(
+            getSfmlVector2f(array[i].position),
+            getSfmlColor(array[i].color),
+            getSfmlVector2f(array[i].tex_coords)
+        );
+    }
     
     static sf::Image image;
     image.create(texture.width, texture.height, reinterpret_cast<const uint8_t*>(texture.data));
@@ -149,14 +117,14 @@ void RenderTexture::draw(const VertexArray& array, const Texture& texture) {
 }
 
 
-void RenderTexture::clear(Color color) {
-    render_texture.clear(color);
+void RenderTexture::clear(plug::Color color) {
+    render_texture.clear(getSfmlColor(color));
     setChanged(true);
 }
 
 
-Vec2d RenderTexture::getSize() const {
-    return render_texture.getSize();
+plug::Vec2d RenderTexture::getSize() const {
+    return getPlugVector(render_texture.getSize());
 }
 
 

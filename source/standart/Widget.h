@@ -12,10 +12,10 @@
 #ifndef __PLUG_WIDGET_H
 #define __PLUG_WIDGET_H
 
-#include "Plug/Event.h"
-#include "Plug/Graphics.h"
-#include "Plug/LayoutBox.h"
-#include "Plug/Math.h"
+#include "standart/Event.h"
+#include "standart/Graphics.h"
+#include "standart/LayoutBox.h"
+#include "standart/Math.h"
 
 namespace plug {
 
@@ -33,7 +33,7 @@ public:
    * @param stack
    * @param target buffer which the widget will be drawn on
    */
-  virtual void draw(TransformStack &stack, RenderTarget &target) = 0;
+  virtual void draw(plug::TransformStack &stack, RenderTarget &target) = 0;
 
   /**
    * @brief Handle abstract event

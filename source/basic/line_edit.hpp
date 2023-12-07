@@ -15,20 +15,20 @@
 struct LineEditStyle {
     const sf::Font *font;       ///< Font
     unsigned font_size;         ///< Font size
-    Color font_color;           ///< Font color
-    Color background_color;     ///< Background color
-    Color cursor_color;         ///< Cursor color
-    Color border_color;         ///< Border color
+    plug::Color font_color;           ///< Font color
+    plug::Color background_color;     ///< Background color
+    plug::Color cursor_color;         ///< Cursor color
+    plug::Color border_color;         ///< Border color
     float border_thickness;     ///< Border thickness
 
 
     LineEditStyle(
         const sf::Font &font_,
         unsigned font_size_,
-        Color font_color_,
-        Color background_color_,
-        Color cursor_color_,
-        Color border_color_,
+        plug::Color font_color_,
+        plug::Color background_color_,
+        plug::Color cursor_color_,
+        plug::Color border_color_,
         float border_thickness_
     ) :
         font(&font_), font_size(font_size_), font_color(font_color_),
@@ -56,22 +56,23 @@ public:
      * \note Max length must be greater than zero
     */
     LineEdit(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const LineEditStyle &style_, size_t max_length_
     );
 
     LineEdit(const LineEdit &line_edit) = delete;
+
     LineEdit &operator = (const LineEdit &line_edit) = delete;
 
     /**
      * \brief Checks if key can be added to string
     */
-    virtual bool isCorrectKey(int key_id, bool shift) const;
+    virtual bool isCorrectKey(plug::KeyCode key_id, bool shift) const;
 
     /**
      * \brief Converts key_id from enum to ASCII character
     */
-    virtual char convertKey(int key_id, bool shift) const;
+    virtual char convertKey(plug::KeyCode key_id, bool shift) const;
 
     /**
      * \brief Returns char buffer
@@ -101,7 +102,7 @@ public:
     /**
      * \brief Draws buffer content and cursor
     */
-    virtual void draw(TransformStack &stack, RenderTarget &result) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
 protected:
     /**
@@ -109,9 +110,9 @@ protected:
     */
     void setCursorVisible();
 
-    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
-    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
-    virtual void onTick(const TickEvent &event, EHC &ehc) override;
+    virtual void onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) override;
+    virtual void onKeyboardPressed(const plug::KeyboardPressedEvent &event, plug::EHC &ehc) override;
+    virtual void onTick(const plug::TickEvent &event, plug::EHC &ehc) override;
 
 
     std::string str;            ///< Char buffer

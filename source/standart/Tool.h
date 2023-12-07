@@ -12,8 +12,8 @@
 #ifndef __PLUG_TOOL_H
 #define __PLUG_TOOL_H
 
-#include "Plug/Tool/ColorPalette.h"
-#include "Plug/Tool/ControlState.h"
-#include "Plug/Tool/Tool.h"
+#include "standart/Tool/ColorPalette.h"
+#include "standart/Tool/ControlState.h"
+#include "standart/Tool/Tool.h"
 
 #endif /* Tool.h */

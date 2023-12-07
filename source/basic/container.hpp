@@ -19,14 +19,14 @@ public:
      * \note If focus_enabled is true, container always has some child in focus
     */
     Container(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         bool focus_enabled_ = true
     );
 
     /**
      * \brief Draws widgets under his management
     */
-    virtual void draw(TransformStack &stack, RenderTarget &result) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
     /**
      * \brief Searches for widget among its children
@@ -52,12 +52,12 @@ public:
     /**
      * \brief Broadcast events to container children
     */
-    virtual void onEvent(const Event &event, EHC &ehc) override;
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Allows widget to change its position and size according to parent
     */
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 
     /**
      * \brief Checks children statuses

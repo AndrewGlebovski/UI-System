@@ -1,10 +1,10 @@
 #ifndef __PLUG_CANVAS_CANVAS_H
 #define __PLUG_CANVAS_CANVAS_H
 
-#include "Plug/Canvas/SelectionMask.h"
-#include "Plug/Color.h"
-#include "Plug/Graphics.h"
-#include "Plug/Math/Vec2d.h"
+#include "standart/Canvas/SelectionMask.h"
+#include "standart/Color.h"
+#include "standart/Graphics.h"
+#include "standart/Math/Vec2d.h"
 
 namespace plug {
 class Canvas {

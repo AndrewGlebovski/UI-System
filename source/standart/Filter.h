@@ -12,9 +12,9 @@
 #ifndef __PLUG_FILTER_H
 #define __PLUG_FILTER_H
 
-#include "Plug/Canvas.h"
-#include "Plug/Plugin.h"
-#include "Plug/Widget.h"
+#include "standart/Canvas.h"
+#include "standart/Plugin.h"
+#include "standart/Widget.h"
 
 namespace plug {
 

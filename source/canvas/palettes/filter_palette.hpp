@@ -15,7 +15,7 @@
 /// Contains filters and remembers last used one 
 class FilterPalette {
 private:
-    List<Filter*> filters;        ///< Filter instances
+    List<plug::Filter*> filters;        ///< plug::Filter instances
     size_t last_filter;                 ///< Last used filter index
 
 public:
@@ -37,7 +37,7 @@ public:
     /**
      * \brief Returns last used filter instance
     */
-    Filter *getLastFilter();
+    plug::Filter *getLastFilter();
 
     /**
      * \brief Sets last used filter
@@ -47,7 +47,7 @@ public:
     /**
      * \brief Returns filter instance by ID
     */
-    Filter *getFilter(size_t filter_id);
+    plug::Filter *getFilter(size_t filter_id);
 
     /**
      * \brief Returns amount of supported filters
@@ -57,7 +57,7 @@ public:
     /**
      * \brief Adds filter to palette
     */
-    void addFilter(Filter &new_filter);
+    void addFilter(plug::Filter &new_filter);
 
     /**
      * \brief Delete filters

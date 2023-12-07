@@ -16,7 +16,7 @@
 /// Base class for all assets
 class Asset {
 protected:
-    List<Texture*> textures;    ///< Textures array
+    List<plug::Texture*> textures;    ///< Textures array
 
     /**
      * \brief Contructs empty asset
@@ -41,7 +41,7 @@ protected:
     /**
      * \brief Returns texture by its id
     */
-    const Texture &getTexture(int id) const;
+    const plug::Texture &getTexture(int id) const;
 
     /**
      * \brief Free textures
@@ -72,7 +72,7 @@ public:
 
     WindowAsset(const char *rootpath);
 
-    const Texture &operator [] (TEXTURE_ID id) const;
+    const plug::Texture &operator [] (TEXTURE_ID id) const;
 };
 
 
@@ -94,7 +94,7 @@ public:
 
     PaletteViewAsset(const char *rootpath);
 
-    const Texture &operator [] (TEXTURE_ID id) const;
+    const plug::Texture &operator [] (TEXTURE_ID id) const;
 };
 
 

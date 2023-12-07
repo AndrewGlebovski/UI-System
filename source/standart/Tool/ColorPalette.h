@@ -12,7 +12,7 @@
 #ifndef __PLUG_TOOL_COLOR_PALETTE_H
 #define __PLUG_TOOL_COLOR_PALETTE_H
 
-#include "Plug/Color.h"
+#include "standart/Color.h"
 
 namespace plug {
 

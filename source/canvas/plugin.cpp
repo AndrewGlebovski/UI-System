@@ -14,25 +14,25 @@ BasicTool::BasicTool() :
     is_drawing(false), canvas(nullptr), color_palette(nullptr), ref_count(1) {}
 
 
-void BasicTool::setColorPalette(ColorPalette &color_palette_) { color_palette = &color_palette_; }
+void BasicTool::setColorPalette(plug::ColorPalette &color_palette_) { color_palette = &color_palette_; }
 
 
-void BasicTool::setActiveCanvas(Canvas &canvas_) { onCancel(); canvas = &canvas_; }
+void BasicTool::setActiveCanvas(plug::Canvas &canvas_) { onCancel(); canvas = &canvas_; }
 
 
-void BasicTool::onSecondaryButton(const ControlState &state, const Vec2d &mouse)  {}
+void BasicTool::onSecondaryButton(const plug::ControlState &state, const plug::Vec2d &mouse)  {}
 
 
-void BasicTool::onModifier1(const ControlState &state) {}
+void BasicTool::onModifier1(const plug::ControlState &state) {}
 
 
-void BasicTool::onModifier2(const ControlState &state) {}
+void BasicTool::onModifier2(const plug::ControlState &state) {}
 
 
-void BasicTool::onModifier3(const ControlState &state) {}
+void BasicTool::onModifier3(const plug::ControlState &state) {}
 
 
-void BasicTool::onMove(const Vec2d &mouse) {}
+void BasicTool::onMove(const plug::Vec2d &mouse) {}
 
 
 void BasicTool::onConfirm() { is_drawing = false; }
@@ -41,24 +41,24 @@ void BasicTool::onConfirm() { is_drawing = false; }
 void BasicTool::onCancel() { is_drawing = false; }
 
 
-WidgetInterface *BasicTool::getWidget() { return nullptr; }
+plug::Widget *BasicTool::getWidget() { return nullptr; }
 
 
-Plugin *BasicTool::tryGetInterface(PluginGuid guid) {
-    Plugin *result = nullptr;
+plug::Plugin *BasicTool::tryGetInterface(size_t guid) {
+    plug::Plugin *result = nullptr;
 
-    if (guid == PluginGuid::Plugin)
-        result = static_cast<Plugin*>(this);
-    else if (guid == PluginGuid::Tool)
+    if (static_cast<plug::PluginGuid>(guid) == plug::PluginGuid::Plugin)
+        result = static_cast<plug::Plugin*>(this);
+    else if (static_cast<plug::PluginGuid>(guid) == plug::PluginGuid::Tool)
         result = static_cast<Tool*>(this);
 
-    if (result) result->addRef();
+    if (result) result->addReference();
 
     return result;
 }
 
 
-void BasicTool::addRef() {
+void BasicTool::addReference() {
     ref_count++;
 }
 
@@ -69,7 +69,7 @@ void BasicTool::release() {
 }
 
 
-const PluginData *BasicTool::getPluginData() const { return nullptr; }
+const plug::PluginData *BasicTool::getPluginData() const { return nullptr; }
 
 
 // ============================================================================
@@ -78,24 +78,24 @@ const PluginData *BasicTool::getPluginData() const { return nullptr; }
 BasicFilter::BasicFilter() : ref_count(1) {}
 
 
-WidgetInterface *BasicFilter::getWidget() { return nullptr; }
+plug::Widget *BasicFilter::getWidget() { return nullptr; }
 
 
-Plugin *BasicFilter::tryGetInterface(PluginGuid guid) {
-    Plugin *result = nullptr;
+plug::Plugin *BasicFilter::tryGetInterface(size_t guid) {
+    plug::Plugin *result = nullptr;
 
-    if (guid == PluginGuid::Plugin)
-        result = static_cast<Plugin*>(this);
-    else if (guid == PluginGuid::Filter)
-        result = static_cast<Filter*>(this);
+    if (static_cast<plug::PluginGuid>(guid) == plug::PluginGuid::Plugin)
+        result = static_cast<plug::Plugin*>(this);
+    else if (static_cast<plug::PluginGuid>(guid) == plug::PluginGuid::Filter)
+        result = static_cast<plug::Filter*>(this);
 
-    if (result) result->addRef();
+    if (result) result->addReference();
 
     return result;
 }
 
 
-void BasicFilter::addRef() {
+void BasicFilter::addReference() {
     ref_count++;
 }
 
@@ -106,4 +106,4 @@ void BasicFilter::release() {
 }
 
 
-const PluginData *BasicFilter::getPluginData() const { return nullptr; }
+const plug::PluginData *BasicFilter::getPluginData() const { return nullptr; }

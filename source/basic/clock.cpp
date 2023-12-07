@@ -12,7 +12,7 @@
 
 
 Clock::Clock(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     const ClockStyle &style_
 ) :
     Widget(id_, layout_),
@@ -27,9 +27,9 @@ Clock::Clock(
 }
 
 
-void Clock::draw(TransformStack &stack, RenderTarget &result) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = applySize(stack, layout->getSize());
+void Clock::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
 
     size_t hours = (daytime / 3600) % 24;
     size_t minutes = (daytime / 60) % 60;
@@ -40,7 +40,7 @@ void Clock::draw(TransformStack &stack, RenderTarget &result) {
 
     text.setText(str);
 
-    Vec2d text_size = applySize(stack, text.getTextureSize());
+    plug::Vec2d text_size = applySize(stack, text.getTextureSize());
 
     text.draw(
         result,
@@ -50,7 +50,7 @@ void Clock::draw(TransformStack &stack, RenderTarget &result) {
 }
 
 
-void Clock::onTick(const TickEvent &event, EHC &ehc) {
+void Clock::onTick(const plug::TickEvent &event, plug::EHC &ehc) {
     time_passed += event.delta_time;
 
     if (time_passed > 1) {

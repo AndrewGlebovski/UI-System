@@ -12,7 +12,7 @@
 #ifndef __PLUG_CANVAS_H
 #define __PLUG_CANVAS_H
 
-#include "Plug/Canvas/Canvas.h"
-#include "Plug/Canvas/SelectionMask.h"
+#include "standart/Canvas/Canvas.h"
+#include "standart/Canvas/SelectionMask.h"
 
 #endif /* Canvas.h */

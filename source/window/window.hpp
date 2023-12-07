@@ -17,21 +17,21 @@
 /// Controls how window looks
 class WindowStyle {
 public:
-    Color title_color;          ///< Title color
-    Vec2d title_offset;         ///< Title offset from top-left corner
+    plug::Color title_color;          ///< Title color
+    plug::Vec2d title_offset;         ///< Title offset from top-left corner
     unsigned font_size;         ///< Title font size
     const sf::Font &font;       ///< Title font
     const WindowAsset &asset;   ///< Textures used in window
     float outline;              ///< Describes size of window resizing buttons
-    Vec2d tl_offset;            ///< Window inner area offset from top-left corner
-    Vec2d br_offset;            ///< Window inner area offset from bottom-right corner
+    plug::Vec2d tl_offset;            ///< Window inner area offset from top-left corner
+    plug::Vec2d br_offset;            ///< Window inner area offset from bottom-right corner
 
 
     WindowStyle(
-        Color title_color_, const Vec2d &title_offset_,
+        plug::Color title_color_, const plug::Vec2d &title_offset_,
         unsigned font_size_, const sf::Font &font_,
         const WindowAsset &asset_, float outline_, 
-        const Vec2d &tl_offset_, const Vec2d &br_offset_
+        const plug::Vec2d &tl_offset_, const plug::Vec2d &br_offset_
     ) :
         title_color(title_color_), title_offset(title_offset_),
         font_size(font_size_), font(font_),
@@ -49,7 +49,7 @@ public:
      * \note Position and size consider title bar and frame
     */
     Window(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const std::string &title_,
         const WindowStyle &style_,
         bool can_resize = true,
@@ -63,12 +63,12 @@ public:
     /**
      * \brief Returns position of the window inner area relative to window top-left corner
     */
-    Vec2d getAreaPosition() const;
+    plug::Vec2d getAreaPosition() const;
 
     /**
      * \brief Returns size of the window inner area
     */
-    Vec2d getAreaSize() const;
+    plug::Vec2d getAreaSize() const;
 
     /**
      * \brief Adds menu to window or replaces existing one
@@ -84,12 +84,12 @@ public:
     /**
      * \brief Sets window position
     */
-    bool setPosition(const Vec2d &position_);
+    bool setPosition(const plug::Vec2d &position_);
 
     /**
      * \brief Sets window size
     */
-    bool setSize(const Vec2d &size_);
+    bool setSize(const plug::Vec2d &size_);
 
     /**
      * \brief Finds pointer to widget inside window container
@@ -115,17 +115,17 @@ public:
     /**
      * \brief Draws window frame, title bar and its content
     */
-    virtual void draw(TransformStack &stack, RenderTarget &result) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
     
     /**
      * \brief Broadcast events to window children
     */
-    virtual void onEvent(const Event &event, EHC &ehc) override;
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Allows widget to change its position and size according to parent
     */
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 
     /**
      * \brief Checks children statuses
@@ -138,8 +138,8 @@ public:
     virtual ~Window() override;
 
 protected:
-    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
-    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    virtual void onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) override;
+    virtual void onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) override;
 
     WindowStyle style;          ///< Window style
     Container buttons;          ///< Window title bar and resize buttons
@@ -179,7 +179,7 @@ private:
 class MainWindow : public Window {
 public:
     MainWindow(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const std::string &title_,
         const WindowStyle &style_
     );
@@ -187,12 +187,12 @@ public:
     /**
      * \brief Parses SFML event into my own event system
     */
-    void parseEvent(const sf::Event &event, TransformStack &stack);
+    void parseEvent(const sf::Event &event, plug::TransformStack &stack);
 
     /**
      * \brief Allows widget to change its position and size according to parent
     */
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 };
 
 

@@ -12,8 +12,8 @@
 #ifndef __PLUG_GRAPHICS_RENDER_TARGET_H
 #define __PLUG_GRAPHICS_RENDER_TARGET_H
 
-#include "Plug/Graphics/Texture.h"
-#include "Plug/Graphics/VertexArray.h"
+#include "standart/Graphics/Texture.h"
+#include "standart/Graphics/VertexArray.h"
 
 namespace plug {
 

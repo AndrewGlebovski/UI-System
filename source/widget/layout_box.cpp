@@ -7,6 +7,7 @@
 #include <cmath>
 #include "config/configs.hpp"
 #include "widget/layout_box.hpp"
+#include "common/utils.hpp"
 
 
 // ============================================================================
@@ -15,38 +16,38 @@
 LazyLayoutBox::LazyLayoutBox() : position(), size() {}
 
 
-LazyLayoutBox::LazyLayoutBox(const Vec2d &position_, const Vec2d &size_) :
+LazyLayoutBox::LazyLayoutBox(const plug::Vec2d &position_, const plug::Vec2d &size_) :
     position(position_), size(size_) {}
 
 
-Vec2d LazyLayoutBox::getPosition() const {
+plug::Vec2d LazyLayoutBox::getPosition() const {
     return position;
 }
 
 
-bool LazyLayoutBox::setPosition(const Vec2d& position_) {
-    if (position == position_) return false;
+bool LazyLayoutBox::setPosition(const plug::Vec2d& position_) {
+    if (isEqual(position, position_)) return false;
     position = position_;
     return true;
 }
 
 
-Vec2d LazyLayoutBox::getSize() const {
+plug::Vec2d LazyLayoutBox::getSize() const {
     return size;
 }
 
 
-bool LazyLayoutBox::setSize(const Vec2d& size_) {
-    if (size == size_) return false;
+bool LazyLayoutBox::setSize(const plug::Vec2d& size_) {
+    if (isEqual(size, size_)) return false;
     size = size_;
     return true;
 }
 
 
-void LazyLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {}
+void LazyLayoutBox::onParentUpdate(const plug::LayoutBox &parent_layout) {}
 
 
-LayoutBox *LazyLayoutBox::clone() const {
+plug::LayoutBox *LazyLayoutBox::clone() const {
     return new LazyLayoutBox(position, size);
 }
 
@@ -57,12 +58,12 @@ LayoutBox *LazyLayoutBox::clone() const {
 BoundLayoutBox::BoundLayoutBox() : LazyLayoutBox(), bound(SCREEN_W, SCREEN_H) {}
 
 
-BoundLayoutBox::BoundLayoutBox(const Vec2d &position_, const Vec2d &size_) :
+BoundLayoutBox::BoundLayoutBox(const plug::Vec2d &position_, const plug::Vec2d &size_) :
     LazyLayoutBox(position_, size_), bound(SCREEN_W, SCREEN_H) {}
 
 
-bool BoundLayoutBox::setPosition(const Vec2d& position_) {
-    Vec2d prev_pos = position;
+bool BoundLayoutBox::setPosition(const plug::Vec2d& position_) {
+    plug::Vec2d prev_pos = position;
     position = position_;
 
     if (position.x < 0)
@@ -75,12 +76,12 @@ bool BoundLayoutBox::setPosition(const Vec2d& position_) {
     else if (position.y + size.y > bound.y)
         position.y = bound.y - size.y;
 
-    return !(position == prev_pos);
+    return !isEqual(position, prev_pos);
 }
 
 
-bool BoundLayoutBox::setSize(const Vec2d& size_) {
-    Vec2d prev_size = size;
+bool BoundLayoutBox::setSize(const plug::Vec2d& size_) {
+    plug::Vec2d prev_size = size;
     size = size_;
 
     if (size.x < 0)
@@ -93,11 +94,11 @@ bool BoundLayoutBox::setSize(const Vec2d& size_) {
     else if (size.y + position.y > bound.y)
         size.y = bound.y - position.y;
 
-    return !(size == prev_size);
+    return !isEqual(size, prev_size);
 }
 
 
-void BoundLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
+void BoundLayoutBox::onParentUpdate(const plug::LayoutBox &parent_layout) {
     bound = parent_layout.getSize();
 
     if (position.x + size.x > bound.x) {
@@ -118,38 +119,38 @@ void BoundLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
 }
 
 
-LayoutBox *BoundLayoutBox::clone() const { return new BoundLayoutBox(position, size); }
+plug::LayoutBox *BoundLayoutBox::clone() const { return new BoundLayoutBox(position, size); }
 
 
 // ============================================================================
 
 
 AnchorLayoutBox::AnchorLayoutBox(
-    const Vec2d &offset_, const Vec2d &size_,
-    const Vec2d &anchor_position_, const Vec2d &anchor_size_
+    const plug::Vec2d &offset_, const plug::Vec2d &size_,
+    const plug::Vec2d &anchor_position_, const plug::Vec2d &anchor_size_
 ) :
-    LazyLayoutBox(Vec2d(), size_),
+    LazyLayoutBox(plug::Vec2d(), size_),
     offset(offset_), basic_size(size_),
     anchor_position(anchor_position_), anchor_size(anchor_size_)
 {}
 
 
-bool AnchorLayoutBox::setPosition(const Vec2d& offset_) {
-    if (offset == offset_) return false;
+bool AnchorLayoutBox::setPosition(const plug::Vec2d& offset_) {
+    if (isEqual(offset, offset_)) return false;
     offset = offset_;
     return true;
 }
 
 
-bool AnchorLayoutBox::setSize(const Vec2d& basic_size_) {
-    if (basic_size == basic_size_) return false;
+bool AnchorLayoutBox::setSize(const plug::Vec2d& basic_size_) {
+    if (isEqual(basic_size, basic_size_)) return false;
     basic_size = basic_size_;
     return true;
 }
 
 
-void AnchorLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
-    Vec2d bound = parent_layout.getSize();
+void AnchorLayoutBox::onParentUpdate(const plug::LayoutBox &parent_layout) {
+    plug::Vec2d bound = parent_layout.getSize();
 
     bool split_x = fabs(anchor_size.x) > 1e-5;
     bool split_y = fabs(anchor_size.y) > 1e-5;
@@ -175,6 +176,6 @@ void AnchorLayoutBox::onParentUpdate(const LayoutBox &parent_layout) {
 }
 
 
-LayoutBox *AnchorLayoutBox::clone() const {
+plug::LayoutBox *AnchorLayoutBox::clone() const {
     return new AnchorLayoutBox(offset, size, anchor_position, anchor_size);
 }

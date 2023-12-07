@@ -11,52 +11,16 @@
 #include <cstdio>
 #include "SFML/Graphics.hpp"
 #include "config/configs.hpp"
-#include "config/key_id.hpp"
 #include "common/list.hpp"
-#include "common/vector.hpp"
 #include "widget/layout_box.hpp"
 #include "widget/transform.hpp"
 #include "render_target.hpp"
 #include "shape.hpp"
-#include "event.hpp"
-
-
-/// Widget basic interface
-class WidgetInterface {
-public:
-    virtual ~WidgetInterface() = default;
-
-    virtual void draw(TransformStack &stack, RenderTarget &result) = 0;
-
-    virtual void onEvent(const Event &event, EHC &ehc) = 0;
-
-    virtual void onParentUpdate(const LayoutBox &parent_layout) = 0;
-
-    virtual LayoutBox &getLayoutBox() = 0;
-
-    virtual const LayoutBox &getLayoutBox() const = 0;
-
-    virtual void setLayoutBox(const LayoutBox &layout_) = 0;
-
-protected:
-    virtual bool covers(TransformStack &stack, const Vec2d &position) const = 0;
-
-    virtual void onTick(const TickEvent &event, EHC &ehc) {};
-    
-    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) {};
-    
-    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) {};
-    
-    virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {};
-    
-    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {};
-    
-    virtual void onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc) {};
-};
+#include "standart/Widget.h"
 
 
 /// Extended widget interface with common implementation
-class Widget : public WidgetInterface {
+class Widget : public plug::Widget {
 public:
     /// Pass into constructor to generate new ID
     static const size_t AUTO_ID = 0;
@@ -74,7 +38,7 @@ public:
      * \brief Widget constructor
      * \note If id_ != AUTO_ID sets id to id_, otherwise generates "unique" id
     */
-    Widget(size_t id_, const LayoutBox &layout_);
+    Widget(size_t id_, const plug::LayoutBox &layout_);
 
     /**
      * \brief Default copy constructor
@@ -96,22 +60,22 @@ public:
     /**
      * \brief Returns current layout box
     */
-    virtual LayoutBox &getLayoutBox() override;
+    virtual plug::LayoutBox &getLayoutBox() override;
 
     /**
      * \brief Returns current layout box
     */
-    virtual const LayoutBox &getLayoutBox() const override;
+    virtual const plug::LayoutBox &getLayoutBox() const override;
 
     /**
      * \brief Sets layout box
     */
-    virtual void setLayoutBox(const LayoutBox &layout_) override;
+    virtual void setLayoutBox(const plug::LayoutBox &layout_) override;
 
     /**
      * \brief Generates transform using widget position
     */
-    Transform getTransform() const;
+    plug::Transform getTransform() const;
 
     /**
      * \brief Returns parent
@@ -147,17 +111,17 @@ public:
      * \brief Draws widget on render target
      * \note By default draws red rectangle for debug purposes
     */
-    virtual void draw(TransformStack &stack, RenderTarget &result) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
     /**
      * \brief Handle all sorts of events event
     */
-    virtual void onEvent(const Event &event, EHC &ehc) override;
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Allows widget to change its position and size according to parent
     */
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 
     /**
      * \brief Checks children statuses
@@ -171,7 +135,7 @@ public:
     virtual ~Widget() override;
 
 protected:
-    virtual bool covers(TransformStack &stack, const Vec2d &position) const override;
+    virtual bool covers(plug::TransformStack &stack, const plug::Vec2d &position) const override;
 
     /**
      * \brief If requested_id != AUTO_ID returns requested_id, otherwise returns unique id
@@ -179,7 +143,7 @@ protected:
     size_t generateId(size_t requested_id);
 
     const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
-    LayoutBox *layout;      ///< Widget position and size encapsulated
+    plug::LayoutBox *layout;      ///< Widget position and size encapsulated
     Widget *parent;         ///< Parent that holds this widget
     Status status;          ///< Shows parent if some actions requiered
 };
@@ -188,7 +152,7 @@ protected:
 /**
  * \brief Checks if point is inside rectangle
 */
-bool isInsideRect(Vec2d position, Vec2d size, Vec2d point);
+bool isInsideRect(plug::Vec2d position, plug::Vec2d size, plug::Vec2d point);
 
 
 #endif

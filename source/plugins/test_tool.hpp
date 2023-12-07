@@ -11,10 +11,10 @@
 #include "canvas/plugin.hpp"
 
 
-extern "C" Plugin *loadPlugin();
+extern "C" plug::Plugin *loadPlugin();
 
 
-class TestToolData : public PluginData {
+class TestToolData : public plug::PluginData {
     virtual const char *getName() const override {
         return "Test Tool";
     }
@@ -29,15 +29,15 @@ class TestTool : public BasicTool {
 public:
     TestTool();
 
-    virtual void onMainButton(const ControlState &state, const Vec2d &mouse) override;
+    virtual void onMainButton(const plug::ControlState &state, const plug::Vec2d &mouse) override;
 
-    virtual void onMove(const Vec2d &mouse) override;
+    virtual void onMove(const plug::Vec2d &mouse) override;
 
-    virtual const PluginData *getPluginData() const override;
+    virtual const plug::PluginData *getPluginData() const override;
     
 private:
     TestToolData my_data;       ///< Tool data instance
-    Vec2d prev_position;        ///< Previous mouse click position
+    plug::Vec2d prev_position;        ///< Previous mouse click position
 };
 
 

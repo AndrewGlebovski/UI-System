@@ -33,7 +33,7 @@ size_t SelectionMask::getWidth() const { return width; }
 size_t SelectionMask::getHeight() const { return height; }
 
 
-void SelectionMask::setPixelMask(size_t x, size_t y, bool flag) {
+void SelectionMask::setPixel(size_t x, size_t y, bool flag) {
     ASSERT(mask, "Mask is nullptr!\n");
     ASSERT(x < width, "X is out of range!\n");
     ASSERT(y < height, "Y is out of range!\n");

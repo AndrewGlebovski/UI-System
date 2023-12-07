@@ -8,7 +8,10 @@
 #define _SELECTION_MASK_H_
 
 
-class SelectionMask {
+#include "standart/Canvas/SelectionMask.h"
+
+
+class SelectionMask : public plug::SelectionMask {
 private:
     bool *mask;
     size_t width;
@@ -21,19 +24,19 @@ public:
 
     SelectionMask &operator = (const SelectionMask &mask) = delete;
 
-    virtual ~SelectionMask();
+    virtual size_t getWidth() const override;
 
-    virtual size_t getWidth() const;
+    virtual size_t getHeight() const override;
 
-    virtual size_t getHeight() const;
+    virtual bool getPixel(size_t x, size_t y) const override;
 
-    virtual bool getPixel(size_t x, size_t y) const;
-
-    virtual void setPixelMask(size_t x, size_t y, bool flag);
+    virtual void setPixel(size_t x, size_t y, bool flag) override;
     
-    virtual void fill(bool value);
+    virtual void fill(bool value) override;
     
-    virtual void invert();
+    virtual void invert() override;
+
+    virtual ~SelectionMask() override;
 };
 
 
