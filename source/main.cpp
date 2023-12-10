@@ -5,6 +5,9 @@
 #include "common/utils.hpp"
 
 
+// ============================================================================
+
+
 /// Stores font, assets and styles
 struct StyleManager {
     sf::Font font;
@@ -31,7 +34,24 @@ struct StyleManager {
 
     /// Creates menu for main window
     Menu *createMainMenu(Window &dialog_parent);
+
+    /// Creates start nodes for main window
+    void setupMainWindow(MainWindow &window);
 };
+
+
+// ============================================================================
+
+
+/// Handles events from SFML window
+void handleInputEvent(sf::RenderWindow &sf_window, MainWindow &main_window, TransformStack &stack);
+
+
+/// Generates and handles tick event
+void handleTimeEvent(sf::Clock &timer, MainWindow &main_window, TransformStack &stack);
+
+
+// ============================================================================
 
 
 int main() {
@@ -53,19 +73,7 @@ int main() {
     );
     ASSERT(main_window, "Failed to allocate tool main window!\n");
 
-    main_window->setMenu(style_manager.createMainMenu(*main_window));
-
-    main_window->addChild(new Clock(
-        Widget::AUTO_ID,
-        BoundLayoutBox(plug::Vec2d(), plug::Vec2d(100, 50)),
-        style_manager.clock_style
-    ));
-    
-    main_window->addChild(new FilterHotkey());
-
-    main_window->addChild(openPicture(nullptr, style_manager.window_style, style_manager.scrollbar_style));
-    main_window->addChild(style_manager.createToolPaletteView());
-    main_window->addChild(style_manager.createColorPaletteView());
+    style_manager.setupMainWindow(*main_window);
 
     PluginLoader plugin_loader(PLUGIN_DIR, *main_window->getMenu(), 1, *main_window);
 
@@ -84,21 +92,9 @@ int main() {
 
         main_window->checkChildren();
 
-        sf::Event event;
-
-        while (render_window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                render_window.close();
-                break;
-            }
-            
-            main_window->parseEvent(event, stack);
-        }
+        handleInputEvent(render_window, *main_window, stack);
         
-        plug::EHC ehc = {stack, false, false};
-
-        main_window->onEvent(plug::TickEvent(timer.getElapsedTime().asSeconds()), ehc);
-        timer.restart();
+        handleTimeEvent(timer, *main_window, stack);
         
         render_texture.clear(Black);
 
@@ -216,4 +212,50 @@ Menu *StyleManager::createMainMenu(Window &dialog_parent) {
     main_menu->addButton(1, "Intensity Curve", new FilterAction(dialog_parent, FilterPalette::INTENSITY_CURVE));
 
     return main_menu;
+}
+
+
+void StyleManager::setupMainWindow(MainWindow &window) {
+    window.setMenu(createMainMenu(window));
+
+    window.addChild(new Clock(
+        Widget::AUTO_ID,
+        BoundLayoutBox(plug::Vec2d(), plug::Vec2d(100, 50)),
+        clock_style
+    ));
+    
+    window.addChild(new FilterHotkey());
+
+    window.addChild(openPicture(nullptr, window_style, scrollbar_style));
+    
+    window.addChild(createToolPaletteView());
+    
+    window.addChild(createColorPaletteView());
+}
+
+
+// ============================================================================
+
+
+void handleInputEvent(sf::RenderWindow &sf_window, MainWindow &main_window, TransformStack &stack) {
+    sf::Event event;
+
+    while (sf_window.pollEvent(event)) {
+        if (event.type == sf::Event::Closed) {
+            sf_window.close();
+            break;
+        }
+        
+        main_window.parseEvent(event, stack);
+    }
+}
+
+
+/// Generates and handles tick event
+void handleTimeEvent(sf::Clock &timer, MainWindow &main_window, TransformStack &stack) {
+    plug::EHC ehc = {stack, false, false};
+
+    main_window.onEvent(plug::TickEvent(timer.getElapsedTime().asSeconds()), ehc);
+
+    timer.restart();
 }
