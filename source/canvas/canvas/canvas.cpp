@@ -6,7 +6,6 @@
 
 #include "common/assert.hpp"
 #include "canvas/canvas/canvas.hpp"
-#include "common/utils.hpp"
 
 
 // ============================================================================

@@ -17,6 +17,7 @@
 #include "render_target.hpp"
 #include "shape.hpp"
 #include "standart/Widget.h"
+#include "common/utils.hpp"
 
 
 /// Extended widget interface with common implementation

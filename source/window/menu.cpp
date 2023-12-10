@@ -6,7 +6,6 @@
 
 #include <limits>
 #include "window/menu.hpp"
-#include "common/utils.hpp"
 
 
 const size_t INVALID_OPENED = std::numeric_limits<size_t>::max();   ///< No opened menu at the moment

@@ -5,7 +5,6 @@
 
 
 #include "plugins/rect_tool.hpp"
-#include "common/utils.hpp"
 
 
 // ============================================================================

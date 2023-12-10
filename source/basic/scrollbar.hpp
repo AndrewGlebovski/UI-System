@@ -31,20 +31,24 @@ public:
 /// Contains scroll bar style
 class ScrollBarStyle {
 public:
-    plug::Color frame_color;          ///< Frame color
-    float frame_outline;        ///< Frame outline thickness
-    plug::Color background_color;     ///< Background color
-    plug::Color scroller_color;       ///< Scroller
-    double scroller_factor;      ///< Scroller height = factor * scrollbar.size
+    plug::Color frame_color;        ///< Frame color
+    float frame_outline;            ///< Frame outline thickness
+    plug::Color background_color;   ///< Background color
+    plug::Color scroller_color;     ///< Scroller
+    double scroller_factor;         ///< Scroller height = factor * scrollbar.size
 
     ScrollBarStyle(
-        plug::Color frame_color_, float frame_outline_,
-        plug::Color background_color_,
-        plug::Color scroller_color_, double scroller_factor_
+        plug::Color frame_color_ = hex2Color(SCROLLBAR_FRAME_COLOR),
+        float frame_outline_ = SCROLLBAR_FRAME_OUTLINE,
+        plug::Color background_color_ = hex2Color(SCROLLBAR_BACKGROUND_COLOR),
+        plug::Color scroller_color_ = hex2Color(SCROLLBAR_SCROLLER_COLOR),
+        double scroller_factor_ = SCROLLBAR_SCROLLER_FACTOR
     ) :
-        frame_color(frame_color_), frame_outline(frame_outline_),
+        frame_color(frame_color_),
+        frame_outline(frame_outline_),
         background_color(background_color_),
-        scroller_color(scroller_color_), scroller_factor(scroller_factor_) 
+        scroller_color(scroller_color_),
+        scroller_factor(scroller_factor_) 
     {}
 };
 

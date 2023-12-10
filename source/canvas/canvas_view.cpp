@@ -6,7 +6,6 @@
 
 #include "canvas/canvas_view.hpp"
 #include "canvas/palettes/palette_manager.hpp"
-#include "common/utils.hpp"
 
 
 // ============================================================================

@@ -13,16 +13,18 @@
 
 /// Controls how clock looks
 struct ClockStyle {
-    plug::Color text_color;       ///< Text color
-    unsigned font_size;     ///< Font size
-    const sf::Font &font;   ///< Font
+    const sf::Font &font;       ///< Font
+    unsigned font_size;         ///< Font size
+    plug::Color text_color;     ///< Text color
 
     ClockStyle(
-        plug::Color text_color_, 
-        unsigned font_size_, sf::Font &font_
+        sf::Font &font_,
+        unsigned font_size_ = 20,
+        plug::Color text_color_ = Black
     ) :
-        text_color(text_color_), 
-        font_size(font_size_), font(font_) 
+        font(font_),
+        font_size(font_size_),
+        text_color(text_color_)
     {}
 };
 

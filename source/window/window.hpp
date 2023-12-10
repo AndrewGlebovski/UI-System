@@ -17,26 +17,34 @@
 /// Controls how window looks
 class WindowStyle {
 public:
-    plug::Color title_color;          ///< Title color
-    plug::Vec2d title_offset;         ///< Title offset from top-left corner
-    unsigned font_size;         ///< Title font size
     const sf::Font &font;       ///< Title font
     const WindowAsset &asset;   ///< Textures used in window
+    plug::Color title_color;    ///< Title color
+    plug::Vec2d title_offset;   ///< Title offset from top-left corner
+    unsigned font_size;         ///< Title font size
     float outline;              ///< Describes size of window resizing buttons
-    plug::Vec2d tl_offset;            ///< Window inner area offset from top-left corner
-    plug::Vec2d br_offset;            ///< Window inner area offset from bottom-right corner
+    plug::Vec2d tl_offset;      ///< Window inner area offset from top-left corner
+    plug::Vec2d br_offset;      ///< Window inner area offset from bottom-right corner
 
 
     WindowStyle(
-        plug::Color title_color_, const plug::Vec2d &title_offset_,
-        unsigned font_size_, const sf::Font &font_,
-        const WindowAsset &asset_, float outline_, 
-        const plug::Vec2d &tl_offset_, const plug::Vec2d &br_offset_
+        const sf::Font &font_,
+        const WindowAsset &asset_,
+        plug::Color title_color_ = hex2Color(WINDOW_TITLE_COLOR),
+        const plug::Vec2d &title_offset_ = WINDOW_TITLE_OFFSET,
+        unsigned font_size_ = WINDOW_FONT_SIZE,
+        float outline_ = WINDOW_OUTLINE, 
+        const plug::Vec2d &tl_offset_ = WINDOW_TL_OFFSET,
+        const plug::Vec2d &br_offset_ = WINDOW_BR_OFFSET
     ) :
-        title_color(title_color_), title_offset(title_offset_),
-        font_size(font_size_), font(font_),
-        asset(asset_), outline(outline_),
-        tl_offset(tl_offset_), br_offset(br_offset_)
+        font(font_),
+        asset(asset_),
+        title_color(title_color_),
+        title_offset(title_offset_),
+        font_size(font_size_),
+        outline(outline_),
+        tl_offset(tl_offset_),
+        br_offset(br_offset_)
     {}
 };
 

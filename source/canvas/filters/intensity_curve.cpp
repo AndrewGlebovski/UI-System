@@ -8,7 +8,6 @@
 #include "canvas/filters/intensity_curve.hpp"
 #include "canvas/palettes/palette_manager.hpp"
 #include "canvas/canvas_view.hpp"
-#include "common/utils.hpp"
 
 
 // ============================================================================

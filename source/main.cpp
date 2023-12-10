@@ -5,29 +5,33 @@
 #include "common/utils.hpp"
 
 
-/// Creates tool palette view in new subwindow
-Widget *createToolPaletteView(
-    WindowStyle &window_style,
-    PaletteViewAsset &palette_asset
-);
+/// Stores font, assets and styles
+struct StyleManager {
+    sf::Font font;
+    WindowAsset window_asset;
+    PaletteViewAsset palette_asset;
 
+    WindowStyle window_style;
+    ScrollBarStyle scrollbar_style;
+    ClockStyle clock_style;
+    FileDialogStyle dialog_style;
+    RectButtonStyle menu_style;
 
-/// Creates color palette view in new subwindow
-Widget *createColorPaletteView(
-    WindowStyle &window_style
-);
+    /// Inititalizes styles with values from configs.hpp
+    StyleManager();
 
+    /// Creates tool palette view in new subwindow
+    Widget *createToolPaletteView();
 
-/// Creates palettes for palette manager
-void setupPaletteManager(WindowStyle &window_style);
+    /// Creates color palette view in new subwindow
+    Widget *createColorPaletteView();
 
+    /// Creates palettes for palette manager
+    void setupPaletteManager();
 
-/// Creates menu for main window
-Menu *createMainMenu(
-    Window &dialog_parent,
-    FileDialogStyle &dialog_style,
-    ScrollBarStyle &scrollbar_style
-);
+    /// Creates menu for main window
+    Menu *createMainMenu(Window &dialog_parent);
+};
 
 
 int main() {
@@ -36,64 +40,32 @@ int main() {
     // ENABLED VSYNC TO AVOID VISUAL ARTIFACTS WHEN WINDOWS ARE MOVING
     render_window.setVerticalSyncEnabled(true);
 
-    sf::Font font;
-    ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
-    
-    WindowAsset window_asset(WINDOW_ASSET_DIR);
-
-    PaletteViewAsset palette_asset(PALETTE_ASSET_DIR);
-    
-    WindowStyle window_style(
-        hex2Color(WINDOW_TITLE_COLOR),
-        WINDOW_TITLE_OFFSET,
-        WINDOW_FONT_SIZE,
-        font,
-        window_asset,
-        WINDOW_OUTLINE,
-        WINDOW_TL_OFFSET,
-        WINDOW_BR_OFFSET
-    );
+    StyleManager style_manager;
     
     // Init palettes
-    setupPaletteManager(window_style);
-
-    ScrollBarStyle scrollbar_style(
-        hex2Color(SCROLLBAR_FRAME_COLOR),
-        SCROLLBAR_FRAME_OUTLINE,
-        hex2Color(SCROLLBAR_BACKGROUND_COLOR),
-        hex2Color(SCROLLBAR_SCROLLER_COLOR),
-        SCROLLBAR_SCROLLER_FACTOR
-    );
-
-    ClockStyle clock_style(
-        Black,
-        20,
-        font
-    );
+    style_manager.setupPaletteManager();
     
     MainWindow *main_window = new MainWindow(
         Widget::AUTO_ID,
         BoundLayoutBox(plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H)),
         "Paint",
-        window_style
+        style_manager.window_style
     );
     ASSERT(main_window, "Failed to allocate tool main window!\n");
 
-    FileDialogStyle dialog_style(window_style);
-
-    main_window->setMenu(createMainMenu(*main_window, dialog_style, scrollbar_style));
+    main_window->setMenu(style_manager.createMainMenu(*main_window));
 
     main_window->addChild(new Clock(
         Widget::AUTO_ID,
         BoundLayoutBox(plug::Vec2d(), plug::Vec2d(100, 50)),
-        clock_style
+        style_manager.clock_style
     ));
     
     main_window->addChild(new FilterHotkey());
 
-    main_window->addChild(openPicture(nullptr, window_style, scrollbar_style));
-    main_window->addChild(createToolPaletteView(window_style, palette_asset));
-    main_window->addChild(createColorPaletteView(window_style));
+    main_window->addChild(openPicture(nullptr, style_manager.window_style, style_manager.scrollbar_style));
+    main_window->addChild(style_manager.createToolPaletteView());
+    main_window->addChild(style_manager.createColorPaletteView());
 
     PluginLoader plugin_loader(PLUGIN_DIR, *main_window->getMenu(), 1, *main_window);
 
@@ -145,7 +117,27 @@ int main() {
 }
 
 
-Widget *createToolPaletteView(WindowStyle &window_style, PaletteViewAsset &palette_asset) {
+// ============================================================================
+
+
+StyleManager::StyleManager() :
+    font(),
+    window_asset(WINDOW_ASSET_DIR),
+    palette_asset(PALETTE_ASSET_DIR),
+    window_style(font, window_asset),
+    scrollbar_style(),
+    clock_style(font),
+    dialog_style(window_style),
+    menu_style(
+        hex2Color(0xd4d0c8ff), hex2Color(0x000080ff), hex2Color(0x000080ff),
+        dialog_style.window.font, 25, Black, White, White
+    )
+{
+    ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
+}
+
+
+Widget *StyleManager::createToolPaletteView() {
     WindowStyle subwindow_style(window_style);
     subwindow_style.outline = 0;
 
@@ -169,7 +161,7 @@ Widget *createToolPaletteView(WindowStyle &window_style, PaletteViewAsset &palet
 }
 
 
-Widget *createColorPaletteView(WindowStyle &window_style) {
+Widget *StyleManager::createColorPaletteView() {
     WindowStyle subwindow_style(window_style);
     subwindow_style.outline = 0;
 
@@ -192,7 +184,7 @@ Widget *createColorPaletteView(WindowStyle &window_style) {
 }
 
 
-void setupPaletteManager(WindowStyle &window_style) {
+void StyleManager::setupPaletteManager() {
     PaletteManager::getInstance().setColorPalette(new ColorPalette(Red, White));
 
     PaletteManager::getInstance().setToolPalette(new ToolPalette(COLOR_PALETTE));
@@ -201,24 +193,11 @@ void setupPaletteManager(WindowStyle &window_style) {
 }
 
 
-Menu *createMainMenu(
-    Window &dialog_parent,
-    FileDialogStyle &dialog_style,
-    ScrollBarStyle &scrollbar_style
-) {
+Menu *StyleManager::createMainMenu(Window &dialog_parent) {
     Menu *main_menu = new Menu(
         Widget::AUTO_ID,
         BoundLayoutBox(),
-        RectButtonStyle(
-            hex2Color(0xd4d0c8ff),
-            hex2Color(0x000080ff),
-            hex2Color(0x000080ff),
-            dialog_style.window.font,
-            25,
-            Black,
-            White,
-            White
-        ),
+        menu_style,
         hex2Color(0xd4d0c8ff)
     );
 

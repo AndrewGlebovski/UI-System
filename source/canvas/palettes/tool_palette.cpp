@@ -9,7 +9,6 @@
 #include "window/window.hpp"
 #include "canvas/palettes/palette_manager.hpp"
 #include "canvas/canvas_view.hpp"
-#include "common/utils.hpp"
 
 
 // ============================================================================

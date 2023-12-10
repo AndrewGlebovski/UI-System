@@ -5,12 +5,11 @@
 
 
 #include "window/window.hpp"
-#include "common/utils.hpp"
 
 
 const float MIN_OUTLINE = 0.0001f;                          ///< If outline is smaller then window can not be resized
-const plug::Vec2d CLOSE_OFFSET = plug::Vec2d(-45, 12);                  ///< Window close button offset from window top-right corner
-const plug::Vec2d EXPAND_OFFSET = plug::Vec2d(-85, 12);                 ///< Window expand button offset from window top-right corner
+const plug::Vec2d CLOSE_OFFSET = plug::Vec2d(-45, 12);      ///< Window close button offset from window top-right corner
+const plug::Vec2d EXPAND_OFFSET = plug::Vec2d(-85, 12);     ///< Window expand button offset from window top-right corner
 const size_t CLOSE_BUTTON_ID = Widget::AUTO_ID + 1;         ///< Window append button ID
 const size_t EXPAND_BUTTON_ID = Widget::AUTO_ID + 2;        ///< Window close button ID
 const size_t BUTTONS_ID = Widget::AUTO_ID + 3;              ///< Window buttons container ID

@@ -6,7 +6,6 @@
 
 #include <cstring>
 #include "canvas/tools/tools.hpp"
-#include "common/utils.hpp"
 
 
 // ============================================================================
