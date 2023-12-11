@@ -40,8 +40,9 @@ public:
     virtual ~SFMLCanvas() override;
 
 private:
-    RenderTexture render_texture;
-    plug::SelectionMask *selection_mask;
+    RenderTexture render_texture;           ///< Texture to draw on
+    plug::SelectionMask *selection_mask;    ///< Canvas selection mask
+    plug::Texture *buffer_texture;          ///< Texture for boosting getPixel
 };
 
 

@@ -4,14 +4,17 @@
 */
 
 
+#include <cstring>
 #include "common/assert.hpp"
 #include "canvas/canvas/canvas.hpp"
+#include "canvas/palettes/palette_manager.hpp"
 
 
 // ============================================================================
 
 
-SFMLCanvas::SFMLCanvas() : render_texture(), selection_mask(nullptr) {}
+SFMLCanvas::SFMLCanvas() :
+    render_texture(), selection_mask(nullptr), buffer_texture(nullptr) {}
 
 
 void SFMLCanvas::draw(const plug::VertexArray& vertex_array) {
@@ -34,6 +37,14 @@ void SFMLCanvas::setSize(const plug::Vec2d& size) {
     ASSERT(selection_mask, "Failed to allocate selection mask!\n");
 
     selection_mask->fill(true);
+
+    buffer_texture = new plug::Texture(size.x, size.y);
+    ASSERT(buffer_texture, "Failed to allocate buffer texture!\n");
+
+    for (size_t i = 0; i < buffer_texture->width * buffer_texture->height; i++)
+        buffer_texture->data[i] = COLOR_PALETTE.getBGColor();
+    
+    TextureShape(*buffer_texture).draw(render_texture, plug::Vec2d(), size);
 }
 
 
@@ -44,7 +55,7 @@ plug::SelectionMask& SFMLCanvas::getSelectionMask() {
 
 
 plug::Color SFMLCanvas::getPixel(size_t x, size_t y) const {
-    return render_texture.getTexture().getPixel(x, y);
+    return buffer_texture->getPixel(x, y);
 }
 
 
@@ -56,7 +67,11 @@ void SFMLCanvas::setPixel(size_t x, size_t y, const plug::Color& color) {
 
 
 const plug::Texture &SFMLCanvas::getTexture() const {
-    return render_texture.getTexture();
+    const plug::Texture &texture = render_texture.getTexture();
+
+    memcpy(buffer_texture->data, texture.data, texture.width * texture.height * 4);
+
+    return texture;
 }
 
 

@@ -153,8 +153,9 @@ plug::Plugin *PluginLoader::loadPlugin(const char *path) {
 
     plug::Plugin *plugin = (*load_plugin)();
 
-    if (!plugin)
-        printf("Failed to get plugin instance!\n");
+    if (!plugin) {
+        printf("Failed to get plugin instance from %s!\n", path);
+    }
 
     return plugin;
 }
