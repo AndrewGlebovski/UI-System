@@ -136,17 +136,14 @@ const sf::Texture &RenderTexture::getSFMLTexture() const {
 RenderTexture::~RenderTexture() {
     if (inner_texture)
         delete inner_texture;
-    
-    ASSERT(is_changed, "Is changed is nullptr!\n");
-    delete is_changed;
 }
 
 
 void RenderTexture::setChanged(bool is_changed_) const {
-    *is_changed = is_changed_;
+    is_changed = is_changed_;
 }
 
 
 bool RenderTexture::isChanged() const {
-    return *is_changed;
+    return is_changed;
 }
