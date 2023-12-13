@@ -36,6 +36,13 @@ make
 and execute 'run.out'
 
 
+## Credits
+
+
+- Thanks to my colleagues from [B05-232](https://github.com/B05-232)
+- Thanks to the author of [retro-style GUI](https://comp3interactive.itch.io/retro-windows-gui)
+
+
 ## License
 
 
