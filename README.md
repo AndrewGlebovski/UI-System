@@ -16,6 +16,7 @@ Features:
 - 8 predefined tools
 - 5 predefined filters
 - 8 predefined colors
+- Built-in clock for time management
 
 
 Main feature is plugin system, that allowes attaching unlimited amount of new tools and filters to application.
