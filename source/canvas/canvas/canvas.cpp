@@ -31,6 +31,9 @@ plug::Vec2d SFMLCanvas::getSize() const { return render_texture.getSize(); }
 
 
 void SFMLCanvas::setSize(const plug::Vec2d& size) {
+    if (selection_mask) delete selection_mask;
+    if (buffer_texture) delete buffer_texture;
+
     render_texture.create(size.x, size.y);
 
     selection_mask = new SelectionMask(size.x, size.y);
@@ -78,4 +81,7 @@ const plug::Texture &SFMLCanvas::getTexture() const {
 SFMLCanvas::~SFMLCanvas() {
     if (selection_mask)
         delete selection_mask;
+    
+    if (buffer_texture)
+        delete buffer_texture;
 }

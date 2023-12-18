@@ -37,10 +37,7 @@ bool loadTexture(plug::Texture **texture_ptr, const char *filename) {
 
 
 RenderTexture::RenderTexture() :
-    render_texture(), inner_texture(nullptr), is_changed(new bool(false))
-{
-    ASSERT(is_changed, "Failed to allocate is_changed!\n");
-}
+    render_texture(), inner_texture(nullptr), is_changed(false) {}
 
 
 void RenderTexture::create(size_t width, size_t height) {
