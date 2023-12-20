@@ -474,10 +474,24 @@ Window::~Window() {
 
 MainWindow::MainWindow(
     size_t id_, const plug::LayoutBox &layout_,
-    const std::string &title_, const WindowStyle &style_
+    const std::string &title_,
+    const WindowStyle &style_,
+    const ClockStyle &clock_style_
 ) :
-    Window(id_, layout_, title_, style_)
-{}
+    Window(id_, layout_, title_, style_),
+    my_clock(
+        Widget::AUTO_ID,
+        AnchorLayoutBox(
+            plug::Vec2d(-120, 50),
+            plug::Vec2d(100, 50),
+            plug::Vec2d(SCREEN_W, 0),
+            plug::Vec2d()
+        ),
+        clock_style_
+    )
+{
+    my_clock.setParent(this);
+}
 
 
 void MainWindow::onParentUpdate(const plug::LayoutBox &parent_layout) {
@@ -563,6 +577,21 @@ void MainWindow::parseEvent(const sf::Event &event, plug::TransformStack &stack)
         default:
             return;
     }
+}
+
+
+void MainWindow::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
+    Window::draw(stack, result);
+    
+    my_clock.draw(stack, result);
+}
+
+
+void MainWindow::onEvent(const plug::Event &event, plug::EHC &ehc) {
+    Window::onEvent(event, ehc);
+
+    if (!ehc.stopped)
+        my_clock.onEvent(event, ehc);
 }
 
 

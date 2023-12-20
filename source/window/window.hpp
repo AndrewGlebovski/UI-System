@@ -12,6 +12,7 @@
 #include "basic/button.hpp"
 #include "window/menu.hpp"
 #include "widget/shape.hpp"
+#include "basic/clock.hpp"
 
 
 /// Controls how window looks
@@ -189,8 +190,19 @@ public:
     MainWindow(
         size_t id_, const plug::LayoutBox &layout_,
         const std::string &title_,
-        const WindowStyle &style_
+        const WindowStyle &style_,
+        const ClockStyle &clock_style_
     );
+
+    /**
+     * \brief Draws window then clock
+    */
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
+
+    /**
+     * \brief Broadcast events to window children
+    */
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Parses SFML event into my own event system
@@ -201,6 +213,9 @@ public:
      * \brief Allows widget to change its position and size according to parent
     */
     virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
+
+private:
+    Clock my_clock;
 };
 
 

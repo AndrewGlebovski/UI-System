@@ -69,7 +69,8 @@ int main() {
         Widget::AUTO_ID,
         BoundLayoutBox(plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H)),
         "Paint",
-        style_manager.window_style
+        style_manager.window_style,
+        style_manager.clock_style
     );
     ASSERT(main_window, "Failed to allocate tool main window!\n");
 
@@ -217,16 +218,8 @@ Menu *StyleManager::createMainMenu(Window &dialog_parent) {
 
 void StyleManager::setupMainWindow(MainWindow &window) {
     window.setMenu(createMainMenu(window));
-
-    window.addChild(new Clock(
-        Widget::AUTO_ID,
-        BoundLayoutBox(plug::Vec2d(), plug::Vec2d(100, 50)),
-        clock_style
-    ));
     
     window.addChild(new FilterHotkey());
-
-    window.addChild(openPicture(nullptr, window_style, scrollbar_style));
     
     window.addChild(createToolPaletteView());
     
@@ -251,7 +244,6 @@ void handleInputEvent(sf::RenderWindow &sf_window, MainWindow &main_window, Tran
 }
 
 
-/// Generates and handles tick event
 void handleTimeEvent(sf::Clock &timer, MainWindow &main_window, TransformStack &stack) {
     plug::EHC ehc = {stack, false, false};
 
