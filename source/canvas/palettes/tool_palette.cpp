@@ -4,6 +4,7 @@
 */
 
 
+#include <cstring>
 #include "canvas/palettes/tool_palette.hpp"
 #include "canvas/tools/tools.hpp"
 #include "window/window.hpp"
@@ -14,7 +15,8 @@
 // ============================================================================
 
 
-const plug::Vec2d TOOL_ICON_SIZE = plug::Vec2d(94, 94);         ///< Tool icon size
+const size_t SHORT_NAME_LEN = 2;                        ///< Max length of tool short name
+const plug::Vec2d TOOL_ICON_SIZE = plug::Vec2d(94, 94); ///< Tool icon size
 
 
 // ============================================================================
@@ -230,6 +232,26 @@ void ToolPaletteView::updateButtons() {
 }
 
 
+
+void ToolPaletteView::getShortName(char *short_name, const char *full_name) const {
+    ASSERT(short_name, "Short name is nullptr!\n");
+    ASSERT(full_name, "Full name is nullptr!\n");
+
+    size_t write = 0, read = 0;
+
+    for (; full_name[read] && write < SHORT_NAME_LEN; read++) {
+        if (('A' <= full_name[read]) && (full_name[read] <= 'Z')) {
+            if (write)
+                short_name[write++] = tolower(full_name[read]);
+            else
+                short_name[write++] = full_name[read];
+        }
+    }
+
+    short_name[write] = '\0';
+}
+
+
 void ToolPaletteView::addTool(size_t tool_id) {
     plug::Tool &new_tool = *TOOL_PALETTE.getTool(tool_id);
 
@@ -242,10 +264,29 @@ void ToolPaletteView::addTool(size_t tool_id) {
         icons.push_back(new_icon);
     }
     else {
-        if (new_tool.getPluginData()->getName())
-            printf("%s icon not found!\n", new_tool.getPluginData()->getName());
-        else
-            printf("Tool icon not found!\n");
+        const char *tool_name = new_tool.getPluginData()->getName();
+        if (!tool_name) tool_name = "UnknownTool";
+
+        printf("%s icon not found!\n", tool_name);
+
+        char short_name[SHORT_NAME_LEN + 1] = "";
+        getShortName(short_name, tool_name);
+
+        sf::Font font;
+        ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font");
+
+        sf::Text text(short_name, font, 25);
+        text.setFillColor(sf::Color::Black);
+
+        plug::Vec2d text_size = plug::Vec2d(text.getLocalBounds().width, text.getLocalBounds().height);
+
+        text.setPosition(getSfmlVector2f((TOOL_ICON_SIZE - text_size) / 2));
+
+        TextShape shape(text, TOOL_ICON_SIZE);
+
+        new_icon = new plug::Texture(shape.getTexture());
+
+        icons.push_back(new_icon);
     }
 
     Widget *prev_button = buttons.findWidget(Widget::AUTO_ID + tool_id);
@@ -269,7 +310,7 @@ void ToolPaletteView::addTool(size_t tool_id) {
         asset[PaletteViewAsset::NORMAL_TEXTURE],
         asset[PaletteViewAsset::NORMAL_TEXTURE],
         asset[PaletteViewAsset::SELECTED_TEXTURE],
-        (new_icon) ? *new_icon : asset[PaletteViewAsset::ERASER_TEXTURE]
+        *new_icon
     );
 
     btn->setButtonGroup(group);

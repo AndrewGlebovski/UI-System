@@ -225,6 +225,11 @@ public:
     */
     void draw(plug::Canvas &canvas, const plug::Vec2d &position, const plug::Vec2d &size);
 
+    /**
+     * \brief Returns texture
+    */
+    const plug::Texture getTexture() const;
+
 private:
     /**
      * \brief Redraws text on internal texture
@@ -232,7 +237,7 @@ private:
     void render();
 
     sf::Text sf_text;                   ///< Text itself
-    plug::Texture texture;                    ///< Internal texture for handling text image
+    plug::Texture texture;              ///< Internal texture for handling text image
     TextureShape shape;                 ///< Shape for convenient texture draw
     sf::RenderTexture render_texture;   ///< Tool texture for text drawing
 };

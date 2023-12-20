@@ -105,6 +105,11 @@ private:
     void updateButtons();
 
     /**
+     * \brief Shorts the name of the tool
+    */
+    void getShortName(char *short_name, const char *full_name) const;
+
+    /**
      * \brief Adds new tool from ToolPalette to PaletteView
     */
     void addTool(size_t tool_id);

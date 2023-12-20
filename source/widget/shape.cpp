@@ -309,6 +309,11 @@ void TextShape::draw(plug::Canvas &canvas, const plug::Vec2d &position, const pl
 }
 
 
+const plug::Texture TextShape::getTexture() const {
+    return texture;
+}
+
+
 void TextShape::render() {
     render_texture.draw(sf_text);
     render_texture.display();
