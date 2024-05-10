@@ -4,43 +4,33 @@
 */
 
 
-#include <SFML/Graphics.hpp>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cassert>
+#include "common/assert.hpp"
 #include "common/asset.hpp"
 
 
 const size_t MAX_PATH = 256;
 
 
-Asset::Asset() : textures(nullptr), count(0) {}
+Asset::Asset() : textures() {}
 
 
-Asset::Asset(const Asset &arg) : textures(nullptr), count(arg.count) {
-    assert(arg.textures);
-
-    textures = new sf::Texture[count];
-    assert(textures);
-
-    for (size_t i = 0; i < count; i++)
-        textures[i] = arg.textures[i];
+Asset::Asset(const Asset &arg) : textures(arg.textures.size(), nullptr) {
+    for (size_t i = 0; i < textures.size(); i++)
+        textures[i] = new plug::Texture(*arg.textures[i]);
 }
 
 
 void Asset::loadTextures(const char *rootpath, const char *files[], size_t files_size) {
-    textures = new sf::Texture[files_size];
-    assert(textures);
-
-    count = files_size;
+    textures.resize(files_size, nullptr);
 
     char *path = (char *) calloc(strlen(rootpath) + MAX_PATH, 1);
-    assert(path);
+    ASSERT(path, "Failed to allocate buffer!\n");
 
     for (size_t i = 0; i < files_size; i++) {
         sprintf(path, "%s/%s.png", rootpath, files[i]);
-        assert(textures[i].loadFromFile(path));
+        loadTexture(&textures[i], path);
     }
 
     free(path);
@@ -48,17 +38,13 @@ void Asset::loadTextures(const char *rootpath, const char *files[], size_t files
 
 
 Asset &Asset::operator = (const Asset &arg) {
-    assert(arg.textures);
-
     if (this != &arg) {
-        if (textures) delete[] textures;
+        for (size_t i = 0; i < textures.size(); i++)
+            delete textures[i];
 
-        count = arg.count;
+        textures.resize(arg.textures.size(), nullptr);
 
-        textures = new sf::Texture[count];
-        assert(textures);
-
-        for (size_t i = 0; i < count; i++)
+        for (size_t i = 0; i < textures.size(); i++)
             textures[i] = arg.textures[i];
     }
 
@@ -66,18 +52,16 @@ Asset &Asset::operator = (const Asset &arg) {
 }
 
 
-const sf::Texture &Asset::getTexture(int id) const {
-    assert(textures);
-    assert(0 <= id && size_t(id) < count);
+const plug::Texture &Asset::getTexture(int id) const {
+    ASSERT(0 <= id && size_t(id) < textures.size(), "Index is out of range!\n");
 
-    return textures[id];
+    return *(textures[id]);
 }
 
 
 Asset::~Asset() {
-    assert(textures);
-    
-    delete[] textures;
+    for (size_t i = 0; i < textures.size(); i++)
+        delete textures[i];
 }
 
 
@@ -100,18 +84,10 @@ WindowAsset::WindowAsset(const char *rootpath) {
     };
 
     loadTextures(rootpath, FILES, sizeof(FILES) / 8);
-
-    // SET REPEAT FLAG
-
-    textures[TITLE].setRepeated(true);
-    textures[FRAME_CENTER].setRepeated(true);
-    textures[FRAME_B].setRepeated(true);
-    textures[FRAME_L].setRepeated(true);
-    textures[FRAME_R].setRepeated(true);
 }
 
 
-const sf::Texture &WindowAsset::operator [] (TEXTURE_ID id) const {
+const plug::Texture &WindowAsset::operator [] (TEXTURE_ID id) const {
     return getTexture(id);
 }
 
@@ -134,6 +110,6 @@ PaletteViewAsset::PaletteViewAsset(const char *rootpath) {
 }
 
 
-const sf::Texture &PaletteViewAsset::operator [] (TEXTURE_ID id) const {
+const plug::Texture &PaletteViewAsset::operator [] (TEXTURE_ID id) const {
     return getTexture(id);
 }

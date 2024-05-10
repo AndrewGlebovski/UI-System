@@ -8,68 +8,14 @@
 #define _TRANSFORM_H_
 
 
-#include "common/vector.hpp"
 #include "common/list.hpp"
-
-
-/// Holds transformation
-class Transform {
-private:
-    Vec2d offset;        ///< Offset from parent
-    Vec2d scale;         ///< Scale
-
-public:
-    /**
-     * \brief Creates transform that does nothing
-    */
-    Transform();
-
-    /**
-     * \brief Creates transform
-    */
-    Transform(const Vec2d &offset_, const Vec2d &scale_ = Vec2d(1, 1));
-
-    /**
-     * \brief Returns offset
-    */
-    Vec2d getOffset() const;
-
-    /**
-     * \brief Sets offset
-    */
-    void setOffset(const Vec2d &offset_);
-
-    /**
-     * \brief Returns scale
-    */
-    Vec2d getScale() const;
-
-    /**
-     * \brief Sets scale
-    */
-    void setScale(const Vec2d &scale_);
-
-    /**
-     * \brief Applies transform to position
-    */
-    Vec2d apply(const Vec2d &vec) const;
-
-    /**
-     * \brief Restores position using transform
-    */
-    Vec2d restore(const Vec2d &vec) const;
-
-    /**
-     * \brief Combines parent transform with this one
-    */
-    Transform combine(const Transform &parent_transform) const;
-};
+#include "standart/Math.h"
 
 
 /// Contains stack of transforms and final transform at the top of it
-class TransformStack {
+class TransformStack : public plug::TransformStack {
 private:
-    List<Transform> transforms;     ///< Stack of transforms
+    List<plug::Transform> transforms;     ///< Stack of transforms
 
 public:
     /**
@@ -80,45 +26,43 @@ public:
     /**
      * \brief Pushes last transform to stack and applies it to the stack top
     */
-    void enter(const Transform &transform);
+    virtual void enter(const plug::Transform &transform) override;
 
     /**
      * \brief Pops last transform from stack
     */
-    void leave();
+    virtual void leave() override;
 
     /**
      * \brief Returns value of the stack first element
     */
-    Transform top() const;
+    virtual plug::Transform top() const override;
 
     /**
      * \brief Applies final transform to position
     */
-    Vec2d apply(const Vec2d &vec) const;
+    virtual plug::Vec2d apply(const plug::Vec2d &vec) const override;
 
     /**
      * \brief Restore position using final transform
     */
-    Vec2d restore(const Vec2d &vec) const;
-
-    /**
-     * \brief Applies final transform to size
-    */
-    Vec2d apply_size(const Vec2d &vec) const;
+    virtual plug::Vec2d restore(const plug::Vec2d &vec) const override;
 };
+
+
+plug::Vec2d applySize(const plug::TransformStack &stack, const plug::Vec2d &vec);
 
 
 /// Tool class for temporarily applying local transform
 class TransformApplier {
 private:
-    TransformStack &stack;     ///< Transform stack
+    plug::TransformStack &stack;     ///< Transform stack
 
 public:
     /**
      * \brief Applies local transform and pushes it to the transform stack
     */
-    TransformApplier(TransformStack &stack_, const Transform &transform);
+    TransformApplier(plug::TransformStack &stack_, const plug::Transform &transform);
 
     /**
      * \brief Cancels local transform and pops it from the transform stack

@@ -8,118 +8,48 @@
 #define _WIDGET_H_
 
 
+#include <cstdio>
+#include "SFML/Graphics.hpp"
 #include "config/configs.hpp"
-#include "config/key-id.hpp"
 #include "common/list.hpp"
-#include "common/vector.hpp"
-#include "layout-box.hpp"
-#include "transform.hpp"
+#include "widget/layout_box.hpp"
+#include "widget/transform.hpp"
+#include "render_target.hpp"
+#include "shape.hpp"
+#include "standart/Widget.h"
+#include "common/utils.hpp"
 
 
-/// Base class for all widgets
-class Widget {
+/// Extended widget interface with common implementation
+class Widget : public plug::Widget {
 public:
-    struct EHC {
-        TransformStack &stack;
-        bool stopped;
-        bool overlapped;
-
-        EHC(TransformStack &stack_, bool stopped_, bool overlapped_) :
-            stack(stack_), stopped(stopped_), overlapped(overlapped_) {}
-    };
-
-    enum EventType {
-        Tick,
-        MouseMove,
-        MousePressed,
-        MouseReleased,
-        KeyboardPressed,
-        KeyboardReleased,
-    };
-
-    class Event {
-    private:
-        const size_t type;
-    public:
-        Event (size_t type_) : type(type_) {}
-
-        size_t getType() const { return type; }
-    };
-
-    struct TickEvent : public Event {
-        double delta_time;
-
-        TickEvent(double delta_time_) :
-            Event(Tick), delta_time(delta_time_) {}
-    };
-
-    struct MouseMoveEvent : public Event {
-        bool shift, ctrl, alt;
-        Vec2d pos;
-
-        MouseMoveEvent(bool shift_, bool ctrl_, bool alt_, const Vec2d &pos_) :
-            Event(MouseMove), shift(shift_), ctrl(ctrl_), alt(alt_), pos(pos_) {}
-    };
-
-    struct MousePressedEvent : public Event {
-        MOUSE_BUTTON_ID button_id;
-        bool shift, ctrl, alt;
-        Vec2d pos;
-
-        MousePressedEvent(MOUSE_BUTTON_ID button_id_, bool shift_, bool ctrl_, bool alt_, const Vec2d &pos_) :
-            Event(MousePressed), button_id(button_id_), shift(shift_), ctrl(ctrl_), alt(alt_), pos(pos_) {}
-    };
-
-    struct MouseReleasedEvent : public Event {
-        MOUSE_BUTTON_ID button_id;
-        bool shift, ctrl, alt;
-        Vec2d pos;
-
-        MouseReleasedEvent(MOUSE_BUTTON_ID button_id_, bool shift_, bool ctrl_, bool alt_, const Vec2d &pos_) :
-            Event(MouseReleased), button_id(button_id_), shift(shift_), ctrl(ctrl_), alt(alt_), pos(pos_) {}
-    };
-
-    struct KeyboardPressedEvent : public Event {
-        KEY_ID key_id;
-        bool shift, ctrl, alt;
-
-        KeyboardPressedEvent(KEY_ID key_id_, bool shift_, bool ctrl_, bool alt_) :
-            Event(KeyboardPressed), key_id(key_id_), shift(shift_), ctrl(ctrl_), alt(alt_) {}
-    };
-
-    struct KeyboardReleasedEvent : public Event {
-        KEY_ID key_id;
-        bool shift, ctrl, alt;
-
-        KeyboardReleasedEvent(KEY_ID key_id_, bool shift_, bool ctrl_, bool alt_) :
-            Event(KeyboardReleased), key_id(key_id_), shift(shift_), ctrl(ctrl_), alt(alt_) {}
-    };
-
     /// Pass into constructor to generate new ID
     static const size_t AUTO_ID = 0;
 
-
     /// Shows parent if some actions requiered for this widget
-    enum WIDGET_STATUS {
-        PASS        = 0,    ///< Nothing to be done for this widget
-        DELETE      = 1     ///< This widget should be deleted
+    enum class Status {
+        Normal      = 0,    ///< Widget accepts events and draws
+        Disabled    = 1,    ///< Widget draws but doesn't accept events
+        Hidden      = 2,    ///< Widget accepts events but doesn't draw
+        Pass        = 3,    ///< Widget doesn't accept events and doesn't draw
+        Delete      = 4     ///< Widget will be deleted
     };
 
     /**
      * \brief Widget constructor
      * \note If id_ != AUTO_ID sets id to id_, otherwise generates "unique" id
     */
-    Widget(size_t id_, const LayoutBox &layout_);
+    Widget(size_t id_, const plug::LayoutBox &layout_);
 
     /**
      * \brief Default copy constructor
-     * \note id is AUTO, z-index is set to 0, parent is set nullptr
+     * \note id is AUTO, parent is set nullptr
     */
     Widget(const Widget &widget);
 
     /**
      * \brief Default assignment
-     * \note z-index is set to 0, parent is set to nullptr
+     * \note Parent is set to nullptr
     */
     Widget &operator = (const Widget &widget);
 
@@ -131,32 +61,22 @@ public:
     /**
      * \brief Returns current layout box
     */
-    LayoutBox &getLayoutBox();
+    virtual plug::LayoutBox &getLayoutBox() override;
 
     /**
      * \brief Returns current layout box
     */
-    const LayoutBox &getLayoutBox() const;
+    virtual const plug::LayoutBox &getLayoutBox() const override;
 
     /**
      * \brief Sets layout box
     */
-    void setLayoutBox(const LayoutBox &layout_);
+    virtual void setLayoutBox(const plug::LayoutBox &layout_) override;
 
     /**
      * \brief Generates transform using widget position
     */
-    Transform getTransform() const;
-
-    /**
-     * \brief Returns z-index
-    */
-    int getZIndex() const;
-
-    /**
-     * \brief Sets z-index
-    */
-    void setZIndex(int z_index_);
+    plug::Transform getTransform() const;
 
     /**
      * \brief Returns parent
@@ -179,42 +99,30 @@ public:
     virtual Widget *findWidget(size_t widget_id);
 
     /**
-     * \brief Adds child widget for this
-     * \warning If widget is not supposed to have children, abort() will be called
-    */
-    virtual size_t addChild(Widget *child);
-
-    /**
-     * \brief Removes child by its id
-     * \warning If widget is not supposed to have children, abort() will be called
-    */
-    virtual void removeChild(size_t child_id);
-
-    /**
      * \brief Returns widget status
     */
-    int getStatus() const;
+    Status getStatus() const;
 
     /**
      * \brief Sets widget status
     */
-    void setStatus(WIDGET_STATUS new_status);
+    void setStatus(Status new_status);
 
     /**
      * \brief Draws widget on render target
      * \note By default draws red rectangle for debug purposes
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack);
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
     /**
      * \brief Handle all sorts of events event
     */
-    virtual void onEvent(const Event &event, EHC &ehc);
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Allows widget to change its position and size according to parent
     */
-    virtual void onParentUpdate(const LayoutBox &parent_layout) { layout->onParentUpdate(parent_layout); }
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 
     /**
      * \brief Checks children statuses
@@ -225,33 +133,27 @@ public:
     /**
      * \brief Delete layout box
     */
-    virtual ~Widget() { delete layout; };
+    virtual ~Widget() override;
 
 protected:
-    const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
-    LayoutBox *layout;      ///< Widget position and size encapsulated
-    int z_index;            ///< Shows order in which widgets are drawn
-    Widget *parent;         ///< Parent that holds this widget
-    int status;             ///< Shows parent if some actions requiered
+    virtual bool covers(plug::TransformStack &stack, const plug::Vec2d &position) const override;
 
     /**
      * \brief If requested_id != AUTO_ID returns requested_id, otherwise returns unique id
     */
     size_t generateId(size_t requested_id);
 
-    virtual void onTick(const TickEvent &event, EHC &ehc) {}
-    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) {}
-    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) {}
-    virtual void onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {}
-    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) {}
-    virtual void onKeyboardReleased(const KeyboardReleasedEvent &event, EHC &ehc) {}
+    const size_t id;        ///< Widget ID that can be used for finding this widget in hierarchy
+    plug::LayoutBox *layout;      ///< Widget position and size encapsulated
+    Widget *parent;         ///< Parent that holds this widget
+    Status status;          ///< Shows parent if some actions requiered
 };
 
 
 /**
  * \brief Checks if point is inside rectangle
 */
-bool isInsideRect(Vec2d position, Vec2d size, Vec2d point);
+bool isInsideRect(plug::Vec2d position, plug::Vec2d size, plug::Vec2d point);
 
 
 #endif

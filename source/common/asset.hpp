@@ -8,42 +8,40 @@
 #define _ASSET_H_
 
 
+#include <cstdio>
+#include "common/list.hpp"
+#include "widget/render_target.hpp"
+
+
 /// Base class for all assets
 class Asset {
 protected:
-    sf::Texture *textures;      ///< Textures required for window
-    size_t count;               ///< Amount of textures
-
+    List<plug::Texture*> textures;    ///< Textures array
 
     /**
      * \brief Contructs empty asset
     */
     Asset();
 
-
     /**
      * \brief Init texture buffer and copies assets
     */
     Asset(const Asset &arg);
-
 
     /**
      * \brief Loads textures from files located in the rootpath directory
     */
     void loadTextures(const char *rootpath, const char *files[], size_t assets_count);
 
-
     /**
      * \brief Copies assets
     */
     Asset &operator = (const Asset &arg);
 
-
     /**
      * \brief Returns texture by its id
     */
-    const sf::Texture &getTexture(int id) const;
-
+    const plug::Texture &getTexture(int id) const;
 
     /**
      * \brief Free textures
@@ -72,11 +70,9 @@ public:
         CLOSE_ICON              ///< Window close button icon
     };
 
-
     WindowAsset(const char *rootpath);
 
-
-    const sf::Texture &operator [] (TEXTURE_ID id) const;
+    const plug::Texture &operator [] (TEXTURE_ID id) const;
 };
 
 
@@ -96,11 +92,9 @@ public:
         TEXT_TEXTURE
     };
 
-
     PaletteViewAsset(const char *rootpath);
 
-
-    const sf::Texture &operator [] (TEXTURE_ID id) const;
+    const plug::Texture &operator [] (TEXTURE_ID id) const;
 };
 
 

@@ -8,7 +8,7 @@
 #define _CONFIGS_H_
 
 
-#include "common/vector.hpp"
+#include "standart/Math/Vec2d.h"
 
 
 const int SCREEN_W = 1920;                      ///< Screen width in pixels
@@ -17,11 +17,11 @@ const int SCREEN_H = 1080;                      ///< Screen height in pixels
 // PREDEFINED VALUES FOR WINDOW STYLE
 
 const size_t WINDOW_TITLE_COLOR = 0xffffffff;
-const Vec2d WINDOW_TITLE_OFFSET(20, 20);
+const plug::Vec2d WINDOW_TITLE_OFFSET(20, 20);
 const int WINDOW_FONT_SIZE = 20;
 const float WINDOW_OUTLINE = 10;
-const Vec2d WINDOW_TL_OFFSET(15, 60);
-const Vec2d WINDOW_BR_OFFSET(15, 15);
+const plug::Vec2d WINDOW_TL_OFFSET(15, 60);
+const plug::Vec2d WINDOW_BR_OFFSET(15, 15);
 
 // PREDEFINED VALUES FOR SCROLLBAR STYLE
 
@@ -44,8 +44,13 @@ const float CURSOR_OFFSET = 2;              ///< Cursor position offset from Lin
 /// Path to palette view textures root directory
 #define PALETTE_ASSET_DIR "assets/textures/tools"
 
+/// Path to root directory for plugins
+#define PLUGIN_DIR "Plugins"
+
 /// Path to font file
 #define FONT_FILE "assets/MainFont.ttf"
 
+/// Path to log file
+#define LOG_FILE "log/log.txt"
 
 #endif

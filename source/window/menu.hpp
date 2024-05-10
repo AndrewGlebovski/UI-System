@@ -16,7 +16,7 @@
 class MenuButton : public RectButton {
 public:
     MenuButton(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const std::string &text_, const RectButtonStyle &style_
     );
 
@@ -33,12 +33,12 @@ public:
     /**
      * \brief Draws menu button and list option buttons if it's open
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
     /**
      * \brief Broadcast events to option buttons
     */
-    virtual void onEvent(const Event &event, EHC &ehc) override;
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Deletes option buttons
@@ -56,7 +56,7 @@ class Menu : public Widget {
 protected:
     List<MenuButton*> buttons;      ///< Menu buttons
     RectButtonStyle style;          ///< Button style
-    sf::Color background;           ///< Menu background color
+    plug::Color background;           ///< Menu background color
     size_t opened;                  ///< Index of opened menu button
 
     /**
@@ -71,8 +71,8 @@ protected:
 
 public:
     Menu(
-        size_t id_, const LayoutBox &layout_,
-        const RectButtonStyle &style_, sf::Color background_
+        size_t id_, const plug::LayoutBox &layout_,
+        const RectButtonStyle &style_, plug::Color background_
     );
 
     /**
@@ -88,12 +88,12 @@ public:
     /**
      * \brief Draws menu rect and menu buttons
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
 
     /**
      * \brief Broadcast events to menu buttons
     */
-    virtual void onEvent(const Event &event, EHC &ehc) override;
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Deletes menu buttons

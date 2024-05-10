@@ -8,7 +8,7 @@
 #define _CANVAS_STUFF_H_
 
 
-#include "canvas/canvas.hpp"
+#include "canvas/canvas_view.hpp"
 #include "window/dialog.hpp"
 #include "basic/scrollbar.hpp"
 
@@ -17,62 +17,59 @@
  * \brief Opens picture on canvas in new subwindow with scrollbars
  * \note If image fails to open, then nullptr will be returned
 */
-Widget *openPicture(const char *filename, ToolPalette &palette, CanvasGroup &group, WindowStyle &window_style, ScrollBarStyle &scrollbar_style);
+Widget *openPicture(
+    const char *filename,
+    WindowStyle &window_style,
+    ScrollBarStyle &scrollbar_style
+);
 
 
 /// Moves canvas texture in vertical direction
 class VScrollCanvas : public ScrollAction {
 protected:
-    Canvas &canvas;
+    CanvasView &canvas;
 
 public:
-    VScrollCanvas(Canvas &canvas_);
+    VScrollCanvas(CanvasView &canvas_);
 
-    virtual void operator () (vec_t param) override;
+    virtual void operator () (double param) override;
 };
 
 
 /// Moves canvas texture in horizontal direction
 class HScrollCanvas : public ScrollAction {
 protected:
-    Canvas &canvas;
+    CanvasView &canvas;
 
 public:
-    HScrollCanvas(Canvas &canvas_);
+    HScrollCanvas(CanvasView &canvas_);
 
-    virtual void operator () (vec_t param) override;
+    virtual void operator () (double param) override;
 };
 
 
 /// Supports hot keys for applying filters
 class FilterHotkey : public Widget {
 public:
-    FilterHotkey(Widget *parent_, FilterPalette &palette_, CanvasGroup &group_);
+    FilterHotkey();
 
 protected:
-    virtual void onKeyboardPressed(const KeyboardPressedEvent &event, EHC &ehc) override;
-
-private:
-    FilterPalette &palette;
-    CanvasGroup &group;
+    virtual void onKeyboardPressed(const plug::KeyboardPressedEvent &event, plug::EHC &ehc) override;
 };
 
 
 /// Applies specified filter to the active canvas
 class FilterAction : public ButtonAction {
-private:
-    FilterPalette::FILTERS filter_id;
-    FilterPalette &palette;
-    CanvasGroup &group;
-
 public:
-    FilterAction(FilterPalette::FILTERS filter_id_, FilterPalette &palette_, CanvasGroup &group_);
-
+    FilterAction(Window &window_, size_t filter_id_);
 
     virtual void operator () () override;
 
-
     virtual FilterAction *clone() override;
+
+private:
+    Window &window;
+    size_t filter_id;
 };
 
 
@@ -81,8 +78,6 @@ class OpenFileAction : public DialogAction {
 public:
     OpenFileAction(
         Window &window_,
-        ToolPalette &palette_,
-        CanvasGroup &group_,
         WindowStyle &window_style_,
         ScrollBarStyle &scrollbar_style_
     );
@@ -93,8 +88,6 @@ public:
 
 private:
     Window &window;
-    ToolPalette &palette;
-    CanvasGroup &group;
     WindowStyle &window_style;
     ScrollBarStyle &scrollbar_style;
 };
@@ -103,14 +96,11 @@ private:
 /// Saves active canvas texture to image
 class SaveAsFileAction : public DialogAction {
 public:
-    SaveAsFileAction(CanvasGroup &group_);
+    SaveAsFileAction();
 
     virtual void operator () () override;
 
     virtual SaveAsFileAction *clone() override;
-
-private:
-    CanvasGroup &group;
 };
 
 
@@ -128,8 +118,6 @@ class CreateOpenFileDialog : public ButtonAction {
 public:
     CreateOpenFileDialog(
         Window &window_,
-        ToolPalette &palette_,
-        CanvasGroup &group_,
         FileDialogStyle &dialog_style_,
         ScrollBarStyle &scrollbar_style_
     );
@@ -140,8 +128,6 @@ public:
 
 private:
     Window &window;
-    ToolPalette &palette;
-    CanvasGroup &group;
     FileDialogStyle &dialog_style;
     ScrollBarStyle &scrollbar_style;
 };
@@ -152,7 +138,6 @@ class CreateSaveAsFileDialog : public ButtonAction {
 public:
     CreateSaveAsFileDialog(
         Window &window_,
-        CanvasGroup &group_,
         FileDialogStyle &dialog_style_
     );
 
@@ -162,7 +147,6 @@ public:
 
 private:
     Window &window;
-    CanvasGroup &group;
     FileDialogStyle &dialog_style;
 };
 
@@ -170,14 +154,11 @@ private:
 /// If active canvas has opened image, saves it to the same path
 class SaveFileAction : public ButtonAction {
 public:
-    SaveFileAction(CanvasGroup &group_);
+    SaveFileAction();
 
     virtual void operator () () override;
 
     virtual SaveAsFileAction *clone() override;
-
-private:
-    CanvasGroup &group;
 };
 
 

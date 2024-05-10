@@ -4,7 +4,6 @@
 */
 
 
-#include <SFML/Graphics.hpp>
 #include "window/dialog.hpp"
 
 
@@ -33,14 +32,14 @@ const size_t MAX_FILENAME_LENGTH = 256;
 
 
 Dialog::Dialog(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     const std::string &title_, const WindowStyle &style_
 ) :
     Window(id_, layout_, title_, style_, false, true, false)
 {}
 
 
-void Dialog::onEvent(const Event &event, EHC &ehc) {
+void Dialog::onEvent(const plug::Event &event, plug::EHC &ehc) {
     Window::onEvent(event, ehc);
     ehc.stopped = true;
 }
@@ -50,7 +49,7 @@ void Dialog::onEvent(const Event &event, EHC &ehc) {
 
 
 ConfirmDialog::ConfirmDialog(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     const std::string &title_,
     DialogAction *ok_action_,
     DialogAction *cancel_action_,
@@ -59,14 +58,14 @@ ConfirmDialog::ConfirmDialog(
 ) :
     Dialog(id_, layout_, title_, window_style_)
 {
-    layout->setSize(Vec2d(400, 200));
+    layout->setSize(plug::Vec2d(400, 200));
 
     ok_action_->setDialog(*this);
     cancel_action_->setDialog(*this);
 
     container.addChild(new RectButton(
         1,
-        LazyLayoutBox(Vec2d(), Vec2d(100, 50)),
+        LazyLayoutBox(plug::Vec2d(), plug::Vec2d(100, 50)),
         ok_action_,
         "Ok",
         button_style_
@@ -74,7 +73,7 @@ ConfirmDialog::ConfirmDialog(
 
     container.addChild(new RectButton(
         2,
-        LazyLayoutBox(Vec2d(120, 0), Vec2d(100, 50)),
+        LazyLayoutBox(plug::Vec2d(120, 0), plug::Vec2d(100, 50)),
         cancel_action_,
         "Cancel",
         button_style_
@@ -86,7 +85,7 @@ ConfirmDialog::ConfirmDialog(
 
 
 SelectFileDialog::SelectFileDialog(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     const std::string &title_,
     DialogAction *select_action_,
     DialogAction *cancel_action_,
@@ -94,35 +93,35 @@ SelectFileDialog::SelectFileDialog(
 ) :
     Dialog(id_, layout_, title_, style_.window)
 {
-    setSize(Vec2d(400, 200));
+    setSize(plug::Vec2d(400, 200));
 
     select_action_->setDialog(*this);
     cancel_action_->setDialog(*this);
 
     RectButtonStyle button_style(
-        sf::Color(BUTTON_NORMAL_COLOR),
-        sf::Color(BUTTON_HOVER_COLOR),
-        sf::Color(BUTTON_PRESSED_COLOR),
+        hex2Color(BUTTON_NORMAL_COLOR),
+        hex2Color(BUTTON_HOVER_COLOR),
+        hex2Color(BUTTON_PRESSED_COLOR),
         style_.window.font,
         BUTTON_FONT_SIZE,
-        sf::Color(BUTTON_FONT_NORMAL_COLOR),
-        sf::Color(BUTTON_FONT_HOVER_COLOR),
-        sf::Color(BUTTON_FONT_PRESSED_COLOR)
+        hex2Color(BUTTON_FONT_NORMAL_COLOR),
+        hex2Color(BUTTON_FONT_HOVER_COLOR),
+        hex2Color(BUTTON_FONT_PRESSED_COLOR)
     );
 
     LineEditStyle line_edit_style(
         style_.window.font,
         LINE_EDIT_FONT_SIZE,
-        sf::Color(LINE_EDIT_FONT_COLOR),
-        sf::Color(LINE_EDIT_BACKGROUND_COLOR),
-        sf::Color(LINE_EDIT_CURSOR_COLOR),
-        sf::Color(LINE_EDIT_BORDER_COLOR),
+        hex2Color(LINE_EDIT_FONT_COLOR),
+        hex2Color(LINE_EDIT_BACKGROUND_COLOR),
+        hex2Color(LINE_EDIT_CURSOR_COLOR),
+        hex2Color(LINE_EDIT_BORDER_COLOR),
         LINE_EDIT_BORDER_THICKNESS
     );
 
     container.addChild(new RectButton(
         1,
-        LazyLayoutBox(Vec2d(0, 50), Vec2d(100, 50)),
+        LazyLayoutBox(plug::Vec2d(0, 50), plug::Vec2d(100, 50)),
         select_action_,
         "Select",
         button_style
@@ -130,7 +129,7 @@ SelectFileDialog::SelectFileDialog(
 
     container.addChild(new RectButton(
         2,
-        LazyLayoutBox(Vec2d(120, 50), Vec2d(100, 50)),
+        LazyLayoutBox(plug::Vec2d(120, 50), plug::Vec2d(100, 50)),
         cancel_action_,
         "Cancel",
         button_style
@@ -138,7 +137,7 @@ SelectFileDialog::SelectFileDialog(
 
     LineEdit *line_edit = new LineEdit(
         3,
-        LazyLayoutBox(Vec2d(), Vec2d(getAreaSize().x, 30)),
+        LazyLayoutBox(plug::Vec2d(), plug::Vec2d(getAreaSize().x, 30)),
         line_edit_style,
         MAX_FILENAME_LENGTH
     );

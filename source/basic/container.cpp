@@ -4,44 +4,40 @@
 */
 
 
-#include <SFML/Graphics.hpp>
 #include "basic/container.hpp"
 
 
 Container::Container(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     bool focus_enabled_
 ) :
     Widget(id_, layout_),
-    widgets(), focused(0), focus_enabled(focus_enabled_)
+    widgets(), focus_enabled(focus_enabled_)
 {}
 
 
-void Container::draw(sf::RenderTarget &result, TransformStack &stack) {
+void Container::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
 # ifdef DEBUG_DRAW
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
 
-    sf::RectangleShape rect(global_size);
-    rect.setPosition(global_position);
-    rect.setFillColor(sf::Color(0));
-    rect.setOutlineColor(sf::Color::Magenta);
-    rect.setOutlineThickness(1);
-    result.draw(rect);
+    RectShape rect(global_position, global_size, hex2Color(0));
+    rect.setBorder(1, Magenta);
+    rect.draw(result);
 #endif
-
-    size_t count = widgets.size();
-    if (count == 0) return;
 
     TransformApplier add_transform(stack, getTransform());
 
-    for (size_t i = count - 1; i > focused; i--)
-        widgets[i]->draw(result, stack);
-    
-    for (size_t i = focused - 1; i < count; i--)
-        widgets[i]->draw(result, stack);
-    
-    widgets[focused]->draw(result, stack);
+    for (size_t i = 0; i < widgets.size(); i++) {
+        switch (widgets[i]->getStatus()) {
+            case Status::Normal:
+            case Status::Disabled:
+                widgets[i]->draw(stack, result);
+                break;
+            
+            default: break;
+        };
+    }
 }
 
 
@@ -60,23 +56,9 @@ size_t Container::addChild(Widget *child) {
 
     // Set this container as child's parent
     child->setParent(this);
-    // Container is empty
-    if (widgets.size() == 0) {
-        widgets.push_back(child);
-        focused = 0;
-        return child->getId();
-    }
-    // Find place for widget according to z-index
-    for (size_t i = 0; i < widgets.size(); i++) {
-        if (child->getZIndex() > widgets[i]->getZIndex()) {
-            widgets.insert(i, child);
-            focused = i;
-            return child->getId();
-        }
-    }
-    // Widget has the biggest z-index
+
     widgets.push_back(child);
-    focused = widgets.size() - 1;
+
     return child->getId();
 }
 
@@ -84,16 +66,20 @@ size_t Container::addChild(Widget *child) {
 void Container::removeWidget(size_t index) {
     ASSERT(index < widgets.size(), "Index is out of range!\n");
 
-    if (widgets.size()) {
-        if (index < focused)
-            focused--;
-        else if (index == focused)
-            focused = 0;
-    }
-    else focused = 0;
-
     delete widgets[index];
     widgets.remove(index);
+}
+
+
+void Container::setFocused(size_t index) {
+    if (!focus_enabled) return;
+
+    ASSERT(index < widgets.size(), "Index is out of range!\n");
+
+    Widget *widget = widgets[index];
+    widgets.remove(index);
+    
+    widgets.push_back(widget);
 }
 
 
@@ -107,43 +93,31 @@ void Container::removeChild(size_t child_id) {
 }
 
 
-#define CHECK_EHC(CALL_FUNC)                    \
-do {                                            \
-    CALL_FUNC;                                  \
-    if (ehc.stopped) {                          \
-        if (event.getType() == MousePressed)    \
-            focused = i;                        \
-        return;                                 \
-    }                                           \
-} while(0)
+size_t Container::getChildCount() const { return widgets.size(); }
 
 
-void Container::onEvent(const Event &event, EHC &ehc) {
-    if (widgets.size() == 0) return;
-
+void Container::onEvent(const plug::Event &event, plug::EHC &ehc) {
     TransformApplier add_transform(ehc.stack, getTransform());
 
-    if (focus_enabled) {
-        widgets[focused]->onEvent(event, ehc);
-        if (ehc.stopped) return;
+    for (size_t i = widgets.size() - 1; i < widgets.size(); i--) {
+        switch (widgets[i]->getStatus()) {
+            case Status::Normal:
+            case Status::Hidden:
+                widgets[i]->onEvent(event, ehc);
 
-        for (size_t i = 0; i < focused; i++)
-            CHECK_EHC(widgets[i]->onEvent(event, ehc));
+                if (ehc.stopped) {
+                    if (event.getType() == plug::MousePressed) setFocused(i);
+                    return;
+                }
+                break;
 
-        for (size_t i = focused + 1; i < widgets.size(); i++)
-            CHECK_EHC(widgets[i]->onEvent(event, ehc));
-    }
-    else {
-        for (size_t i = 0; i < widgets.size(); i++)
-            CHECK_EHC(widgets[i]->onEvent(event, ehc));
+            default: break;
+        };
     }
 }
 
 
-#undef CHECK_EHC
-
-
-void Container::onParentUpdate(const LayoutBox &parent_layout) {
+void Container::onParentUpdate(const plug::LayoutBox &parent_layout) {
     Widget::onParentUpdate(parent_layout);
 
     for (size_t i = 0; i < widgets.size(); i++)
@@ -157,17 +131,10 @@ void Container::checkChildren() {
     // ELEMENT OF THE LIST CAN BE DELETED IN ITERATION
 
     while(curr < widgets.size()) {
-        switch(widgets[curr]->getStatus()) {
-            case PASS: 
-                widgets[curr]->checkChildren();
-                curr++;
-                break;
-            case DELETE:
-                removeWidget(curr);
-                break;
-            default:
-                ASSERT(0, "Unknown status!\n");
-        }
+        if (widgets[curr]->getStatus() == Status::Delete)
+            removeWidget(curr);
+        else
+            curr++;
     }
 }
 

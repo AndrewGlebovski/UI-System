@@ -11,31 +11,41 @@
 #include "basic/container.hpp"
 #include "basic/button.hpp"
 #include "window/menu.hpp"
+#include "widget/shape.hpp"
+#include "basic/clock.hpp"
 
 
 /// Controls how window looks
 class WindowStyle {
 public:
-    sf::Color title_color;      ///< Title color
-    Vec2d title_offset;      ///< Title offset from top-left corner
-    unsigned font_size;         ///< Title font size
     const sf::Font &font;       ///< Title font
     const WindowAsset &asset;   ///< Textures used in window
+    plug::Color title_color;    ///< Title color
+    plug::Vec2d title_offset;   ///< Title offset from top-left corner
+    unsigned font_size;         ///< Title font size
     float outline;              ///< Describes size of window resizing buttons
-    Vec2d tl_offset;         ///< Window inner area offset from top-left corner
-    Vec2d br_offset;         ///< Window inner area offset from bottom-right corner
+    plug::Vec2d tl_offset;      ///< Window inner area offset from top-left corner
+    plug::Vec2d br_offset;      ///< Window inner area offset from bottom-right corner
 
 
     WindowStyle(
-        const sf::Color &title_color_, const Vec2d &title_offset_,
-        unsigned font_size_, const sf::Font &font_,
-        const WindowAsset &asset_, float outline_, 
-        const Vec2d &tl_offset_, const Vec2d &br_offset_
+        const sf::Font &font_,
+        const WindowAsset &asset_,
+        plug::Color title_color_ = hex2Color(WINDOW_TITLE_COLOR),
+        const plug::Vec2d &title_offset_ = WINDOW_TITLE_OFFSET,
+        unsigned font_size_ = WINDOW_FONT_SIZE,
+        float outline_ = WINDOW_OUTLINE, 
+        const plug::Vec2d &tl_offset_ = WINDOW_TL_OFFSET,
+        const plug::Vec2d &br_offset_ = WINDOW_BR_OFFSET
     ) :
-        title_color(title_color_), title_offset(title_offset_),
-        font_size(font_size_), font(font_),
-        asset(asset_), outline(outline_),
-        tl_offset(tl_offset_), br_offset(br_offset_)
+        font(font_),
+        asset(asset_),
+        title_color(title_color_),
+        title_offset(title_offset_),
+        font_size(font_size_),
+        outline(outline_),
+        tl_offset(tl_offset_),
+        br_offset(br_offset_)
     {}
 };
 
@@ -48,7 +58,7 @@ public:
      * \note Position and size consider title bar and frame
     */
     Window(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const std::string &title_,
         const WindowStyle &style_,
         bool can_resize = true,
@@ -62,12 +72,12 @@ public:
     /**
      * \brief Returns position of the window inner area relative to window top-left corner
     */
-    Vec2d getAreaPosition() const;
+    plug::Vec2d getAreaPosition() const;
 
     /**
      * \brief Returns size of the window inner area
     */
-    Vec2d getAreaSize() const;
+    plug::Vec2d getAreaSize() const;
 
     /**
      * \brief Adds menu to window or replaces existing one
@@ -83,12 +93,12 @@ public:
     /**
      * \brief Sets window position
     */
-    bool setPosition(const Vec2d &position_);
+    bool setPosition(const plug::Vec2d &position_);
 
     /**
      * \brief Sets window size
     */
-    bool setSize(const Vec2d &size_);
+    bool setSize(const plug::Vec2d &size_);
 
     /**
      * \brief Finds pointer to widget inside window container
@@ -99,12 +109,12 @@ public:
      * \brief Adds new widget to window container
      * \warning Widgets should be allocated using new and will be deleted by window
     */
-    virtual size_t addChild(Widget *child) override;
+    virtual size_t addChild(Widget *child);
 
     /**
      * \brief Removes child from window container
     */
-    virtual void removeChild(size_t child_id) override;
+    virtual void removeChild(size_t child_id);
 
     /**
      * \brief Returns window style
@@ -114,17 +124,17 @@ public:
     /**
      * \brief Draws window frame, title bar and its content
     */
-    virtual void draw(sf::RenderTarget &result, TransformStack &stack) override;
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
     
     /**
      * \brief Broadcast events to window children
     */
-    virtual void onEvent(const Event &event, EHC &ehc) override;
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Allows widget to change its position and size according to parent
     */
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
 
     /**
      * \brief Checks children statuses
@@ -137,14 +147,14 @@ public:
     virtual ~Window() override;
 
 protected:
-    std::string title;          ///< Window title
+    virtual void onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) override;
+    virtual void onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) override;
+
     WindowStyle style;          ///< Window style
     Container buttons;          ///< Window title bar and resize buttons
     Container container;        ///< Window content manager
     Menu *menu;                 ///< Window menu
-
-    virtual void onMouseMove(const MouseMoveEvent &event, EHC &ehc) override;
-    virtual void onMousePressed(const MousePressedEvent &event, EHC &ehc) override;
+    TextShape title;            ///< Window title
 
 private:
     /**
@@ -178,20 +188,34 @@ private:
 class MainWindow : public Window {
 public:
     MainWindow(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const std::string &title_,
-        const WindowStyle &style_
+        const WindowStyle &style_,
+        const ClockStyle &clock_style_
     );
+
+    /**
+     * \brief Draws window then clock
+    */
+    virtual void draw(plug::TransformStack &stack, plug::RenderTarget &result) override;
+
+    /**
+     * \brief Broadcast events to window children
+    */
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
     /**
      * \brief Parses SFML event into my own event system
     */
-    void parseEvent(const sf::Event &event, TransformStack &stack);
+    void parseEvent(const sf::Event &event, plug::TransformStack &stack);
 
     /**
      * \brief Allows widget to change its position and size according to parent
     */
-    virtual void onParentUpdate(const LayoutBox &parent_layout) override;
+    virtual void onParentUpdate(const plug::LayoutBox &parent_layout) override;
+
+private:
+    Clock my_clock;
 };
 
 

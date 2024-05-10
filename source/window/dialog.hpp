@@ -9,7 +9,7 @@
 
 
 #include "window/window.hpp"
-#include "basic/line-edit.hpp"
+#include "basic/line_edit.hpp"
 
 
 /// Base class for all dialogs
@@ -18,7 +18,7 @@ public:
     /**
      * \brief Dialog always stops event broadcasting
     */
-    virtual void onEvent(const Event &event, EHC &ehc) override;
+    virtual void onEvent(const plug::Event &event, plug::EHC &ehc) override;
 
 protected:
     /**
@@ -26,7 +26,7 @@ protected:
      * \note Position and size consider title bar and frame
     */
     Dialog(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const std::string &title_, const WindowStyle &style_
     );
 };
@@ -59,7 +59,7 @@ public:
      * \note Actions must set window status as DELETE on exit
     */
     ConfirmDialog(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const std::string &title_,
         DialogAction *ok_action_,
         DialogAction *cancel_action_,
@@ -85,7 +85,7 @@ public:
      * \note Actions must set window status as DELETE on exit
     */
     SelectFileDialog(
-        size_t id_, const LayoutBox &layout_,
+        size_t id_, const plug::LayoutBox &layout_,
         const std::string &title_,
         DialogAction *select_action_,
         DialogAction *cancel_action_,

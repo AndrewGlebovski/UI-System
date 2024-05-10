@@ -1,11 +1,57 @@
-#include <SFML/Graphics.hpp>
-#include <cstdio>
 #include "basic/clock.hpp"
 #include "canvas/canvas_stuff.hpp"
+#include "canvas/plugin_loader.hpp"
+#include "canvas/palettes/palette_manager.hpp"
+#include "common/utils.hpp"
 
 
-/// Creates palette view in new subwindow
-Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset);
+// ============================================================================
+
+
+/// Stores font, assets and styles
+struct StyleManager {
+    sf::Font font;
+    WindowAsset window_asset;
+    PaletteViewAsset palette_asset;
+
+    WindowStyle window_style;
+    ScrollBarStyle scrollbar_style;
+    ClockStyle clock_style;
+    FileDialogStyle dialog_style;
+    RectButtonStyle menu_style;
+
+    /// Inititalizes styles with values from configs.hpp
+    StyleManager();
+
+    /// Creates tool palette view in new subwindow
+    Widget *createToolPaletteView();
+
+    /// Creates color palette view in new subwindow
+    Widget *createColorPaletteView();
+
+    /// Creates palettes for palette manager
+    void setupPaletteManager();
+
+    /// Creates menu for main window
+    Menu *createMainMenu(Window &dialog_parent);
+
+    /// Creates start nodes for main window
+    void setupMainWindow(MainWindow &window);
+};
+
+
+// ============================================================================
+
+
+/// Handles events from SFML window
+void handleInputEvent(sf::RenderWindow &sf_window, MainWindow &main_window, TransformStack &stack);
+
+
+/// Generates and handles tick event
+void handleTimeEvent(sf::Clock &timer, MainWindow &main_window, TransformStack &stack);
+
+
+// ============================================================================
 
 
 int main() {
@@ -14,147 +60,87 @@ int main() {
     // ENABLED VSYNC TO AVOID VISUAL ARTIFACTS WHEN WINDOWS ARE MOVING
     render_window.setVerticalSyncEnabled(true);
 
-    sf::Font font;
-    ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
-
-    WindowAsset window_asset(WINDOW_ASSET_DIR);
-
-    PaletteViewAsset palette_asset(PALETTE_ASSET_DIR);
+    StyleManager style_manager;
     
-    WindowStyle window_style(
-        sf::Color(WINDOW_TITLE_COLOR),
-        WINDOW_TITLE_OFFSET,
-        WINDOW_FONT_SIZE,
-        font,
-        window_asset,
-        WINDOW_OUTLINE,
-        WINDOW_TL_OFFSET,
-        WINDOW_BR_OFFSET
-    );
-
-    ScrollBarStyle scrollbar_style(
-        sf::Color(SCROLLBAR_FRAME_COLOR),
-        SCROLLBAR_FRAME_OUTLINE,
-        sf::Color(SCROLLBAR_BACKGROUND_COLOR),
-        sf::Color(SCROLLBAR_SCROLLER_COLOR),
-        SCROLLBAR_SCROLLER_FACTOR
-    );
-
-    ClockStyle clock_style(
-        sf::Color::Black,
-        20,
-        font
-    );
-
+    // Init palettes
+    style_manager.setupPaletteManager();
+    
     MainWindow *main_window = new MainWindow(
         Widget::AUTO_ID,
-        BoundLayoutBox(Vec2d(), Vec2d(SCREEN_W, SCREEN_H)),
+        BoundLayoutBox(plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H)),
         "Paint",
-        window_style
+        style_manager.window_style,
+        style_manager.clock_style
     );
-    
-    Menu *main_menu = new Menu(
-        Widget::AUTO_ID,
-        BoundLayoutBox(),
-        RectButtonStyle(
-            sf::Color(0xd4d0c8ff),
-            sf::Color(0x000080ff),
-            sf::Color(0x000080ff),
-            font,
-            25,
-            sf::Color::Black,
-            sf::Color::White,
-            sf::Color::White
-        ),
-        sf::Color(0xd4d0c8ff)
-    );
+    ASSERT(main_window, "Failed to allocate tool main window!\n");
 
-    ToolPalette *palette = new ToolPalette();
-    CanvasGroup *canvas_group = new CanvasGroup();
-    FilterPalette *filter_palette = new FilterPalette();
+    style_manager.setupMainWindow(*main_window);
 
-    FileDialogStyle dialog_style(window_style);
+    PluginLoader plugin_loader(PLUGIN_DIR, *main_window->getMenu(), 1, *main_window);
 
-    main_menu->addMenuButton("File");
-    main_menu->addButton(0, "Open", new CreateOpenFileDialog(*main_window, *palette, *canvas_group, dialog_style, scrollbar_style));
-    main_menu->addButton(0, "Save", new SaveFileAction(*canvas_group));
-    main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(*main_window, *canvas_group, dialog_style));
-    
-    main_menu->addMenuButton("Filter");
-    main_menu->addButton(1, "Lighten", new FilterAction(FilterPalette::LIGHTEN_FILTER, *filter_palette, *canvas_group));
-    main_menu->addButton(1, "Darken", new FilterAction(FilterPalette::DARKEN_FILTER, *filter_palette, *canvas_group));
-    main_menu->addButton(1, "Monochrome", new FilterAction(FilterPalette::MONOCHROME_FILTER, *filter_palette, *canvas_group));
-    main_menu->addButton(1, "Negative", new FilterAction(FilterPalette::NEGATIVE_FILTER, *filter_palette, *canvas_group));
-
-    main_window->setMenu(main_menu);
-    
-    main_window->addChild(new Clock(
-        Widget::AUTO_ID,
-        BoundLayoutBox(Vec2d(), Vec2d(100, 50)),
-        clock_style
-    ));
-    
-    main_window->addChild(new FilterHotkey(
-        main_window,
-        *filter_palette,
-        *canvas_group
-    ));
-    
-    main_window->addChild(openPicture(nullptr, *palette, *canvas_group, window_style, scrollbar_style));
-    main_window->addChild(createToolPaletteView(palette, window_style, palette_asset));
-    
     TransformStack stack;
 
     sf::Clock timer;
 
+    RenderTexture render_texture;
+    render_texture.create(SCREEN_W, SCREEN_H);
+
     while (render_window.isOpen()) {
-        if (main_window->getStatus() == Widget::DELETE) {
+        if (main_window->getStatus() == Widget::Status::Delete) {
             render_window.close();
             break;
         }
 
         main_window->checkChildren();
 
-        sf::Event event;
-
-        while (render_window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                render_window.close();
-                break;
-            }
-            
-            main_window->parseEvent(event, stack);
-        }
+        handleInputEvent(render_window, *main_window, stack);
         
-        Widget::EHC ehc(stack, false, false);
-
-        main_window->onEvent(Widget::TickEvent(timer.getElapsedTime().asSeconds()), ehc);
-        timer.restart();
+        handleTimeEvent(timer, *main_window, stack);
         
-        render_window.clear();
+        render_texture.clear(Black);
 
-        main_window->draw(render_window, stack);
+        main_window->draw(stack, render_texture);
+
+        render_window.draw(sf::Sprite(render_texture.getSFMLTexture()));
 
         render_window.display();
     }
-
+    
     delete main_window;
-    delete palette;
-    delete canvas_group;
-    delete filter_palette;
+    main_window = nullptr;
     
     printf("UI System!\n");
     return 0;
 }
 
 
-Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, PaletteViewAsset &palette_asset) {
+// ============================================================================
+
+
+StyleManager::StyleManager() :
+    font(),
+    window_asset(WINDOW_ASSET_DIR),
+    palette_asset(PALETTE_ASSET_DIR),
+    window_style(font, window_asset),
+    scrollbar_style(),
+    clock_style(font),
+    dialog_style(window_style),
+    menu_style(
+        hex2Color(0xd4d0c8ff), hex2Color(0x000080ff), hex2Color(0x000080ff),
+        dialog_style.window.font, 25, Black, White, White
+    )
+{
+    ASSERT(font.loadFromFile(FONT_FILE), "Failed to load font!\n");
+}
+
+
+Widget *StyleManager::createToolPaletteView() {
     WindowStyle subwindow_style(window_style);
     subwindow_style.outline = 0;
 
     Window *subwindow = new Window(
         Widget::AUTO_ID,
-        BoundLayoutBox(Vec2d(0, 100), Vec2d(218, 451)),
+        BoundLayoutBox(plug::Vec2d(0, 100), plug::Vec2d(218, 451)),
         "Tools",
         subwindow_style,
         false,
@@ -164,10 +150,104 @@ Widget *createToolPaletteView(ToolPalette *palette, WindowStyle &window_style, P
 
     subwindow->addChild(new ToolPaletteView(
         Widget::AUTO_ID,
-        BoundLayoutBox(Vec2d(), Vec2d(188, 376)),
-        palette,
+        AnchorLayoutBox(plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H), plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H)),
         palette_asset
     ));
 
     return subwindow;
+}
+
+
+Widget *StyleManager::createColorPaletteView() {
+    WindowStyle subwindow_style(window_style);
+    subwindow_style.outline = 0;
+
+    Window *subwindow = new Window(
+        Widget::AUTO_ID,
+        BoundLayoutBox(plug::Vec2d(1280, 100), plug::Vec2d(218, 451)),
+        "Colors",
+        subwindow_style,
+        false,
+        true,
+        false
+    );
+
+    subwindow->addChild(new ColorPaletteView(
+        Widget::AUTO_ID,
+        AnchorLayoutBox(plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H), plug::Vec2d(), plug::Vec2d(SCREEN_W, SCREEN_H))
+    ));
+
+    return subwindow;
+}
+
+
+void StyleManager::setupPaletteManager() {
+    PaletteManager::getInstance().setColorPalette(new ColorPalette(Red, White));
+
+    PaletteManager::getInstance().setToolPalette(new ToolPalette(COLOR_PALETTE));
+
+    PaletteManager::getInstance().setFilterPalette(new FilterPalette(window_style));
+}
+
+
+Menu *StyleManager::createMainMenu(Window &dialog_parent) {
+    Menu *main_menu = new Menu(
+        Widget::AUTO_ID,
+        BoundLayoutBox(),
+        menu_style,
+        hex2Color(0xd4d0c8ff)
+    );
+
+    ASSERT(main_menu, "Failed to allocate tool main menu!\n");
+
+    main_menu->addMenuButton("File");
+    main_menu->addButton(0, "Open", new CreateOpenFileDialog(dialog_parent, dialog_style, scrollbar_style));
+    main_menu->addButton(0, "Save", new SaveFileAction());
+    main_menu->addButton(0, "Save As", new CreateSaveAsFileDialog(dialog_parent, dialog_style));
+    
+    main_menu->addMenuButton("Filter");
+    main_menu->addButton(1, "Lighten", new FilterAction(dialog_parent, FilterPalette::LIGHTEN_FILTER));
+    main_menu->addButton(1, "Darken", new FilterAction(dialog_parent, FilterPalette::DARKEN_FILTER));
+    main_menu->addButton(1, "Monochrome", new FilterAction(dialog_parent, FilterPalette::MONOCHROME_FILTER));
+    main_menu->addButton(1, "Negative", new FilterAction(dialog_parent, FilterPalette::NEGATIVE_FILTER));
+    main_menu->addButton(1, "Intensity Curve", new FilterAction(dialog_parent, FilterPalette::INTENSITY_CURVE));
+
+    return main_menu;
+}
+
+
+void StyleManager::setupMainWindow(MainWindow &window) {
+    window.setMenu(createMainMenu(window));
+    
+    window.addChild(new FilterHotkey());
+    
+    window.addChild(createToolPaletteView());
+    
+    window.addChild(createColorPaletteView());
+}
+
+
+// ============================================================================
+
+
+void handleInputEvent(sf::RenderWindow &sf_window, MainWindow &main_window, TransformStack &stack) {
+    sf::Event event;
+
+    while (sf_window.pollEvent(event)) {
+        if (event.type == sf::Event::Closed) {
+            sf_window.close();
+            break;
+        }
+        
+        main_window.parseEvent(event, stack);
+    }
+}
+
+
+void handleTimeEvent(sf::Clock &timer, MainWindow &main_window, TransformStack &stack) {
+    plug::EHC ehc = {stack, false, false};
+
+    main_window.onEvent(plug::TickEvent(timer.getElapsedTime().asSeconds()), ehc);
+
+    timer.restart();
 }

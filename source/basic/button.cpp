@@ -4,7 +4,6 @@
 */
 
 
-#include <SFML/Graphics.hpp>
 #include "basic/button.hpp"
 
 
@@ -12,7 +11,7 @@
 
 
 ActionButton::ActionButton(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     ButtonAction *action_
 ) :
     BaseButton(id_, layout_),
@@ -70,9 +69,9 @@ void ActionButton::setButtonGroup(ButtonGroup *group_) {
 ButtonGroup *ActionButton::getButtonGroup() { return group; }
 
 
-void ActionButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
-    Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+void ActionButton::onMouseMove(const plug::MouseMoveEvent &event, plug::EHC &ehc) {
+    plug::Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(ehc.stack, layout->getSize());
     
     if (isInsideButton(event.pos - global_position, global_size)) {
         if (status != BUTTON_PRESSED)
@@ -86,10 +85,10 @@ void ActionButton::onMouseMove(const MouseMoveEvent &event, EHC &ehc) {
 }
 
 
-void ActionButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
-    Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
-    
+void ActionButton::onMousePressed(const plug::MousePressedEvent &event, plug::EHC &ehc) {
+    plug::Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(ehc.stack, layout->getSize());
+
     if (!isInsideButton(event.pos - global_position, global_size)) return;
 
     setButtonStatus(BUTTON_PRESSED);
@@ -100,9 +99,9 @@ void ActionButton::onMousePressed(const MousePressedEvent &event, EHC &ehc) {
 }
 
 
-void ActionButton::onMouseReleased(const MouseReleasedEvent &event, EHC &ehc) {
-    Vec2d global_position = ehc.stack.apply(layout->getPosition());
-    Vec2d global_size = ehc.stack.apply_size(layout->getSize());
+void ActionButton::onMouseReleased(const plug::MouseReleasedEvent &event, plug::EHC &ehc) {
+    plug::Vec2d global_position = ehc.stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(ehc.stack, layout->getSize());
 
     if (isInsideButton(event.pos - global_position, global_size)) {
         if (!isPressedInGroup()) setButtonStatus(BUTTON_HOVER);
@@ -183,54 +182,95 @@ bool ButtonGroup::isInGroup(ActionButton *button) const {
 // ============================================================================
 
 
+SimpleRectButton::SimpleRectButton(
+    size_t id_, const plug::LayoutBox &layout_,
+    ButtonAction *action_,
+    const SimpleRectButtonStyle &style_
+) :
+    ActionButton(id_, layout_, action_),
+    style(style_)
+{}
+
+
+bool SimpleRectButton::isInsideButton(const plug::Vec2d &point, const plug::Vec2d &global_size) const {
+    return isInsideRect(plug::Vec2d(), global_size, point);
+}
+
+
+void SimpleRectButton::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
+
+    RectShape btn_rect(global_position, global_size, plug::Color());
+
+    switch(status) {
+        case BUTTON_NORMAL:
+            btn_rect.setColor(style.normal);
+            break;
+        case BUTTON_HOVER:
+            btn_rect.setColor(style.hover);
+            break;
+        case BUTTON_PRESSED:
+            btn_rect.setColor(style.pressed);
+            break;
+        default: ASSERT(0, "Invalid button status!\n");
+    }
+
+    btn_rect.draw(result);
+}
+
+
+// ============================================================================
+
+
 RectButton::RectButton(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     ButtonAction *action_,
     const std::string &text_,
     const RectButtonStyle &style_
 ) :
     ActionButton(id_, layout_, action_),
-    text(text_), style(style_)
+    style(style_),
+    text_shape(sf::Text(text_, style.font, style.font_size))
 {}
 
 
-bool RectButton::isInsideButton(const Vec2d &point, const Vec2d &global_size) const {
-    return isInsideRect(Vec2d(), global_size, point);
+bool RectButton::isInsideButton(const plug::Vec2d &point, const plug::Vec2d &global_size) const {
+    return isInsideRect(plug::Vec2d(), global_size, point);
 }
 
 
-void RectButton::draw(sf::RenderTarget &result, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-    Vec2d global_size = stack.apply_size(layout->getSize());
-    
-    sf::Text btn_text(text, style.font, style.font_size);
-    sf::FloatRect text_rect = btn_text.getLocalBounds();
-    Vec2d text_offset((global_size.x - text_rect.width) / 2, (global_size.y - text_rect.height) / 2);
+void RectButton::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
 
-    btn_text.setPosition(global_position + text_offset);
-
-    sf::RectangleShape btn_rect(global_size);
+    RectShape btn_rect(global_position, global_size, plug::Color());
 
     switch(status) {
         case BUTTON_NORMAL:
-            btn_rect.setFillColor(style.normal);
-            btn_text.setFillColor(style.font_normal);
+            btn_rect.setColor(style.normal);
+            text_shape.setColor(style.font_normal);
             break;
         case BUTTON_HOVER:
-            btn_rect.setFillColor(style.hover);
-            btn_text.setFillColor(style.font_hover);
+            btn_rect.setColor(style.hover);
+            text_shape.setColor(style.font_hover);
             break;
         case BUTTON_PRESSED:
-            btn_rect.setFillColor(style.pressed);
-            btn_text.setFillColor(style.font_pressed);
+            btn_rect.setColor(style.pressed);
+            text_shape.setColor(style.font_pressed);
             break;
         default: ASSERT(0, "Invalid button status!\n");
     }
 
-    btn_rect.setPosition(global_position);
+    btn_rect.draw(result);
 
-    result.draw(btn_rect);
-    result.draw(btn_text);
+    plug::Vec2d text_size = applySize(stack, text_shape.getTextureSize());
+
+    text_shape.draw(
+        result,
+        global_position + (global_size - text_size) / 2,
+        text_size
+    );
 }
 
 
@@ -238,57 +278,61 @@ void RectButton::draw(sf::RenderTarget &result, TransformStack &stack) {
 
 
 TextureButton::TextureButton(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     ButtonAction *action_,
-    const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_
+    const plug::Texture &normal_, const plug::Texture &hover_, const plug::Texture &pressed_
 ) :
     ActionButton(id_, layout_, action_),
     normal(normal_), hover(hover_), pressed(pressed_)
 {
-    layout->setSize(Vec2d(normal.getSize().x, normal.getSize().y));
+    layout->setSize(plug::Vec2d(normal.width, normal.height));
 }
 
 
-bool TextureButton::isInsideButton(const Vec2d &point, const Vec2d &global_size) const {
-    return isInsideRect(Vec2d(), global_size, point);
+bool TextureButton::isInsideButton(const plug::Vec2d &point, const plug::Vec2d &global_size) const {
+    return isInsideRect(plug::Vec2d(), global_size, point);
 }
 
 
-void TextureButton::draw(sf::RenderTarget &result, TransformStack &stack) {
-    Vec2d global_position = stack.apply(layout->getPosition());
-
-    sf::Sprite btn_sprite;
+void TextureButton::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
 
     switch(status) {
-        case BUTTON_NORMAL: btn_sprite.setTexture(normal); break;
-        case BUTTON_HOVER: btn_sprite.setTexture(hover); break;
-        case BUTTON_PRESSED: btn_sprite.setTexture(pressed); break;
-        default: ASSERT(0, "Invalid button status!\n");
+        case BUTTON_NORMAL:
+            TextureShape(normal).draw(result, global_position, global_size);
+            break;
+        
+        case BUTTON_HOVER:
+            TextureShape(hover).draw(result, global_position, global_size);
+            break;
+        
+        case BUTTON_PRESSED:
+            TextureShape(pressed).draw(result, global_position, global_size);
+            break;
+        
+        default:
+            ASSERT(0, "Invalid button status!\n");
     }
-    
-    btn_sprite.setPosition(global_position);
-
-    result.draw(btn_sprite);
 }
 
 
 TextureIconButton::TextureIconButton(
-    size_t id_, const LayoutBox &layout_,
+    size_t id_, const plug::LayoutBox &layout_,
     ButtonAction *action_,
-    const sf::Texture &normal_, const sf::Texture &hover_, const sf::Texture &pressed_,
-    const sf::Texture &icon_
+    const plug::Texture &normal_, const plug::Texture &hover_, const plug::Texture &pressed_,
+    const plug::Texture &icon_
 ) : 
     TextureButton(id_, layout_, action_, normal_, hover_, pressed_),
     icon(icon_)
 {}
 
 
-void TextureIconButton::draw(sf::RenderTarget &result, TransformStack &stack) {
-    TextureButton::draw(result, stack);
+void TextureIconButton::draw(plug::TransformStack &stack, plug::RenderTarget &result) {
+    TextureButton::draw(stack, result);
 
-    Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_position = stack.apply(layout->getPosition());
+    plug::Vec2d global_size = applySize(stack, layout->getSize());
 
-    sf::Sprite icon_sprite(icon);
-    icon_sprite.setPosition(global_position);
-    result.draw(icon_sprite);
+    TextureShape(icon).draw(result, global_position, global_size);
 }

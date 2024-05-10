@@ -33,3 +33,9 @@
 
 # VS Code
 .vscode
+
+# Log directory
+log
+
+# Plugins director
+Plugins
